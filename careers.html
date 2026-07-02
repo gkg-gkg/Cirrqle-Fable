@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Careers — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .perks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 64px; }
+    .perk { padding: 22px; }
+    .perk:nth-child(odd){transform:rotate(-.5deg)} .perk:nth-child(even){transform:rotate(.5deg)}
+    .perk-icon { font-size: 1.6rem; display: block; margin-bottom: 10px; }
+    .perk-title { font-family: var(--font-display); font-weight: 800; font-size: .98rem; margin-bottom: 6px; }
+    .perk-text { font-size: .82rem; color: var(--ink-soft); line-height: 1.6; }
+    .job-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 24px; margin-bottom: 14px; flex-wrap: wrap; }
+    .job-dept { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.6px; color: var(--pink-deep); margin-bottom: 4px; }
+    .job-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; margin-bottom: 8px; }
+    .job-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .no-role { text-align: center; margin-top: 44px; font-size: .92rem; color: var(--ink-soft); }
+    .no-role a { color: var(--pink-deep); font-weight: 800; text-decoration: none; }
+    @media(max-width:760px){ .perks { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:520px){ .perks { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <div class="nav-cta">
+      <a href="browse.html" class="btn btn-sm">Browse</a>
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Get started</a>
+      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-hero">
+      <span class="sticker sticker-lime fade-up">🚀 Careers at Cirqle</span>
+      <h1 class="h-display fade-up d1" style="margin-top:20px">Build the future<br>of <span class="hl hl-pink">cashback</span></h1>
+      <p class="h-sub fade-up d2" style="margin:16px auto 0">We're a small, ambitious team in London. If you love building products people actually use, you'll fit right in.</p>
+    </div>
+
+    <div class="perks">
+      <div class="card perk fade-up d1"><span class="perk-icon">💸</span><div class="perk-title">Competitive salary</div><div class="perk-text">Benchmarked at the top quartile for UK startups at our stage.</div></div>
+      <div class="card card-lime perk fade-up d2"><span class="perk-icon">🏡</span><div class="perk-title">Remote-first</div><div class="perk-text">Work from anywhere. We meet in London monthly.</div></div>
+      <div class="card card-pink perk fade-up d3"><span class="perk-icon">📈</span><div class="perk-title">Equity</div><div class="perk-text">All employees get meaningful equity — you own a piece of what you build.</div></div>
+      <div class="card card-sky perk fade-up d4"><span class="perk-icon">🌴</span><div class="perk-title">Unlimited PTO</div><div class="perk-text">We trust you to manage your time and recharge when you need to.</div></div>
+      <div class="card card-tang perk fade-up d5"><span class="perk-icon">🎓</span><div class="perk-title">Learning budget</div><div class="perk-text">£1,500/year for courses, books, and conferences.</div></div>
+      <div class="card perk fade-up d6"><span class="perk-icon">🛍️</span><div class="perk-title">Premium cashback</div><div class="perk-text">Team members get boosted cashback rates across all partners.</div></div>
+    </div>
+
+    <div class="prose reveal"><h2>💼 Open roles</h2></div>
+
+    <div class="card card-hover job-card reveal">
+      <div>
+        <div class="job-dept">Engineering</div>
+        <div class="job-title">Senior Full-Stack Engineer</div>
+        <div class="job-meta"><span class="chip">🌍 Remote</span><span class="chip">⏰ Full-time</span><span class="chip" style="background:var(--lime)">💰 £80k–£110k</span></div>
+      </div>
+      <a href="contact.html" class="btn btn-lime">Apply →</a>
+    </div>
+    <div class="card card-hover job-card reveal reveal-delay-1">
+      <div>
+        <div class="job-dept">Growth</div>
+        <div class="job-title">Head of Partnerships</div>
+        <div class="job-meta"><span class="chip">📍 London / Remote</span><span class="chip">⏰ Full-time</span><span class="chip" style="background:var(--lime)">💰 £70k–£90k</span></div>
+      </div>
+      <a href="contact.html" class="btn btn-lime">Apply →</a>
+    </div>
+    <div class="card card-hover job-card reveal reveal-delay-2">
+      <div>
+        <div class="job-dept">Design</div>
+        <div class="job-title">Product Designer (Mid–Senior)</div>
+        <div class="job-meta"><span class="chip">🌍 Remote</span><span class="chip">⏰ Full-time</span><span class="chip" style="background:var(--lime)">💰 £60k–£80k</span></div>
+      </div>
+      <a href="contact.html" class="btn btn-lime">Apply →</a>
+    </div>
+    <div class="card card-hover job-card reveal reveal-delay-3">
+      <div>
+        <div class="job-dept">Marketing</div>
+        <div class="job-title">Social Media &amp; Content Manager</div>
+        <div class="job-meta"><span class="chip">📍 London</span><span class="chip">⏰ Full-time</span><span class="chip" style="background:var(--lime)">💰 £35k–£48k</span></div>
+      </div>
+      <a href="contact.html" class="btn btn-lime">Apply →</a>
+    </div>
+
+    <div class="no-role reveal">
+      <p>Don't see your role? We're always looking for exceptional people.</p>
+      <a href="contact.html">Send us your CV →</a>
+    </div>
+  </div>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

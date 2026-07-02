@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Affiliates — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 64px; }
+    .tier { text-align: center; padding: 32px 20px; position: relative; }
+    .tier:nth-child(1){transform:rotate(-1deg)} .tier:nth-child(2){transform:rotate(.6deg) scale(1.03)} .tier:nth-child(3){transform:rotate(-.6deg)}
+    .tier-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(-2deg); }
+    .tier-name { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .tier-rate { font-family: var(--font-display); font-weight: 800; font-size: 3rem; letter-spacing: -0.04em; line-height: 1; }
+    .tier-label { font-size: .8rem; font-weight: 600; color: var(--ink-soft); margin: 8px 0 16px; }
+    .tier-req { font-size: .78rem; font-weight: 600; color: var(--ink-soft); line-height: 1.7; border-top: 2px dashed rgba(31,27,19,.2); padding-top: 14px; }
+    .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+    .step { display: flex; gap: 14px; align-items: flex-start; padding: 18px; }
+    .step-t { font-size: .86rem; color: var(--ink-soft); line-height: 1.6; padding-top: 8px; }
+    .step-t strong { color: var(--ink); }
+    .cta-box { text-align: center; padding: 44px 30px; margin-top: 60px; }
+    @media(max-width:700px){ .tiers, .steps { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <div class="nav-cta">
+      <a href="browse.html" class="btn btn-sm">Browse</a>
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Get started</a>
+      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-hero">
+      <span class="sticker sticker-tang fade-up">🤝 Affiliates</span>
+      <h1 class="h-display fade-up d1" style="margin-top:20px">Refer friends.<br><span class="hl hl-pink">Earn forever.</span></h1>
+      <p class="h-sub fade-up d2" style="margin:16px auto 0">Invite people to Cirqle and earn a commission on every pound of cashback they earn — for life. No cap, no expiry.</p>
+      <div class="fade-up d3" style="margin-top:28px"><a href="signup.html" class="btn btn-lg btn-lime">Start earning commissions →</a></div>
+    </div>
+
+    <div class="tiers">
+      <div class="card tier fade-up d2">
+        <div class="tier-name">Starter</div>
+        <div class="tier-rate">5%</div>
+        <div class="tier-label">commission on referrals' cashback</div>
+        <div class="tier-req">1–9 active referrals<br>No minimum required</div>
+      </div>
+      <div class="card card-lime tier fade-up d3">
+        <span class="tier-badge sticker sticker-pink">⭐ Most popular</span>
+        <div class="tier-name">Pro</div>
+        <div class="tier-rate">10%</div>
+        <div class="tier-label">commission on referrals' cashback</div>
+        <div class="tier-req">10–49 active referrals<br>Dedicated affiliate support</div>
+      </div>
+      <div class="card card-sky tier fade-up d4">
+        <div class="tier-name">Elite</div>
+        <div class="tier-rate">15%</div>
+        <div class="tier-label">commission on referrals' cashback</div>
+        <div class="tier-req">50+ active referrals<br>Priority payouts + bonuses</div>
+      </div>
+    </div>
+
+    <div class="prose reveal"><h2>⚙️ How it works</h2></div>
+    <div class="steps">
+      <div class="card step reveal"><span class="coin coin-sky">1</span><p class="step-t"><strong>Sign up</strong> to Cirqle and get your unique referral link in your dashboard.</p></div>
+      <div class="card step reveal reveal-delay-1"><span class="coin coin-pink">2</span><p class="step-t"><strong>Share</strong> your link via social, email, or your website — anywhere.</p></div>
+      <div class="card step reveal reveal-delay-2"><span class="coin coin-lime">3</span><p class="step-t"><strong>They join</strong> and start shopping — your commission kicks in automatically.</p></div>
+      <div class="card step reveal reveal-delay-3"><span class="coin">4</span><p class="step-t"><strong>Earn forever</strong> — you get a % of every pound they earn, for life.</p></div>
+    </div>
+
+    <div class="prose reveal" style="margin-top:56px"><h2>❓ FAQ</h2></div>
+    <div class="faq-item reveal"><button class="faq-q">When do I get paid? <span class="faq-chevron">▼</span></button><div class="faq-a"><div class="faq-a-inner">Commission is credited to your wallet monthly, on the 1st. Minimum payout is £5.</div></div></div>
+    <div class="faq-item reveal"><button class="faq-q">Is there a limit on how many people I can refer? <span class="faq-chevron">▼</span></button><div class="faq-a"><div class="faq-a-inner">No limit at all. Refer as many people as you like — you earn on every single one.</div></div></div>
+    <div class="faq-item reveal"><button class="faq-q">What counts as an "active referral"? <span class="faq-chevron">▼</span></button><div class="faq-a"><div class="faq-a-inner">A referral is active if they've earned cashback at least once in the past 90 days.</div></div></div>
+    <div class="faq-item reveal"><button class="faq-q">Can I use my own referral link? <span class="faq-chevron">▼</span></button><div class="faq-a"><div class="faq-a-inner">No — self-referral isn't allowed. Your referral link is only valid for genuinely new accounts.</div></div></div>
+
+    <div class="card card-ink cta-box reveal">
+      <h2 style="color:var(--paper); font-size:clamp(1.6rem,3.4vw,2.2rem)">Ready to earn <span class="hl hl-lime" style="color:var(--ink)">commissions?</span></h2>
+      <p style="color:rgba(255,246,233,.7); margin:12px 0 26px">Create your free Cirqle account — your referral link is waiting in your dashboard.</p>
+      <a href="signup.html" class="btn btn-lg btn-lime" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Create your account →</a>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.faq-q').forEach(q => {
+      q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+    });
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

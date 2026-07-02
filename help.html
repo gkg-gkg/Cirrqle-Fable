@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help Centre — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .search-box { position: relative; max-width: 480px; margin: 26px auto 0; }
+    .search-box input {
+      width: 100%;
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-chip);
+      padding: 15px 24px 15px 50px;
+      font-size: .95rem; font-weight: 600;
+      font-family: var(--font-body);
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform .15s var(--snap), box-shadow .15s var(--snap);
+    }
+    .search-box input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); }
+    .categories { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
+    .cat-btn {
+      padding: 8px 18px;
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-chip);
+      background: var(--card);
+      font-size: .84rem; font-weight: 700;
+      font-family: var(--font-body); color: var(--ink);
+      cursor: pointer;
+      transition: all .15s var(--snap);
+    }
+    .cat-btn:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
+    .cat-btn.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); transform: rotate(-1.5deg); }
+    .faq-section { margin-bottom: 44px; }
+    .faq-section h2 { font-size: 1.3rem; margin-bottom: 16px; }
+    .contact-strip { text-align: center; padding: 40px 30px; }
+    .contact-strip h3 { font-size: 1.5rem; margin-bottom: 8px; color: var(--paper); }
+    .contact-strip p { color: rgba(255,246,233,.7); margin-bottom: 22px; font-size: .92rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <div class="nav-cta">
+      <a href="browse.html" class="btn btn-sm">Browse</a>
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Get started</a>
+      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-hero">
+      <span class="sticker sticker-sky fade-up">🛟 Help Centre</span>
+      <h1 class="h-display fade-up d1" style="margin-top:20px">How can we <span class="hl hl-lime">help?</span></h1>
+      <div class="search-box fade-up d2">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search for answers…" aria-label="Search help articles" />
+      </div>
+    </div>
+
+    <div class="categories fade-up d3">
+      <button class="cat-btn active">All</button>
+      <button class="cat-btn">Getting started</button>
+      <button class="cat-btn">Cashback</button>
+      <button class="cat-btn">Posting</button>
+      <button class="cat-btn">Withdrawals</button>
+      <button class="cat-btn">Account</button>
+    </div>
+
+    <div class="faq-section reveal">
+      <h2>🚀 Getting started</h2>
+      <div class="faq-item">
+        <button class="faq-q">How does Cirqle work? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Sign up for free, browse 500+ brand deals, click through to shop, then post about your purchase on social media. Once your post is verified, cashback is added to your wallet.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is Cirqle free to use? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Completely free. There are no subscriptions, no membership fees. Cirqle earns a commission from brands when you shop — a portion of that comes back to you as cashback.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Which brands are on Cirqle? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">We partner with 500+ brands across fashion, food, travel, tech, home and more — including Nike, ASOS, Gymshark, Apple, Booking.com, Deliveroo and many others. New brands are added every week.</div></div>
+      </div>
+    </div>
+
+    <div class="faq-section reveal">
+      <h2>💰 Cashback</h2>
+      <div class="faq-item">
+        <button class="faq-q">When do I receive my cashback? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Cashback typically appears in your wallet within 7–14 days after your post is verified. Some brands take up to 30 days to confirm the purchase.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Why is my cashback showing as "pending"? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Pending means we're waiting for the brand to confirm your purchase. This usually takes 7–14 days. Once confirmed, cashback moves to "available" in your wallet.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Can I use discount codes alongside Cirqle? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Generally no — using another discount code or going through another cashback platform can break our tracking link. Check each deal's terms as some brands do allow it.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What happens if I return an item? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">If you return part or all of your order, cashback for the returned items will be removed from your wallet. If the cashback has already been withdrawn, we'll deduct it from a future transaction.</div></div>
+      </div>
+    </div>
+
+    <div class="faq-section reveal">
+      <h2>💸 Withdrawals</h2>
+      <div class="faq-item">
+        <button class="faq-q">How do I withdraw my cashback? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Go to your dashboard and click "Withdraw". You can transfer to your bank account or PayPal. Transfers usually arrive within 1–2 business days.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is there a minimum withdrawal amount? <span class="faq-chevron">▼</span></button>
+        <div class="faq-a"><div class="faq-a-inner">The minimum withdrawal is £1.00. There's no maximum — withdraw as much as you have available.</div></div>
+      </div>
+    </div>
+
+    <div class="card card-ink contact-strip reveal">
+      <h3>Still need help? 💬</h3>
+      <p>Our support team replies within 24 hours.</p>
+      <a href="contact.html" class="btn btn-lg btn-lime" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Contact support →</a>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.faq-q').forEach(q => {
+      q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+    });
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

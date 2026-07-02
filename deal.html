@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deal — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .deal-page { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: clamp(28px,4vw,44px) clamp(20px,4vw,44px) 90px; }
+
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 28px; flex-wrap: wrap; }
+    .breadcrumb a { color: var(--ink-soft); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--pink-deep); }
+    .breadcrumb-sep { opacity: .4; }
+
+    .deal-layout { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
+
+    /* Hero card */
+    .hero-card { overflow: hidden; padding: 0; margin-bottom: 24px; }
+    .hero-img { height: 240px; border-bottom: var(--bw) solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 5.5rem; position: relative; }
+    .hero-badge { position: absolute; top: 16px; left: 16px; }
+    .hero-chip { position: absolute; top: 16px; right: 16px; }
+    .hero-body { padding: 26px 28px; }
+    .hero-brand { font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--pink-deep); margin-bottom: 6px; }
+    .hero-title { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .hero-desc { font-size: .9rem; color: var(--ink-soft); line-height: 1.7; }
+
+    .panel-title { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin-bottom: 16px; }
+    .info-card { margin-bottom: 22px; }
+    .info-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .expiry-note { font-size: .82rem; font-weight: 700; margin-top: 14px; }
+
+    /* Steps */
+    .how-step { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+    .how-step:last-child { margin-bottom: 0; }
+    .how-text { font-size: .88rem; color: var(--ink-soft); line-height: 1.6; padding-top: 8px; }
+    .how-text strong { color: var(--ink); }
+
+    /* Action panel */
+    .sticky-panel { position: sticky; top: 90px; }
+    .action-card { background: var(--lime); padding: 26px; margin-bottom: 20px; transform: rotate(.5deg); }
+    .cashback-label { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; }
+    .cashback-big { font-family: var(--font-display); font-weight: 800; font-size: 2.9rem; letter-spacing: -0.04em; line-height: 1.05; margin: 2px 0; }
+    .cashback-desc { font-size: .82rem; font-weight: 700; color: rgba(31,27,19,.72); }
+    .cashback-total { font-size: .72rem; font-weight: 600; color: rgba(31,27,19,.55); margin: 6px 0 20px; }
+    .shop-big-btn { width: 100%; margin-bottom: 12px; font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; }
+    .save-btn { width: 100%; }
+    .save-btn.saved { background: var(--pink); }
+    .action-note { font-size: .72rem; font-weight: 600; color: rgba(31,27,19,.6); text-align: center; margin-top: 14px; line-height: 1.6; }
+
+    .stat-mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .stat-mini { text-align: center; padding: 16px 10px; }
+    .stat-mini:first-child { transform: rotate(-1deg); }
+    .stat-mini:last-child { transform: rotate(1deg); }
+    .stat-mini-val { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; }
+    .stat-mini-label { font-size: .68rem; font-weight: 700; color: var(--ink-soft); margin-top: 3px; }
+
+    .terms-card { font-size: .8rem; }
+    .terms-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .terms-list { color: var(--ink-soft); line-height: 2; font-weight: 500; }
+    .terms-list a { color: var(--pink-deep); font-weight: 700; text-decoration: none; }
+
+    @media (max-width: 840px) {
+      .deal-layout { grid-template-columns: 1fr; }
+      .sticky-panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <div class="nav-cta">
+      <a href="browse.html" class="btn btn-sm">Browse</a>
+      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Sign up free</a>
+    </div>
+  </nav>
+
+  <div class="deal-page">
+    <div class="breadcrumb fade-up">
+      <a href="index.html">Home</a><span class="breadcrumb-sep">›</span>
+      <a href="browse.html">Browse</a><span class="breadcrumb-sep">›</span>
+      <span id="bcCategory">Fashion</span><span class="breadcrumb-sep">›</span>
+      <span id="bcTitle" style="font-weight:800;color:var(--ink)">Deal</span>
+    </div>
+
+    <div class="deal-layout">
+      <div>
+        <!-- Hero -->
+        <div class="card hero-card fade-up d1">
+          <div class="hero-img" id="heroImg" style="background:var(--sky)">
+            <span id="heroEmoji" aria-hidden="true">👟</span>
+            <span class="hero-badge sticker sticker-lime" id="heroBadge">13% cashback</span>
+            <span class="hero-chip chip" id="heroChip" style="background:var(--card)">Nike</span>
+          </div>
+          <div class="hero-body">
+            <div class="hero-brand" id="heroBrand">Nike</div>
+            <div class="hero-title" id="heroTitle">Nike Summer Sale — up to 13% back</div>
+            <div class="hero-desc" id="heroDesc">Shop the biggest sale of the year and earn cashback on every purchase.</div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="card info-card fade-up d2">
+          <div class="panel-title">🏷️ Deal details</div>
+          <div class="info-row" id="infoTags"></div>
+          <div class="expiry-note" id="expiry">⏰ Offer expires 30 Jun 2026 — don't miss out</div>
+        </div>
+
+        <!-- Steps -->
+        <div class="card fade-up d3">
+          <div class="panel-title">💰 How to earn cashback</div>
+          <div class="how-step">
+            <span class="coin coin-sky">1</span>
+            <p class="how-text"><strong>Sign up or sign in</strong> to your Cirqle account — it's free and takes 30 seconds.</p>
+          </div>
+          <div class="how-step">
+            <span class="coin coin-pink">2</span>
+            <p class="how-text"><strong>Click "Shop &amp; Earn"</strong> — the brand's website opens in a new tab so you can shop.</p>
+          </div>
+          <div class="how-step">
+            <span class="coin coin-lime">3</span>
+            <p class="how-text"><strong>Make your purchase</strong> as normal. Don't clear your cookies or use another discount code.</p>
+          </div>
+          <div class="how-step">
+            <span class="coin">4</span>
+            <p class="how-text"><strong>Post on social</strong> about your purchase to unlock full cashback — then watch the money hit your wallet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel -->
+      <div>
+        <div class="sticky-panel">
+          <div class="card action-card fade-up d1">
+            <div class="cashback-label">You could earn</div>
+            <div class="cashback-big" id="earnBig">£13.00</div>
+            <div class="cashback-desc" id="earnDesc">on a £100 spend</div>
+            <div class="cashback-total" id="totalPaid">£112,705 paid to members</div>
+            <button class="btn btn-lg btn-ink shop-big-btn" id="shopBtn" onclick="handleShop()">🛍️ Shop &amp; Earn</button>
+            <button class="btn save-btn" onclick="handleSave()">🔖 Save deal</button>
+            <div class="action-note">Opens the brand's website in a new tab. Shop as normal, then post to unlock your cashback.</div>
+          </div>
+
+          <div class="stat-mini-row">
+            <div class="card card-pink stat-mini fade-up d2">
+              <div class="stat-mini-val" id="rateVal">13%</div>
+              <div class="stat-mini-label">Cashback rate</div>
+            </div>
+            <div class="card card-sky stat-mini fade-up d3">
+              <div class="stat-mini-val" id="membersVal">4.2k</div>
+              <div class="stat-mini-label">Members used this</div>
+            </div>
+          </div>
+
+          <div class="card terms-card fade-up d4">
+            <div class="terms-title">📋 Terms</div>
+            <div class="terms-list" id="termsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const deals = {
+      1: { brand:'Nike', title:'Nike Summer Sale — up to 13% back', emoji:'👟', bg:'var(--paper-deep)', cat:'Fashion & Beauty', rate:13, earn:'£13.00', desc:'on a £100 spend', total:'£112,705 paid to members', members:'1.8k', expiry:'30 Jun 2026', desc2:'Shop the biggest sale of the year and earn cashback on every purchase. From running shoes to lifestyle trainers, earn back on every pair.', tags:['Fashion & Beauty','Footwear','Sale','New arrivals eligible'], terms:'• Cashback on full-price & sale items<br>• Excludes gift cards<br>• Minimum spend: £20<br>• Post within 7 days of purchase<br>• <a href="terms.html">Full terms →</a>' },
+      2: { brand:'ASOS', title:'ASOS New In — 10% cashback', emoji:'👗', bg:'var(--paper-deep)', cat:'Fashion & Beauty', rate:10, earn:'£6.00', desc:'on a £60 spend', total:'£54,116 paid to members', members:'2.1k', expiry:'Ongoing', desc2:'Shop ASOS and earn cashback on thousands of styles. Fashion, beauty, accessories — earn every time.', tags:['Fashion & Beauty','Clothing','Accessories'], terms:'• All categories eligible<br>• Excludes marketplace sellers<br>• No minimum spend<br>• Post within 7 days of purchase<br>• <a href="terms.html">Full terms →</a>' },
+      3: { brand:'Amazon', title:'Amazon Prime — New account offer', emoji:'📦', bg:'var(--paper-deep)', cat:'Electronics', rate:10, earn:'£1.00', desc:'on first month', total:'£9,891 paid to members', members:'980', expiry:'New members only', desc2:'10% cashback on your first Amazon Prime subscription. Plus cashback on all eligible purchases through Cirqle.', tags:['Electronics','Subscription','New members'], terms:'• New Prime subscribers only<br>• First month eligible<br>• <a href="terms.html">Full terms →</a>' },
+      4: { brand:'Trainline', title:'Trainline — 12% cashback on journeys', emoji:'🚆', bg:'var(--paper-deep)', cat:'Travel', rate:12, earn:'£5.40', desc:'on a £45 booking', total:'£112,705 paid to members', members:'3.2k', expiry:'31 Jul 2026', desc2:'Book trains, coaches and more through Cirqle and earn 12% cashback. Fast, easy, and fully tracked.', tags:['Travel','Trains','Coaches','UK'], terms:'• All Trainline bookings eligible<br>• Excludes season tickets<br>• Post within 7 days of travel<br>• <a href="terms.html">Full terms →</a>' },
+      5: { brand:'Boots', title:'Boots Beauty — 15% cashback', emoji:'💄', bg:'var(--paper-deep)', cat:'Fashion & Beauty', rate:15, earn:'£5.25', desc:'on a £35 spend', total:'£28,940 paid to members', members:'1.6k', expiry:'Ongoing', desc2:'Earn 15% cashback on beauty, skincare, and health products at Boots. Advantage Card points on top.', tags:['Fashion & Beauty','Health','Skincare'], terms:'• In-store & online eligible<br>• Excludes prescriptions<br>• Post within 7 days<br>• <a href="terms.html">Full terms →</a>' },
+      6: { brand:'Gymshark', title:'Gymshark Sale — up to 20% cashback', emoji:'🏋️', bg:'var(--paper-deep)', cat:'Fitness', rate:20, earn:'£14.00', desc:'on a £70 spend', total:'£62,140 paid to members', members:'2.8k', expiry:'15 Jul 2026', desc2:'The best cashback rate on the platform. Shop Gymshark, post your haul, and earn 20% back. Activewear, gym gear and accessories.', tags:['Fitness','Activewear','Gymwear','Sale'], terms:'• All items eligible<br>• Post within 5 days<br>• Minimum spend: £40<br>• <a href="terms.html">Full terms →</a>' },
+      7: { brand:'Deliveroo', title:'Deliveroo — 8% back on every order', emoji:'🍔', bg:'var(--paper-deep)', cat:'Food & Drink', rate:8, earn:'£2.00', desc:'on a £25 order', total:'£18,440 paid to members', members:'4.1k', expiry:'Ongoing', desc2:'Get cashback on food, grocery and alcohol deliveries from thousands of restaurants and shops across the UK.', tags:['Food & Drink','Takeaway','Groceries'], terms:'• All orders eligible<br>• Minimum order: £10<br>• <a href="terms.html">Full terms →</a>' },
+      8: { brand:'Currys', title:'Currys Tech Deals — 11% cashback', emoji:'💻', bg:'var(--paper-deep)', cat:'Electronics', rate:11, earn:'£16.50', desc:'on a £150 spend', total:'£75,200 paid to members', members:'1.2k', expiry:'20 Jul 2026', desc2:'Earn cashback on laptops, TVs, appliances and smart home devices. UK\'s biggest electronics retailer.', tags:['Electronics','Tech','Home Appliances'], terms:'• In-store & online eligible<br>• Excludes clearance<br>• Minimum spend: £50<br>• <a href="terms.html">Full terms →</a>' },
+      9: { brand:'TUI', title:'TUI Holidays — 9% cashback', emoji:'✈️', bg:'var(--paper-deep)', cat:'Travel', rate:9, earn:'£72.00', desc:'on a £800 holiday', total:'£98,500 paid to members', members:'760', expiry:'1 Sep 2026', desc2:'Book your dream holiday and earn cashback. Package holidays, flights, hotels and cruises all included.', tags:['Travel','Holidays','Flights','Hotels'], terms:'• UK departures only<br>• Post must go live before departure<br>• Excludes last-minute deals<br>• <a href="terms.html">Full terms →</a>' },
+      10:{ brand:'IKEA', title:'IKEA Home — 7% cashback', emoji:'🛋️', bg:'var(--paper-deep)', cat:'Home & Living', rate:7, earn:'£7.00', desc:'on a £100 spend', total:'£31,020 paid to members', members:'890', expiry:'Ongoing', desc2:'Earn cashback on furniture, storage, kitchenware and home décor. Free delivery on orders over £50.', tags:['Home & Living','Furniture','Decor'], terms:'• All departments eligible<br>• Excludes food market<br>• Minimum spend: £30<br>• <a href="terms.html">Full terms →</a>' },
+      11:{ brand:'Costa', title:'Costa Coffee — 6% cashback', emoji:'☕', bg:'var(--paper-deep)', cat:'Food & Drink', rate:6, earn:'£0.90', desc:'on a £15 order', total:'£12,080 paid to members', members:'5.6k', expiry:'Ongoing', desc2:'Get cashback on drinks, food and Costa Club purchases. Works in-store and on the Costa app across the UK.', tags:['Food & Drink','Coffee','In-store'], terms:'• In-store purchases only<br>• App orders eligible<br>• No minimum spend<br>• <a href="terms.html">Full terms →</a>' },
+      12:{ brand:'PureGym', title:'PureGym Membership — 14% back', emoji:'💪', bg:'var(--paper-deep)', cat:'Fitness', rate:14, earn:'£2.80', desc:'per month', total:'£24,310 paid to members', members:'1.1k', expiry:'New members only', desc2:'Earn cashback on new monthly or annual gym memberships at PureGym. 300+ gyms across the UK.', tags:['Fitness','Gym','Membership','New members'], terms:'• New members only<br>• Monthly & annual plans eligible<br>• Post within 7 days of joining<br>• <a href="terms.html">Full terms →</a>' },
+    };
+
+    // Real brand destinations (interim — opens the brand site directly.
+    // A tracked affiliate link + conversion postbacks would replace these.)
+    const brandUrls = {
+      1:'https://www.nike.com/gb',        2:'https://www.asos.com',
+      3:'https://www.amazon.co.uk',       4:'https://www.thetrainline.com',
+      5:'https://www.boots.com',          6:'https://www.gymshark.com',
+      7:'https://deliveroo.co.uk',        8:'https://www.currys.co.uk',
+      9:'https://www.tui.co.uk',          10:'https://www.ikea.com/gb/en/',
+      11:'https://www.costa.co.uk',       12:'https://www.puregym.com',
+    };
+
+    // Load deal from URL param
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id')) || 1;
+    const d = deals[id] || deals[1];
+
+    // Populate
+    document.title = `${d.brand} — Cirqle`;
+    document.getElementById('heroImg').style.background = d.bg;
+    document.getElementById('heroEmoji').textContent = d.emoji;
+    document.getElementById('heroBadge').textContent = d.rate + '% cashback';
+    document.getElementById('heroChip').textContent = d.brand;
+    document.getElementById('heroBrand').textContent = d.brand;
+    document.getElementById('heroTitle').textContent = d.title;
+    document.getElementById('heroDesc').textContent = d.desc2;
+    document.getElementById('bcCategory').textContent = d.cat;
+    document.getElementById('bcTitle').textContent = d.brand;
+    document.getElementById('earnBig').textContent = d.earn;
+    document.getElementById('earnDesc').textContent = d.desc;
+    document.getElementById('totalPaid').textContent = d.total;
+    document.getElementById('rateVal').textContent = d.rate + '%';
+    document.getElementById('membersVal').textContent = d.members;
+    document.getElementById('termsList').innerHTML = d.terms;
+    document.getElementById('expiry').textContent = d.expiry === 'Ongoing' ? '✅ Ongoing offer — available now'
+      : d.expiry.includes('members') ? '✨ ' + d.expiry
+      : `⏰ Offer expires ${d.expiry} — don't miss out`;
+    document.getElementById('infoTags').innerHTML = d.tags.map(t => `<span class="chip">${t}</span>`).join('');
+
+    // Auth state (enhance.js also handles data-auth toggling)
+    const session = JSON.parse(localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session') || 'null');
+
+    // Reflect whether this deal is already saved
+    const savedDeals = JSON.parse(localStorage.getItem('cirqle_saved') || '[]');
+    updateSaveBtn(savedDeals.some(s => s.id === id));
+
+    function handleShop() {
+      if (!session) {
+        cirqleToast('Please sign in to earn cashback');
+        setTimeout(() => window.location.href = 'signin.html', 1500);
+        return;
+      }
+      const url = brandUrls[id];
+      if (url) {
+        cirqleToast(`🛍️ Opening ${d.brand} in a new tab — shop as normal`);
+        window.open(url, '_blank', 'noopener');
+      } else {
+        cirqleToast(`Shop ${d.brand} as normal, then post to unlock cashback`);
+      }
+    }
+    function handleSave() {
+      if (!session) {
+        cirqleToast('Please sign in to save deals');
+        setTimeout(() => window.location.href = 'signin.html', 1500);
+        return;
+      }
+      const saved = JSON.parse(localStorage.getItem('cirqle_saved') || '[]');
+      const idx = saved.findIndex(s => s.id === id);
+      if (idx >= 0) {
+        saved.splice(idx, 1);
+        localStorage.setItem('cirqle_saved', JSON.stringify(saved));
+        updateSaveBtn(false);
+        cirqleToast('Removed from your saved deals');
+      } else {
+        saved.push({ id, brand: d.brand, emoji: d.emoji, rate: d.rate, title: d.title });
+        localStorage.setItem('cirqle_saved', JSON.stringify(saved));
+        updateSaveBtn(true);
+        cirqleToast('🔖 Saved — view it on your dashboard');
+      }
+    }
+    function updateSaveBtn(isSaved) {
+      const btn = document.querySelector('.save-btn');
+      if (!btn) return;
+      btn.textContent = isSaved ? '✓ Saved to your list' : '🔖 Save deal';
+      btn.classList.toggle('saved', isSaved);
+    }
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

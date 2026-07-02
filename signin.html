@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    main {
+      position: relative; z-index: 1;
+      min-height: calc(100vh - 70px);
+      display: flex; align-items: center; justify-content: center;
+      gap: clamp(36px, 6vw, 80px);
+      padding: clamp(36px, 6vw, 64px) clamp(20px, 4vw, 44px) 70px;
+      max-width: 1140px; margin: 0 auto;
+    }
+    .auth-left { flex: 1; max-width: 400px; }
+    .auth-h { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.2rem, 4vw, 3.1rem); letter-spacing: -0.03em; line-height: 1.02; margin: 20px 0 16px; }
+    .auth-sub { font-size: .95rem; color: var(--ink-soft); line-height: 1.7; margin-bottom: 30px; }
+
+    .stat-mini { display: flex; align-items: center; gap: 14px; padding: 15px 18px; margin-bottom: 14px; }
+    .stat-mini:nth-child(odd) { transform: rotate(-.8deg); }
+    .stat-mini:nth-child(even) { transform: rotate(.8deg); }
+    .stat-mini-val { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; line-height: 1.1; }
+    .stat-mini-label { font-size: .78rem; font-weight: 600; color: var(--ink-soft); }
+
+    .auth-card { width: 100%; max-width: 440px; padding: 36px; transform: rotate(-.4deg); }
+    .card-title { font-family: var(--font-display); font-weight: 800; font-size: 1.45rem; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .card-sub { font-size: .86rem; font-weight: 500; color: var(--ink-soft); margin-bottom: 24px; }
+
+    .error-banner {
+      background: #FFE5E5;
+      border: var(--bw) solid var(--red);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: .84rem; font-weight: 600; color: #A62222;
+      margin-bottom: 16px;
+      display: none; align-items: center; gap: 8px;
+    }
+    .error-banner.visible { display: flex; }
+
+    .remember-row { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 20px; }
+    .remember { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+    .remember input { accent-color: var(--ink); cursor: pointer; width: 16px; height: 16px; }
+    .forgot { font-size: .82rem; font-weight: 700; color: var(--pink-deep); text-decoration: none; }
+    .forgot:hover { text-decoration: underline; }
+
+    .btn-submit { width: 100%; font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider-line { flex: 1; height: 2px; background: var(--ink); opacity: .15; border-radius: 2px; }
+    .divider-text { font-size: .74rem; font-weight: 700; color: var(--ink-soft); }
+    .social-btns { display: flex; gap: 10px; }
+    .social-btns .btn { flex: 1; }
+
+    .signup-link { text-align: center; margin-top: 20px; font-size: .84rem; font-weight: 600; color: var(--ink-soft); }
+    .signup-link a { color: var(--pink-deep); font-weight: 800; text-decoration: none; }
+    .signup-link a:hover { text-decoration: underline; }
+
+    /* Forgot password modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(31,27,19,.55);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { max-width: 400px; width: 100%; margin: 20px; padding: 32px; position: relative; transform: translateY(16px) rotate(-.5deg); transition: transform .3s var(--bounce); }
+    .modal-overlay.open .modal { transform: translateY(0) rotate(-.5deg); }
+    .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; margin-bottom: 8px; }
+    .modal-sub { font-size: .86rem; font-weight: 500; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.55; }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px;
+      width: 34px; height: 34px;
+      border: var(--bw) solid var(--ink); border-radius: 50%;
+      background: var(--pink);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: .85rem; font-weight: 800;
+      transition: transform .2s var(--bounce);
+    }
+    .modal-close:hover { transform: rotate(90deg); }
+    .modal-success { text-align: center; display: none; }
+    .modal-success.visible { display: block; }
+    .modal-success-icon { font-size: 2.6rem; margin-bottom: 12px; }
+    .modal-success-text { font-size: .9rem; font-weight: 500; color: var(--ink-soft); line-height: 1.6; }
+
+    @media (max-width: 880px) {
+      main { flex-direction: column; }
+      .auth-left, .auth-card { max-width: 100%; }
+      .stats-list { display: flex; gap: 12px; }
+      .stats-list .stat-mini { flex: 1; }
+    }
+    @media (max-width: 560px) { .stats-list { flex-direction: column; } .auth-card { padding: 26px 20px; } }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <a href="signup.html" class="btn btn-sm btn-lime">New here? Create an account</a>
+  </nav>
+
+  <main>
+    <!-- Left panel -->
+    <div class="auth-left fade-up">
+      <span class="sticker sticker-sky">👋 Welcome back</span>
+      <h1 class="auth-h">Good to have you <span class="squiggle">back.</span></h1>
+      <p class="auth-sub">Sign in to see your cashback earnings, active deals, and wallet balance.</p>
+      <div class="stats-list">
+        <div class="card stat-mini">
+          <span class="coin coin-lime" style="font-size:1rem">💸</span>
+          <div><div class="stat-mini-val">£2M+</div><div class="stat-mini-label">Cashback paid to members</div></div>
+        </div>
+        <div class="card card-pink stat-mini">
+          <span class="coin coin-sky" style="font-size:1rem">🛍️</span>
+          <div><div class="stat-mini-val">500+</div><div class="stat-mini-label">Partner brands available</div></div>
+        </div>
+        <div class="card card-sky stat-mini">
+          <span class="coin" style="font-size:1rem">⭐</span>
+          <div><div class="stat-mini-val">4.9★</div><div class="stat-mini-label">Average app store rating</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form card -->
+    <div class="card auth-card fade-up d2">
+      <div class="card-title">Sign in to Cirqle</div>
+      <div class="card-sub">Enter your email and password below.</div>
+
+      <div class="error-banner" id="errorBanner" role="alert">
+        <span>⚠️</span>
+        <span id="errorMsg">Incorrect email or password. Please try again.</span>
+      </div>
+
+      <form id="signinForm" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <div class="field-wrap">
+            <span class="field-icon">✉️</span>
+            <input type="email" id="email" placeholder="alex@example.com" autocomplete="email" />
+          </div>
+          <div class="field-error" id="emailErr">Please enter a valid email address.</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field-wrap">
+            <span class="field-icon">🔒</span>
+            <input type="password" id="password" placeholder="Your password" autocomplete="current-password" />
+            <button type="button" class="pass-toggle" id="passToggle" aria-label="Show password">👁</button>
+          </div>
+          <div class="field-error" id="passwordErr">Please enter your password.</div>
+        </div>
+
+        <div class="remember-row">
+          <label class="remember">
+            <input type="checkbox" id="rememberMe" /> Remember me
+          </label>
+          <a href="#" class="forgot" id="forgotLink">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-lime btn-submit" id="submitBtn">
+          <span id="submitText">Sign in →</span>
+        </button>
+
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span class="divider-text">or continue with</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <div class="social-btns">
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🍎 Apple</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🔵 Google</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">📘 Facebook</a>
+        </div>
+      </form>
+
+      <div class="signup-link">
+        Don't have an account? <a href="signup.html">Sign up free</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Forgot password modal -->
+  <div class="modal-overlay" id="forgotModal">
+    <div class="card modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div id="forgotForm">
+        <div class="modal-title">Reset your password</div>
+        <div class="modal-sub">Enter your email and we'll send you a link to reset your password.</div>
+        <div class="field">
+          <label for="resetEmail">Email address</label>
+          <div class="field-wrap">
+            <span class="field-icon">✉️</span>
+            <input type="email" id="resetEmail" placeholder="alex@example.com" />
+          </div>
+        </div>
+        <button class="btn btn-lime" id="resetBtn" style="width:100%">Send reset link</button>
+      </div>
+      <div class="modal-success" id="forgotSuccess">
+        <div class="modal-success-icon">📬</div>
+        <div class="modal-title" style="margin-bottom:8px;">Check your inbox</div>
+        <div class="modal-success-text">If an account exists for that email, you'll receive a password reset link within a few minutes.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── If already signed in, go to dashboard ──
+    if (localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // ── Password toggle ──
+    const passInput = document.getElementById('password');
+    document.getElementById('passToggle').addEventListener('click', function() {
+      const isText = passInput.type === 'text';
+      passInput.type = isText ? 'password' : 'text';
+      this.textContent = isText ? '👁' : '🙈';
+    });
+
+    // ── Sign in form ──
+    document.getElementById('signinForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('rememberMe').checked;
+      const banner   = document.getElementById('errorBanner');
+      let valid = true;
+
+      const emailOk = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      document.getElementById('email').classList.toggle('error', !emailOk);
+      document.getElementById('emailErr').classList.toggle('visible', !emailOk);
+      if (!emailOk) valid = false;
+
+      const passOk = password.length > 0;
+      document.getElementById('password').classList.toggle('error', !passOk);
+      document.getElementById('passwordErr').classList.toggle('visible', !passOk);
+      if (!passOk) valid = false;
+
+      if (!valid) return;
+
+      // Check against stored users
+      const users = JSON.parse(localStorage.getItem('cirqle_users') || '[]');
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+
+      if (!user) {
+        banner.classList.add('visible');
+        document.getElementById('email').classList.add('error');
+        document.getElementById('password').classList.add('error');
+        return;
+      }
+
+      banner.classList.remove('visible');
+
+      // Set session
+      const session = { firstName: user.firstName, lastName: user.lastName, email: user.email };
+      if (remember) {
+        localStorage.setItem('cirqle_session', JSON.stringify(session));
+      } else {
+        sessionStorage.setItem('cirqle_session', JSON.stringify(session));
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.classList.add('success');
+      document.getElementById('submitText').textContent = `🎉 Welcome back, ${user.firstName}!`;
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1400);
+    });
+
+    // ── Clear errors on input ──
+    ['email','password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById(id).classList.remove('error');
+        document.getElementById(id + 'Err').classList.remove('visible');
+        document.getElementById('errorBanner').classList.remove('visible');
+      });
+    });
+
+    // ── Forgot password modal ──
+    const modal = document.getElementById('forgotModal');
+    document.getElementById('forgotLink').addEventListener('click', e => { e.preventDefault(); modal.classList.add('open'); });
+    document.getElementById('modalClose').addEventListener('click', () => {
+      modal.classList.remove('open');
+      document.getElementById('forgotForm').style.display = '';
+      document.getElementById('forgotSuccess').classList.remove('visible');
+    });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      const em = document.getElementById('resetEmail').value.trim();
+      if (!em) return;
+      document.getElementById('forgotForm').style.display = 'none';
+      document.getElementById('forgotSuccess').classList.add('visible');
+    });
+
+    // ── Social auth toast ──
+    function showSocialToast(e) {
+      e.preventDefault();
+      cirqleToast('🔜 Social sign-in coming soon — use email for now');
+    }
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

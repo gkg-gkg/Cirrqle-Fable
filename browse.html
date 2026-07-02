@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Deals — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    /* ── Page header ── */
+    .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .search-wrap { position: relative; flex-shrink: 0; }
+    .search-input {
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-chip);
+      padding: 13px 22px 13px 46px;
+      font-size: .92rem; font-weight: 600;
+      font-family: var(--font-body);
+      color: var(--ink);
+      width: 300px;
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform .15s var(--snap), box-shadow .15s var(--snap);
+    }
+    .search-input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .search-input::placeholder { color: #A79C86; }
+    .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+
+    /* ── Featured banner ── */
+    .featured-banner { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 26px; position: relative; z-index: 1; }
+    .banner-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      padding: 24px 30px; flex-wrap: wrap;
+      transform: rotate(-.4deg);
+    }
+    .banner-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; margin: 6px 0 4px; }
+    .banner-sub { font-size: .85rem; color: var(--ink-soft); font-weight: 500; }
+
+    /* ── Filters ── */
+    .filters-bar { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-tab {
+      padding: 8px 18px;
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-chip);
+      background: var(--card);
+      color: var(--ink);
+      font-size: .84rem; font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all .15s var(--snap);
+    }
+    .filter-tab:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
+    .filter-tab.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); transform: rotate(-1.5deg); }
+    .sort-wrap { display: flex; align-items: center; gap: 10px; }
+    .sort-label { font-size: .8rem; font-weight: 700; color: var(--ink-soft); }
+    .sort-select {
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-size: .84rem; font-weight: 600;
+      font-family: var(--font-body);
+      color: var(--ink);
+      outline: none; cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Grid ── */
+    .deals-section { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 100px; position: relative; z-index: 1; }
+    .results-count { font-size: .85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 22px; }
+    .results-count span { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 1rem; }
+    .deals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+    /* ── Deal card ── */
+    .deal-card {
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0; transform: translateY(24px);
+      animation: cardIn .5s var(--snap) forwards;
+      transition: transform .22s var(--bounce), box-shadow .22s var(--bounce);
+    }
+    .deal-card:hover { transform: translate(-3px,-3px) rotate(-.5deg); box-shadow: var(--shadow-lg); }
+    .deal-card.hidden { display: none; }
+    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    .deal-card:nth-child(1){animation-delay:.04s}.deal-card:nth-child(2){animation-delay:.08s}.deal-card:nth-child(3){animation-delay:.12s}
+    .deal-card:nth-child(4){animation-delay:.16s}.deal-card:nth-child(5){animation-delay:.2s}.deal-card:nth-child(6){animation-delay:.24s}
+    .deal-card:nth-child(7){animation-delay:.28s}.deal-card:nth-child(8){animation-delay:.32s}.deal-card:nth-child(9){animation-delay:.36s}
+
+    .card-image { position: relative; height: 150px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 3.6rem; overflow: hidden; }
+    .card-image .bg-emoji { transition: transform .3s var(--bounce); }
+    .deal-card:hover .bg-emoji { transform: scale(1.18) rotate(-6deg); }
+    .cb-sticker { position: absolute; top: 12px; right: 12px; }
+    .brand-tag {
+      position: absolute; bottom: 10px; left: 12px;
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-chip);
+      padding: 4px 12px 4px 5px;
+      font-size: .74rem; font-weight: 800;
+    }
+    .brand-dot { width: 22px; height: 22px; border-radius: 50%; border: var(--bw) solid var(--ink); background: var(--lime); display: inline-flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; }
+
+    .card-body { padding: 18px 18px 14px; }
+    .card-title { font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 6px; }
+    .card-desc { font-size: .8rem; color: var(--ink-soft); line-height: 1.55; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .card-meta .chip { font-size: .68rem; padding: 3px 10px; }
+
+    .card-footer {
+      border-top: var(--bw) solid var(--ink);
+      background: var(--paper);
+      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .earn-label { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); }
+    .earn-val { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--green); line-height: 1.1; }
+    .earn-total { font-size: .64rem; color: var(--ink-soft); font-weight: 600; }
+    .card-clicks { font-size: .7rem; font-weight: 700; color: var(--ink-soft); }
+    .shop-btn { font-size: .8rem; padding: 9px 18px; }
+
+    .empty-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; display: none; }
+    .empty-state.visible { display: block; }
+    .empty-icon { font-size: 3rem; margin-bottom: 14px; }
+    .empty-title { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; margin-bottom: 6px; }
+    .empty-sub { font-size: .9rem; color: var(--ink-soft); }
+
+    @media (max-width: 960px) { .deals-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 620px) {
+      .deals-grid { grid-template-columns: 1fr; }
+      .browse-head { flex-direction: column; align-items: stretch; }
+      .search-input, .search-wrap { width: 100%; }
+      .banner-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <ul class="nav-links">
+      <li><a href="index.html#how">How it works</a></li>
+      <li><a href="browse.html">Deals</a></li>
+      <li><a href="for-brands.html">For brands</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Sign up free</a>
+      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">My dashboard →</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="browse-head">
+    <div>
+      <span class="sticker sticker-lime fade-up">🔥 500+ live deals</span>
+      <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
+      <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands — pick one and get earning.</p>
+    </div>
+    <div class="search-wrap fade-up d2">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
+    </div>
+  </div>
+
+  <!-- FEATURED BANNER -->
+  <div class="featured-banner fade-up d3">
+    <div class="card card-tang banner-inner">
+      <div>
+        <span class="sticker sticker-pink">⏰ Limited time</span>
+        <div class="banner-title">Double cashback weekend — up to 20% back</div>
+        <div class="banner-sub">Shop at 50+ selected brands this weekend and earn double. Ends Sunday midnight.</div>
+      </div>
+      <a href="signup.html" class="btn btn-lg btn-ink">Shop now →</a>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <div class="filter-tabs" role="tablist" aria-label="Deal categories">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="fashion">Fashion &amp; Beauty</button>
+      <button class="filter-tab" data-filter="food">Food &amp; Drink</button>
+      <button class="filter-tab" data-filter="electronics">Electronics</button>
+      <button class="filter-tab" data-filter="travel">Travel</button>
+      <button class="filter-tab" data-filter="home">Home &amp; Living</button>
+      <button class="filter-tab" data-filter="fitness">Fitness</button>
+    </div>
+    <div class="sort-wrap">
+      <span class="sort-label">Sort by</span>
+      <select class="sort-select" id="sortSelect" aria-label="Sort deals">
+        <option value="popular">Most popular</option>
+        <option value="cashback">Highest cashback</option>
+        <option value="newest">Newest first</option>
+        <option value="discount">Biggest discount</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- DEALS GRID -->
+  <div class="deals-section">
+    <p class="results-count"><span id="countNum">12</span> deals available</p>
+
+    <div class="deals-grid" id="dealsGrid">
+
+      <!-- 1 · Nike -->
+      <div class="deal-card" data-category="fashion" data-cashback="4200" data-clicks="1840" data-discount="13">
+        <div class="card-image">
+          <span class="bg-emoji">👟</span>
+          <span class="cb-sticker sticker sticker-lime">13% back</span>
+          <span class="brand-tag"><span class="brand-dot">N</span><span class="card-brand-name">Nike</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Nike Summer Sale — up to 13% back</div>
+          <div class="card-desc">Cashback on all Nike footwear, apparel and accessories. Air Max, Jordan and more.</div>
+          <div class="card-meta"><span class="chip">📍 Online · UK</span><span class="chip">📅 Ends 30 Jun</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£13.00</div><div class="earn-total">£112,705 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 1,840 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 2 · ASOS -->
+      <div class="deal-card" data-category="fashion" data-cashback="3250" data-clicks="2100" data-discount="10">
+        <div class="card-image">
+          <span class="bg-emoji">👗</span>
+          <span class="cb-sticker sticker sticker-lime">10% back</span>
+          <span class="brand-tag"><span class="brand-dot">A</span><span class="card-brand-name">ASOS</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">ASOS New In — 10% cashback</div>
+          <div class="card-desc">10% back on thousands of styles. Fashion, beauty and accessories all included.</div>
+          <div class="card-meta"><span class="chip">📍 Online · UK</span><span class="chip">✅ Ongoing</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£6.00</div><div class="earn-total">£54,116 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 2,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 3 · Amazon -->
+      <div class="deal-card" data-category="electronics" data-cashback="8900" data-clicks="980" data-discount="10">
+        <div class="card-image">
+          <span class="bg-emoji">📦</span>
+          <span class="cb-sticker sticker sticker-lime">10% back</span>
+          <span class="brand-tag"><span class="brand-dot">a</span><span class="card-brand-name">Amazon</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Amazon Prime — new account offer</div>
+          <div class="card-desc">10% cashback on your first Prime subscription, plus cashback on eligible purchases.</div>
+          <div class="card-meta"><span class="chip">📍 Online · UK</span><span class="chip">✨ New members</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£1.00</div><div class="earn-total">£9,891 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 980 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 4 · Trainline -->
+      <div class="deal-card" data-category="travel" data-cashback="5500" data-clicks="3200" data-discount="12">
+        <div class="card-image">
+          <span class="bg-emoji">🚆</span>
+          <span class="cb-sticker sticker sticker-lime">12% back</span>
+          <span class="brand-tag"><span class="brand-dot">T</span><span class="card-brand-name">Trainline</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Trainline special offers — 12% back</div>
+          <div class="card-desc">Up to 12% cashback on trains, coaches and more at the best prices in the UK.</div>
+          <div class="card-meta"><span class="chip">📍 Online · UK</span><span class="chip">📅 Ends 31 Jul</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£5.40</div><div class="earn-total">£112,705 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 3,200 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 5 · Boots -->
+      <div class="deal-card" data-category="fashion" data-cashback="2800" data-clicks="1560" data-discount="15">
+        <div class="card-image">
+          <span class="bg-emoji">💄</span>
+          <span class="cb-sticker sticker sticker-lime">15% back</span>
+          <span class="brand-tag"><span class="brand-dot">B</span><span class="card-brand-name">Boots</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Boots Beauty — 15% cashback</div>
+          <div class="card-desc">15% back on beauty, skincare and health products. Advantage Card points on top.</div>
+          <div class="card-meta"><span class="chip">📍 In-store &amp; online</span><span class="chip">✅ Ongoing</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£5.25</div><div class="earn-total">£28,940 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 1,560 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 6 · Gymshark -->
+      <div class="deal-card" data-category="fitness" data-cashback="6200" data-clicks="2800" data-discount="20">
+        <div class="card-image">
+          <span class="bg-emoji">🏋️</span>
+          <span class="cb-sticker sticker sticker-lime">🔥 20% back</span>
+          <span class="brand-tag"><span class="brand-dot">G</span><span class="card-brand-name">Gymshark</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Gymshark Sale — up to 20% cashback</div>
+          <div class="card-desc">Stack cashback on top of sale prices. Activewear, gym gear and accessories.</div>
+          <div class="card-meta"><span class="chip">📍 Online · UK</span><span class="chip">📅 Ends 15 Jul</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£14.00</div><div class="earn-total">£62,140 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 2,800 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 7 · Deliveroo -->
+      <div class="deal-card" data-category="food" data-cashback="1800" data-clicks="4100" data-discount="8">
+        <div class="card-image">
+          <span class="bg-emoji">🍔</span>
+          <span class="cb-sticker sticker sticker-lime">8% back</span>
+          <span class="brand-tag"><span class="brand-dot">D</span><span class="card-brand-name">Deliveroo</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Deliveroo — 8% back on every order</div>
+          <div class="card-desc">Cashback on food, grocery and drink deliveries from thousands of restaurants.</div>
+          <div class="card-meta"><span class="chip">📍 App &amp; online</span><span class="chip">✅ Ongoing</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£2.00</div><div class="earn-total">£18,440 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 4,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 8 · Currys -->
+      <div class="deal-card" data-category="electronics" data-cashback="7500" data-clicks="1200" data-discount="11">
+        <div class="card-image">
+          <span class="bg-emoji">💻</span>
+          <span class="cb-sticker sticker sticker-lime">11% back</span>
+          <span class="brand-tag"><span class="brand-dot">C</span><span class="card-brand-name">Currys</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Currys Tech Deals — 11% cashback</div>
+          <div class="card-desc">Cashback on laptops, TVs, appliances and smart home from the UK's biggest tech retailer.</div>
+          <div class="card-meta"><span class="chip">📍 In-store &amp; online</span><span class="chip">📅 Ends 20 Jul</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£16.50</div><div class="earn-total">£75,200 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 1,200 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 9 · TUI -->
+      <div class="deal-card" data-category="travel" data-cashback="9800" data-clicks="760" data-discount="9">
+        <div class="card-image">
+          <span class="bg-emoji">✈️</span>
+          <span class="cb-sticker sticker sticker-lime">9% back</span>
+          <span class="brand-tag"><span class="brand-dot">T</span><span class="card-brand-name">TUI</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">TUI Holidays — 9% cashback</div>
+          <div class="card-desc">Book your dream holiday and earn back. Packages, flights, hotels and cruises included.</div>
+          <div class="card-meta"><span class="chip">📍 UK departures</span><span class="chip">📅 Ends 1 Sep</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£72.00</div><div class="earn-total">£98,500 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 760 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 10 · IKEA -->
+      <div class="deal-card" data-category="home" data-cashback="3100" data-clicks="890" data-discount="7">
+        <div class="card-image">
+          <span class="bg-emoji">🛋️</span>
+          <span class="cb-sticker sticker sticker-lime">7% back</span>
+          <span class="brand-tag"><span class="brand-dot">I</span><span class="card-brand-name">IKEA</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">IKEA Home — 7% cashback</div>
+          <div class="card-desc">Cashback on furniture, storage, kitchenware and décor. Free delivery over £50.</div>
+          <div class="card-meta"><span class="chip">📍 In-store &amp; online</span><span class="chip">✅ Ongoing</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£7.00</div><div class="earn-total">£31,020 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 890 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 11 · Costa -->
+      <div class="deal-card" data-category="food" data-cashback="1200" data-clicks="5600" data-discount="6">
+        <div class="card-image">
+          <span class="bg-emoji">☕</span>
+          <span class="cb-sticker sticker sticker-lime">6% back</span>
+          <span class="brand-tag"><span class="brand-dot">C</span><span class="card-brand-name">Costa</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Costa Coffee — 6% cashback</div>
+          <div class="card-desc">Cashback on drinks, food and Costa Club purchases. In-store and on the app.</div>
+          <div class="card-meta"><span class="chip">📍 In-store · UK</span><span class="chip">✅ Ongoing</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£0.90</div><div class="earn-total">£12,080 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 5,600 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- 12 · PureGym -->
+      <div class="deal-card" data-category="fitness" data-cashback="2400" data-clicks="1100" data-discount="14">
+        <div class="card-image">
+          <span class="bg-emoji">💪</span>
+          <span class="cb-sticker sticker sticker-lime">14% back</span>
+          <span class="brand-tag"><span class="brand-dot">P</span><span class="card-brand-name">PureGym</span></span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">PureGym Membership — 14% back</div>
+          <div class="card-desc">Cashback on new monthly or annual memberships. 300+ gyms across the UK.</div>
+          <div class="card-meta"><span class="chip">📍 UK wide</span><span class="chip">✨ New members</span></div>
+        </div>
+        <div class="card-footer">
+          <div><div class="earn-label">You could earn</div><div class="earn-val">£2.80</div><div class="earn-total">£24,310 paid to members</div></div>
+          <div style="text-align:right"><div class="card-clicks">👆 1,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🫥</div>
+        <div class="empty-title">No deals found</div>
+        <div class="empty-sub">Try a different search term or category.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Filter tabs ──
+    const tabs = document.querySelectorAll('.filter-tab');
+    const cards = document.querySelectorAll('.deal-card[data-category]');
+    const emptyState = document.getElementById('emptyState');
+    const countNum = document.getElementById('countNum');
+    let activeFilter = 'all';
+    let searchTerm = '';
+
+    function applyFilters() {
+      let visible = 0;
+      cards.forEach(card => {
+        const cat = card.dataset.category;
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const brand = card.querySelector('.card-brand-name').textContent.toLowerCase();
+        const matchesCat = activeFilter === 'all' || cat === activeFilter;
+        const matchesSearch = !searchTerm || title.includes(searchTerm) || brand.includes(searchTerm);
+        if (matchesCat && matchesSearch) { card.classList.remove('hidden'); visible++; }
+        else card.classList.add('hidden');
+      });
+      countNum.textContent = visible;
+      emptyState.classList.toggle('visible', visible === 0);
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeFilter = tab.dataset.filter;
+        applyFilters();
+      });
+    });
+
+    // ── Search ──
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchTerm = e.target.value.toLowerCase().trim();
+      applyFilters();
+    });
+
+    // ── Sort ──
+    document.getElementById('sortSelect').addEventListener('change', e => {
+      const grid = document.getElementById('dealsGrid');
+      const allCards = [...cards];
+      allCards.sort((a, b) => {
+        if (e.target.value === 'cashback') return +b.dataset.cashback - +a.dataset.cashback;
+        if (e.target.value === 'discount') return +b.dataset.discount - +a.dataset.discount;
+        if (e.target.value === 'popular')  return +b.dataset.clicks - +a.dataset.clicks;
+        if (e.target.value === 'newest')   return Math.random() - 0.5;
+        return 0;
+      });
+      allCards.forEach(c => grid.insertBefore(c, emptyState));
+    });
+
+    // ── Wire shop buttons + whole card to deal pages ──
+    document.querySelectorAll('.deal-card[data-category]').forEach((card, i) => {
+      const btn = card.querySelector('.shop-btn');
+      if (btn) btn.href = `deal.html?id=${i + 1}`;
+      card.addEventListener('click', e => {
+        if (e.target.closest('a')) return; // let the button handle its own click
+        window.location.href = `deal.html?id=${i + 1}`;
+      });
+    });
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>

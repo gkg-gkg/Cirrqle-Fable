@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: var(--bw) solid var(--ink);
+      background: var(--pink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: .95rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-name { font-size: .88rem; font-weight: 700; }
+
+    .dash { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: clamp(32px,5vw,56px) clamp(20px,4vw,44px) 90px; }
+
+    .greeting { margin-bottom: 36px; }
+    .greeting-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem,4vw,2.9rem); letter-spacing: -0.03em; margin-top: 14px; }
+    .greeting-sub { font-size: .95rem; color: var(--ink-soft); font-weight: 500; margin-top: 4px; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { padding: 20px 22px; }
+    .stat-card:nth-child(odd) { transform: rotate(-.6deg); }
+    .stat-card:nth-child(even) { transform: rotate(.6deg); }
+    .stat-label { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); margin-bottom: 8px; }
+    .stat-val { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; letter-spacing: -0.03em; line-height: 1; }
+    .stat-sub { font-size: .72rem; font-weight: 600; color: var(--ink-soft); margin-top: 7px; }
+    .stat-up { color: var(--green); font-weight: 800; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+
+    /* Wallet */
+    .wallet-card { background: var(--lime); padding: 30px; margin-bottom: 24px; transform: rotate(-.4deg); }
+    .wallet-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 6px; }
+    .wallet-balance { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 5vw, 3.4rem); letter-spacing: -0.04em; line-height: 1; }
+    .wallet-sub { font-size: .85rem; font-weight: 600; color: rgba(31,27,19,.7); margin: 8px 0 24px; }
+    .wallet-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .panel-title { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-bottom: 16px; }
+
+    /* Activity */
+    .activity-item { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 2px dashed rgba(31,27,19,.15); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-name { font-size: .88rem; font-weight: 700; }
+    .activity-date { font-size: .72rem; color: var(--ink-soft); font-weight: 600; margin-top: 1px; }
+    .activity-amount { margin-left: auto; font-family: var(--font-display); font-weight: 800; font-size: .95rem; flex-shrink: 0; }
+    .amount-green { color: var(--green); }
+    .amount-pending { color: var(--tang-deep); }
+    .amount-muted { color: var(--ink-soft); }
+
+    /* Goal */
+    .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: .84rem; font-weight: 700; }
+    .goal-val { color: var(--green); font-weight: 800; }
+    .progress-bar { height: 16px; border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--paper); overflow: hidden; margin: 8px 0; }
+    .progress-fill {
+      height: 100%; border-radius: 999px;
+      background: repeating-linear-gradient(-45deg, var(--lime) 0 10px, var(--lime-soft) 10px 20px);
+      border-right: var(--bw) solid var(--ink);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 1.4s var(--snap);
+    }
+    .progress-fill.anim { transform: scaleX(1); }
+    .progress-note { font-size: .74rem; font-weight: 600; color: var(--ink-soft); }
+
+    /* Streak */
+    .streak-card { display: flex; align-items: center; gap: 16px; padding: 22px; background: var(--paper-deep); }
+    .streak-num { font-family: var(--font-display); font-weight: 800; font-size: 2rem; line-height: 1; color: var(--tang-deep); }
+    .streak-label { font-size: .78rem; font-weight: 700; color: var(--ink-soft); }
+
+    /* Mini deals */
+    .mini-deal { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 2px dashed rgba(31,27,19,.15); }
+    .mini-deal:last-child { border-bottom: none; }
+    .mini-deal-name { font-size: .85rem; font-weight: 800; }
+    .mini-deal-cb { font-size: .7rem; font-weight: 700; color: var(--green); }
+    .mini-deal-btn { margin-left: auto; flex-shrink: 0; }
+
+    .right-col > .card { margin-bottom: 20px; }
+
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .main-grid { grid-template-columns: 1fr; }
+      .nav-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <div class="nav-cta">
+      <div class="nav-user">
+        <span class="nav-avatar" id="navAvatar">?</span>
+        <span class="nav-name" id="navName">Loading…</span>
+      </div>
+      <a href="browse.html" class="btn btn-sm">Browse deals</a>
+      <button class="btn btn-sm" onclick="signOut()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="dash">
+    <div class="greeting">
+      <span class="sticker sticker-lime fade-up" id="greetingTime">Good morning</span>
+      <div class="greeting-name fade-up d1" id="greetingName">Welcome back 👋</div>
+      <div class="greeting-sub fade-up d2">Here's your cashback overview.</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="card stat-card fade-up d1">
+        <div class="stat-label">Total earned</div>
+        <div class="stat-val">£<span class="count" data-target="47.80" data-dec="2">0</span></div>
+        <div class="stat-sub"><span class="stat-up">↑ £12.40</span> this month</div>
+      </div>
+      <div class="card card-sky stat-card fade-up d2">
+        <div class="stat-label">Pending</div>
+        <div class="stat-val">£<span class="count" data-target="8.40" data-dec="2">0</span></div>
+        <div class="stat-sub">3 purchases verifying</div>
+      </div>
+      <div class="card card-pink stat-card fade-up d3">
+        <div class="stat-label">Brands used</div>
+        <div class="stat-val"><span class="count" data-target="12" data-dec="0">0</span></div>
+        <div class="stat-sub">This month</div>
+      </div>
+      <div class="card card-tang stat-card fade-up d4">
+        <div class="stat-label">Day streak</div>
+        <div class="stat-val"><span class="count" data-target="7" data-dec="0">0</span> 🔥</div>
+        <div class="stat-sub">Keep it going!</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div>
+        <!-- Wallet -->
+        <div class="card wallet-card fade-up d3">
+          <div class="wallet-label">💰 Available balance</div>
+          <div class="wallet-balance">£<span id="walletBal">47.80</span></div>
+          <div class="wallet-sub">Ready to withdraw to your bank or PayPal</div>
+          <div class="wallet-actions">
+            <button class="btn btn-ink" onclick="cirqleToast('💸 Withdrawal requested — arrives in 1–2 days')">💸 Withdraw</button>
+            <a href="browse.html" class="btn">🛍️ Find deals</a>
+            <button class="btn" onclick="cirqleToast('📤 Share link copied!')">📤 Refer a friend</button>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="card fade-up d4">
+          <div class="panel-title">⚡ Recent activity</div>
+          <div class="activity-item">
+            <span class="coin coin-lime" style="font-size:.95rem">✅</span>
+            <div><div class="activity-name">Nike — Summer Sale cashback confirmed</div><div class="activity-date">Today, 09:14</div></div>
+            <span class="activity-amount amount-green">+£3.50</span>
+          </div>
+          <div class="activity-item">
+            <span class="coin coin-sky" style="font-size:.95rem">🛍️</span>
+            <div><div class="activity-name">ASOS post verified</div><div class="activity-date">Yesterday, 18:42</div></div>
+            <span class="activity-amount amount-green">+£2.10</span>
+          </div>
+          <div class="activity-item">
+            <span class="coin" style="font-size:.95rem">⏳</span>
+            <div><div class="activity-name">Gymshark — purchase pending verification</div><div class="activity-date">12 Jun, 14:20</div></div>
+            <span class="activity-amount amount-pending">Pending</span>
+          </div>
+          <div class="activity-item">
+            <span class="coin coin-lime" style="font-size:.95rem">✅</span>
+            <div><div class="activity-name">Deliveroo — order cashback</div><div class="activity-date">10 Jun, 20:05</div></div>
+            <span class="activity-amount amount-green">+£0.80</span>
+          </div>
+          <div class="activity-item">
+            <span class="coin coin-pink" style="font-size:.95rem">💸</span>
+            <div><div class="activity-name">Withdrawal to PayPal</div><div class="activity-date">8 Jun, 11:00</div></div>
+            <span class="activity-amount amount-muted">−£25.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <!-- Monthly goal -->
+        <div class="card fade-up d4">
+          <div class="panel-title">🎯 Monthly goal</div>
+          <div class="goal-header">
+            <span>£47.80 / £100 target</span>
+            <span class="goal-val">48%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:47.8%"></div></div>
+          <div class="progress-note">£52.20 to go — you're on track 🎯</div>
+        </div>
+
+        <!-- Streak -->
+        <div class="card streak-card fade-up d5">
+          <span style="font-size:2.2rem">🔥</span>
+          <div>
+            <div class="streak-num">7</div>
+            <div class="streak-label">day earning streak</div>
+          </div>
+        </div>
+
+        <!-- Active deals -->
+        <div class="card fade-up d5">
+          <div class="panel-title">✨ Active deals for you</div>
+          <div class="mini-deal">
+            <span class="coin coin-sky" style="font-size:1rem">👟</span>
+            <div><div class="mini-deal-name">Nike</div><div class="mini-deal-cb">13% cashback</div></div>
+            <a href="deal.html?id=1" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
+          </div>
+          <div class="mini-deal">
+            <span class="coin coin-pink" style="font-size:1rem">👗</span>
+            <div><div class="mini-deal-name">ASOS</div><div class="mini-deal-cb">10% cashback</div></div>
+            <a href="deal.html?id=2" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
+          </div>
+          <div class="mini-deal">
+            <span class="coin coin-lime" style="font-size:1rem">🏋️</span>
+            <div><div class="mini-deal-name">Gymshark</div><div class="mini-deal-cb">20% cashback</div></div>
+            <a href="deal.html?id=6" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
+          </div>
+          <div class="mini-deal">
+            <span class="coin" style="font-size:1rem">🍔</span>
+            <div><div class="mini-deal-name">Deliveroo</div><div class="mini-deal-cb">8% cashback</div></div>
+            <a href="deal.html?id=7" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
+          </div>
+          <div style="text-align:center; margin-top:16px">
+            <a href="browse.html" style="font-size:.82rem; font-weight:800; color:var(--pink-deep); text-decoration:none">View all 500+ deals →</a>
+          </div>
+        </div>
+
+        <!-- Saved deals -->
+        <div class="card card-sky fade-up d6">
+          <div class="panel-title">🔖 Saved deals</div>
+          <div id="savedDealsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Auth check ──
+    const session = JSON.parse(localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session') || 'null');
+    if (!session) { window.location.href = 'signin.html'; }
+    else {
+      document.getElementById('navName').textContent = session.firstName + ' ' + session.lastName;
+      document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
+      const h = new Date().getHours();
+      const time = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('greetingTime').textContent = (h < 12 ? '🌅 ' : h < 17 ? '☀️ ' : '🌙 ') + time;
+      document.getElementById('greetingName').textContent = `${time}, ${session.firstName} 👋`;
+    }
+
+    // ── Counters ──
+    document.querySelectorAll('.count').forEach(el => {
+      const target = +el.dataset.target;
+      const dec = +el.dataset.dec;
+      let cur = 0;
+      const step = target / 60;
+      const t = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        el.textContent = dec ? cur.toFixed(dec) : Math.floor(cur);
+        if (cur >= target) clearInterval(t);
+      }, 16);
+    });
+
+    // ── Progress bar ──
+    setTimeout(() => document.getElementById('progFill').classList.add('anim'), 500);
+
+    // ── Saved deals ──
+    (function renderSaved() {
+      const list = document.getElementById('savedDealsList');
+      if (!list) return;
+      const saved = JSON.parse(localStorage.getItem('cirqle_saved') || '[]');
+      if (!saved.length) {
+        list.innerHTML = '<div style="font-size:.82rem;font-weight:600;color:var(--ink-soft);padding:4px 0">No saved deals yet. Tap “🔖 Save deal” on any offer to keep it here.</div>' +
+          '<div style="text-align:center;margin-top:12px"><a href="browse.html" style="font-size:.82rem;font-weight:800;color:var(--pink-deep);text-decoration:none">Browse deals →</a></div>';
+        return;
+      }
+      list.innerHTML = saved.map(s =>
+        '<div class="mini-deal">' +
+          '<span class="coin coin-lime" style="font-size:1rem">' + (s.emoji || '🔖') + '</span>' +
+          '<div><div class="mini-deal-name">' + s.brand + '</div>' +
+          '<div class="mini-deal-cb">' + s.rate + '% cashback</div></div>' +
+          '<a href="deal.html?id=' + s.id + '" class="btn btn-sm mini-deal-btn">View →</a>' +
+        '</div>'
+      ).join('');
+    })();
+
+    // ── Sign out ──
+    function signOut() {
+      localStorage.removeItem('cirqle_session');
+      sessionStorage.removeItem('cirqle_session');
+      window.location.href = 'index.html';
+    }
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>
