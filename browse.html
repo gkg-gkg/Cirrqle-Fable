@@ -26,7 +26,7 @@
       transition: transform .15s var(--snap), box-shadow .15s var(--snap);
     }
     .search-input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
-    .search-input::placeholder { color: #A79C86; }
+    .search-input::placeholder { color: #93A0AD; }
     .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
     /* ── Featured banner ── */
@@ -127,6 +127,35 @@
     .card-clicks { font-size: .7rem; font-weight: 700; color: var(--ink-soft); }
     .shop-btn { font-size: .8rem; padding: 9px 18px; }
 
+    /* ── Rating · ending-soon · distance ── */
+    .card-rating { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 800; color: var(--ink); margin-bottom: 9px; }
+    .card-rating .rc { color: var(--ink-soft); font-weight: 600; }
+    .ending-badge {
+      position: absolute; top: 12px; left: 12px;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .66rem; font-weight: 800;
+      padding: 5px 11px;
+      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      background: var(--teal-tint); box-shadow: var(--shadow-sm);
+      transform: rotate(-3deg);
+    }
+    .dist-chip { background: var(--teal-tint) !important; }
+
+    /* ── Postcode bar ── */
+    .postcode-bar { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 30px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; z-index: 1; }
+    .postcode-bar .pc-icon { font-size: 1.1rem; }
+    .postcode-input {
+      flex: 0 1 320px; background: var(--card);
+      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      padding: 11px 18px; font-size: .9rem; font-weight: 600;
+      font-family: var(--font-body); color: var(--ink);
+      outline: none; box-shadow: var(--shadow-sm);
+      transition: transform .15s var(--snap), box-shadow .15s var(--snap);
+    }
+    .postcode-input::placeholder { color: #93A0AD; }
+    .postcode-input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .pc-note { font-size: .8rem; font-weight: 700; color: var(--blue-deep); }
+
     .empty-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; display: none; }
     .empty-state.visible { display: block; }
     .empty-icon { font-size: 3rem; margin-bottom: 14px; }
@@ -146,9 +175,8 @@
 
   <!-- NAV -->
   <nav class="nav">
-    <a href="index.html" class="logo"><span class="logo-mark">💸</span>cirqle</a>
+    <a href="index.html" class="logo">cirqle</a>
     <ul class="nav-links">
-      <li><a href="index.html#how">How it works</a></li>
       <li><a href="browse.html">Deals</a></li>
       <li><a href="for-brands.html">For brands</a></li>
     </ul>
@@ -201,8 +229,19 @@
         <option value="cashback">Highest cashback</option>
         <option value="newest">Newest first</option>
         <option value="discount">Biggest discount</option>
+        <option value="nearest">Nearest to me</option>
+        <option value="rating">Top rated</option>
       </select>
     </div>
+  </div>
+
+  <!-- POSTCODE -->
+  <div class="postcode-bar fade-up">
+    <span class="pc-icon" aria-hidden="true">📍</span>
+    <input class="postcode-input" id="postcodeInput" type="text" maxlength="8" autocomplete="postal-code"
+           placeholder="Add your postcode to see deals near you" aria-label="Your postcode" />
+    <button class="btn btn-sm btn-lime" id="postcodeBtn" type="button">See deals near me</button>
+    <span class="pc-note" id="pcNote"></span>
   </div>
 
   <!-- DEALS GRID -->
@@ -225,7 +264,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£13.00</div><div class="earn-total">£112,705 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 1,840 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️1,840 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -243,7 +282,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£6.00</div><div class="earn-total">£54,116 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 2,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️2,100 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -261,7 +300,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£1.00</div><div class="earn-total">£9,891 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 980 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️980 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -279,7 +318,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£5.40</div><div class="earn-total">£112,705 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 3,200 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️3,200 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -297,7 +336,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£5.25</div><div class="earn-total">£28,940 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 1,560 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️1,560 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -315,7 +354,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£14.00</div><div class="earn-total">£62,140 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 2,800 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️2,800 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -333,7 +372,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£2.00</div><div class="earn-total">£18,440 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 4,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️4,100 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -351,7 +390,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£16.50</div><div class="earn-total">£75,200 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 1,200 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️1,200 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -369,7 +408,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£72.00</div><div class="earn-total">£98,500 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 760 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️760 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -387,7 +426,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£7.00</div><div class="earn-total">£31,020 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 890 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️890 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -405,7 +444,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£0.90</div><div class="earn-total">£12,080 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 5,600 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️5,600 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -423,7 +462,7 @@
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">£2.80</div><div class="earn-total">£24,310 paid to members</div></div>
-          <div style="text-align:right"><div class="card-clicks">👆 1,100 clicks</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <div style="text-align:right"><div class="card-clicks">🎟️1,100 claims</div><a href="#" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
         </div>
       </div>
 
@@ -445,6 +484,38 @@
     const countNum = document.getElementById('countNum');
     let activeFilter = 'all';
     let searchTerm = '';
+
+    // ── Ratings, review counts, distances, ending-soon flags (card order = 1–12) ──
+    const dealMeta = [
+      { rating: 4.7, reviews: 1284, distance: 2.3,  ending: true  },
+      { rating: 4.5, reviews: 2015, distance: 5.1,  ending: false },
+      { rating: 4.8, reviews: 3540, distance: 1.2,  ending: false },
+      { rating: 4.3, reviews: 942,  distance: 8.6,  ending: true  },
+      { rating: 4.6, reviews: 1120, distance: 0.8,  ending: false },
+      { rating: 4.9, reviews: 2760, distance: 3.7,  ending: true  },
+      { rating: 4.2, reviews: 3980, distance: 1.9,  ending: false },
+      { rating: 4.4, reviews: 870,  distance: 4.2,  ending: true  },
+      { rating: 4.1, reviews: 610,  distance: 12.4, ending: false },
+      { rating: 4.7, reviews: 1430, distance: 6.5,  ending: false },
+      { rating: 4.5, reviews: 5210, distance: 0.5,  ending: false },
+      { rating: 4.6, reviews: 780,  distance: 2.1,  ending: false },
+    ];
+    cards.forEach((card, i) => {
+      const m = dealMeta[i];
+      if (!m) return;
+      card.dataset.rating = m.rating;
+      card.dataset.distance = m.distance;
+      const rating = document.createElement('div');
+      rating.className = 'card-rating';
+      rating.innerHTML = `⭐ ${m.rating.toFixed(1)} <span class="rc">(${m.reviews.toLocaleString()})</span>`;
+      card.querySelector('.card-title').insertAdjacentElement('afterend', rating);
+      if (m.ending) {
+        const badge = document.createElement('span');
+        badge.className = 'ending-badge';
+        badge.textContent = '⏰ Ends soon';
+        card.querySelector('.card-image').appendChild(badge);
+      }
+    });
 
     function applyFilters() {
       let visible = 0;
@@ -477,18 +548,45 @@
     });
 
     // ── Sort ──
-    document.getElementById('sortSelect').addEventListener('change', e => {
-      const grid = document.getElementById('dealsGrid');
+    const sortSelect = document.getElementById('sortSelect');
+    const grid = document.getElementById('dealsGrid');
+    function sortCards(value) {
       const allCards = [...cards];
       allCards.sort((a, b) => {
-        if (e.target.value === 'cashback') return +b.dataset.cashback - +a.dataset.cashback;
-        if (e.target.value === 'discount') return +b.dataset.discount - +a.dataset.discount;
-        if (e.target.value === 'popular')  return +b.dataset.clicks - +a.dataset.clicks;
-        if (e.target.value === 'newest')   return Math.random() - 0.5;
+        if (value === 'cashback') return +b.dataset.cashback - +a.dataset.cashback;
+        if (value === 'discount') return +b.dataset.discount - +a.dataset.discount;
+        if (value === 'popular')  return +b.dataset.clicks - +a.dataset.clicks;
+        if (value === 'rating')   return +b.dataset.rating - +a.dataset.rating;
+        if (value === 'nearest')  return +a.dataset.distance - +b.dataset.distance;
+        if (value === 'newest')   return Math.random() - 0.5;
         return 0;
       });
       allCards.forEach(c => grid.insertBefore(c, emptyState));
-    });
+    }
+    sortSelect.addEventListener('change', e => sortCards(e.target.value));
+
+    // ── Postcode · "See deals near me" ──
+    const postcodeInput = document.getElementById('postcodeInput');
+    const pcNote = document.getElementById('pcNote');
+    function showNearby() {
+      const pc = postcodeInput.value.trim().toUpperCase();
+      if (!pc) { pcNote.textContent = 'Enter a postcode first'; return; }
+      cards.forEach(card => {
+        const meta = card.querySelector('.card-meta');
+        let chip = meta.querySelector('.dist-chip');
+        if (!chip) {
+          chip = document.createElement('span');
+          chip.className = 'chip dist-chip';
+          meta.appendChild(chip);
+        }
+        chip.textContent = `📍 ${(+card.dataset.distance).toFixed(1)} mi away`;
+      });
+      pcNote.textContent = `📍 Showing deals near ${pc}`;
+      sortSelect.value = 'nearest';
+      sortCards('nearest');
+    }
+    document.getElementById('postcodeBtn').addEventListener('click', showNearby);
+    postcodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') showNearby(); });
 
     // ── Wire shop buttons + whole card to deal pages ──
     document.querySelectorAll('.deal-card[data-category]').forEach((card, i) => {

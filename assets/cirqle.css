@@ -1,13 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════
    CIRQLE DESIGN SYSTEM — "Coin Arcade"
-   Cool paper + steel-blue brand + coral accent, sticker energy.
+   Cool paper + steel-blue brand + teal accent, sticker energy.
    Circles everywhere, because… Cirqle.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── Tokens ── */
 :root {
   /* color — Cirqle steel-blue theme (brand blue #487995, sampled from the logo)
-     Two-accent system: BLUE acts, warm CORAL supports. */
+     Two-accent system: BLUE acts, TEAL supports. */
   --paper:      #EBF0F5;   /* page background — cool off-white */
   --paper-deep: #DBE5EE;   /* tinted panels — cool blue-grey */
   --card:       #FFFFFF;   /* card faces — clean white */
@@ -19,19 +19,19 @@
   --blue-deep:   #35617E;  /* deeper blue — links, squiggles, focus ring (on light) */
   --blue-tint:   #7FB6DB;  /* light blue — the ONE loud fill; dark text sits on it */
   --blue-pale:   #DCEBF6;  /* palest blue — soft card faces */
-  /* complementary warm accent */
-  --coral:       #ED7B4E;  /* warm coral — punchy accent that pairs with the blue */
-  --coral-tint:  #F6C2A3;  /* light coral — support fills; dark text sits on it */
+  /* complementary teal accent */
+  --teal:       #12A594;  /* teal — punchy accent that pairs with the blue */
+  --teal-tint:  #B6EDE4;  /* light teal — support fills; dark text sits on it */
 
-  /* legacy aliases — existing markup keeps working, now blue/coral instead of green/pink */
+  /* legacy aliases — existing markup keeps working, now blue/teal instead of green/pink */
   --lime:       var(--blue-tint);   /* the ONE loud accent — now light blue */
   --lime-soft:  var(--blue-pale);
   --green:      var(--blue-deep);   /* was money green */
-  --pink:       var(--coral-tint);
+  --pink:       var(--teal-tint);
   --pink-deep:  var(--blue-deep);
-  --sky:        var(--coral-tint);
+  --sky:        var(--teal-tint);
   --sky-deep:   var(--blue-deep);
-  --tang:       var(--coral-tint);
+  --tang:       var(--teal-tint);
   --tang-deep:  var(--blue-deep);
   --red:        #E23D3D;   /* errors */
 
@@ -123,17 +123,6 @@ body::before {
   color: var(--ink);
   flex-shrink: 0;
 }
-.logo-mark {
-  width: 34px; height: 34px;
-  border: var(--bw) solid var(--ink);
-  border-radius: 50%;
-  background: var(--lime);
-  box-shadow: var(--shadow-sm);
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1rem;
-  transition: transform .4s var(--bounce);
-}
-.logo:hover .logo-mark { transform: rotate(360deg); }
 .nav-links {
   display: flex; gap: 26px; list-style: none;
   font-size: .92rem; font-weight: 600;
