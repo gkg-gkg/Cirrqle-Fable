@@ -32,7 +32,6 @@
       background: var(--paper-deep); padding: clamp(30px,6vw,60px) 20px;
       transition: background .18s, transform .18s var(--bounce); }
     .drop:hover, .drop.drag { background: var(--blue-pale); transform: translateY(-2px); }
-    .drop-icon { font-size: 2.6rem; margin-bottom: 10px; }
     .drop-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
     .drop-sub { font-size: .85rem; color: var(--ink-soft); margin-top: 6px; }
 
@@ -72,7 +71,6 @@
     <div class="card fade-up d3" id="uploadCard">
       <label class="drop" id="dropZone">
         <input type="file" id="receiptInput" accept="image/*" hidden />
-        <div class="drop-icon">📄</div>
         <div class="drop-title">Attach receipt photo</div>
         <div class="drop-sub">Tap to choose an image — JPG, PNG or HEIC</div>
       </label>
@@ -80,7 +78,7 @@
 
     <div class="card result fade-up" id="resultCard" hidden>
       <img id="preview" alt="Your receipt" />
-      <div class="result-badge">✅ Authenticated</div>
+      <div class="result-badge">Authenticated</div>
       <p class="result-note">Your receipt was received and <strong>authenticated</strong>. Cashback will land in your account after the 3‑day hold.</p>
       <a href="feed.html" class="btn btn-ink">Back to dashboard</a>
     </div>

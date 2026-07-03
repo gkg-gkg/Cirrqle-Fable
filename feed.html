@@ -9,6 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
+    /* Receipt status chip: amber = pending, green = verified */
+    :root { --tile-pending: #E6892B; --tile-done: #2E9E5A; }
+
     /* Logged-in nav (matches dashboard.html) */
     .nav-user { display: flex; align-items: center; gap: 10px; }
     .nav-avatar {
@@ -48,10 +51,9 @@
     .post-tile:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
     .post-img { flex-shrink: 0; width: 210px; background: var(--paper-deep); border-right: var(--bw) solid var(--ink); overflow: hidden; }
     .post-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .post-img .noimg { width: 100%; height: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
+    .post-img .noimg { width: 100%; height: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; font-size: .95rem; font-weight: 700; color: var(--ink-soft); }
     .post-body { flex: 1; min-width: 0; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
     .post-owner { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; }
-    .post-handle { font-size: .8rem; font-weight: 700; color: var(--ink-soft); margin-top: 1px; }
     .post-caption { font-size: .88rem; color: var(--ink-soft); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .post-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .post-date { font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
@@ -80,9 +82,9 @@
       font-size: .76rem; font-weight: 800;
       padding: 8px 12px;
       border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
-      background: var(--paper-deep); color: var(--ink-soft);
+      background: var(--tile-pending); color: var(--ink);
     }
-    .tile-status.done { background: var(--lime); color: var(--ink); }
+    .tile-status.done { background: var(--tile-done); color: #fff; }
 
     .feed-empty { text-align: center; padding: 60px 20px; }
     .feed-empty .ei { font-size: 3rem; margin-bottom: 12px; }
@@ -157,7 +159,7 @@
     }
     function imgFail(img) {
       const d = document.createElement('div');
-      d.className = 'noimg'; d.textContent = '🖼️';
+      d.className = 'noimg'; d.textContent = 'No image';
       if (img.parentNode) img.parentNode.replaceChild(d, img);
     }
 
@@ -188,10 +190,10 @@
         const deadline = +el.dataset.deadline;
         const expired = deadline - Date.now() <= 0;
         if (el.dataset.kind === 'campaign') {
-          el.textContent = '📅 ' + fmtCampaign(deadline);
+          el.textContent = fmtCampaign(deadline);
           el.classList.toggle('ended', expired);
         } else {
-          el.textContent = (expired ? '✅ ' : '💸 ') + fmtCashback(deadline);
+          el.textContent = fmtCashback(deadline);
           el.classList.toggle('done', expired);
         }
       });
@@ -210,7 +212,6 @@
       if (!posts.length) {
         listEl.innerHTML =
           '<div class="feed-empty">' +
-            '<div class="ei">📭</div>' +
             '<div class="et">No posts yet</div>' +
             '<div class="es">Tag <strong>@cirqle</strong> in an Instagram post, then hit Refresh.</div>' +
           '</div>';
@@ -219,7 +220,7 @@
       listEl.innerHTML = posts.map(p => {
         const img = p.displayUrl
           ? '<img src="' + esc(p.displayUrl) + '" alt="Instagram post" loading="lazy" onerror="imgFail(this)" />'
-          : '<div class="noimg">🖼️</div>';
+          : '<div class="noimg">No image</div>';
         const caption = esc((p.caption || '').replace(/\s+/g, ' ').trim()) || '<em>No caption</em>';
 
         // Countdown deadlines derived from the post date.
@@ -232,16 +233,16 @@
           const cashExpired = cashbackEnd - Date.now() <= 0;
           timers =
             '<div class="post-timers">' +
-              '<span class="timer-chip' + (campExpired ? ' ended' : '') + '" data-kind="campaign" data-deadline="' + campaignEnd + '">📅 ' + fmtCampaign(campaignEnd) + '</span>' +
-              '<span class="timer-chip cash' + (cashExpired ? ' done' : '') + '" data-kind="cashback" data-deadline="' + cashbackEnd + '">' + (cashExpired ? '✅ ' : '💸 ') + fmtCashback(cashbackEnd) + '</span>' +
+              '<span class="timer-chip' + (campExpired ? ' ended' : '') + '" data-kind="campaign" data-deadline="' + campaignEnd + '">' + fmtCampaign(campaignEnd) + '</span>' +
+              '<span class="timer-chip cash' + (cashExpired ? ' done' : '') + '" data-kind="cashback" data-deadline="' + cashbackEnd + '">' + fmtCashback(cashbackEnd) + '</span>' +
             '</div>';
         }
 
-        // Receipt completion icon: flips once a receipt is uploaded for this post.
+        // Receipt state: flips the tile's status chip + border once verified.
         const done = hasReceipt(p.id);
         const status = done
-          ? '<span class="tile-status done">✅ Receipt verified</span>'
-          : '<span class="tile-status">◯ Receipt pending</span>';
+          ? '<span class="tile-status done">Receipt verified</span>'
+          : '<span class="tile-status">Receipt pending</span>';
 
         return (
           '<article class="post-tile">' +
@@ -249,19 +250,18 @@
             '<div class="post-body">' +
               '<div>' +
                 '<div class="post-owner">' + esc(p.ownerFullName || p.ownerUsername || 'Unknown') + '</div>' +
-                '<div class="post-handle">@' + esc(p.ownerUsername || '') + '</div>' +
               '</div>' +
               '<div class="post-caption">' + caption + '</div>' +
               timers +
               '<div class="post-meta">' +
-                '<span class="chip">❤️ ' + (p.likesCount || 0) + '</span>' +
-                '<span class="chip">💬 ' + (p.commentsCount || 0) + '</span>' +
+                '<span class="chip">' + (p.likesCount || 0) + ' likes</span>' +
+                '<span class="chip">' + (p.commentsCount || 0) + ' comments</span>' +
                 '<span class="post-date">' + fmtDate(p.timestamp) + '</span>' +
               '</div>' +
             '</div>' +
             '<div class="post-actions">' +
               status +
-              '<a class="btn btn-lime btn-sm" href="receipt.html?id=' + encodeURIComponent(p.id || '') + '">Upload Receipt</a>' +
+              (done ? '' : '<a class="btn btn-lime btn-sm" href="receipt.html?id=' + encodeURIComponent(p.id || '') + '">Upload Receipt</a>') +
               (p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="btn btn-sm">View on Instagram →</a>' : '') +
             '</div>' +
           '</article>'
@@ -344,7 +344,6 @@
     function promptForHandle() {
       listEl.innerHTML =
         '<div class="feed-empty">' +
-          '<div class="ei">📸</div>' +
           '<div class="et">What\'s your Instagram username?</div>' +
           '<div class="es">We use it to find the posts where you tagged @cirqle.</div>' +
           '<div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">' +
