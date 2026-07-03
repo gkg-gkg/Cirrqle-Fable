@@ -1,1 +1,5 @@
 .DS_Store
+.env
+assets/config.js
+__pycache__/
+*.pyc

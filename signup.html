@@ -119,6 +119,15 @@
         </div>
 
         <div class="field">
+          <label for="instagram">Instagram username</label>
+          <div class="field-wrap">
+            <span class="field-icon">📸</span>
+            <input type="text" id="instagram" placeholder="yourhandle" autocomplete="off" />
+          </div>
+          <div class="field-error" id="instagramErr">Please enter your Instagram username.</div>
+        </div>
+
+        <div class="field">
           <label for="password">Password</label>
           <div class="field-wrap">
             <span class="field-icon">🔒</span>
@@ -230,6 +239,7 @@
       const fn = document.getElementById('firstName').value.trim();
       const ln = document.getElementById('lastName').value.trim();
       const em = document.getElementById('email').value.trim();
+      const ig = document.getElementById('instagram').value.trim().replace(/^@+/, '').toLowerCase();
       const pw = document.getElementById('password').value;
       const cp = document.getElementById('confirmPassword').value;
       const tc = document.getElementById('terms').checked;
@@ -238,10 +248,11 @@
       const v1 = showErr('firstName',       'firstNameErr', !fn);
       const v2 = showErr('lastName',        'lastNameErr',  !ln);
       const v3 = showErr('email',           'emailErr',     !em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em));
+      const vig = showErr('instagram',      'instagramErr', !ig);
       const v4 = showErr('password',        'passwordErr',  pw.length < 8);
       const v5 = showErr('confirmPassword', 'confirmErr',   pw !== cp);
       termsErr.classList.toggle('visible', !tc);
-      if (!v1 || !v2 || !v3 || !v4 || !v5 || !tc) return;
+      if (!v1 || !v2 || !v3 || !vig || !v4 || !v5 || !tc) return;
 
       // Check email not already registered
       const users = JSON.parse(localStorage.getItem('cirqle_users') || '[]');
@@ -253,11 +264,11 @@
       }
 
       // Save new user
-      users.push({ firstName: fn, lastName: ln, email: em, password: pw });
+      users.push({ firstName: fn, lastName: ln, email: em, password: pw, instagramHandle: ig });
       localStorage.setItem('cirqle_users', JSON.stringify(users));
 
       // Set session
-      localStorage.setItem('cirqle_session', JSON.stringify({ firstName: fn, lastName: ln, email: em }));
+      localStorage.setItem('cirqle_session', JSON.stringify({ firstName: fn, lastName: ln, email: em, instagramHandle: ig }));
 
       const btn = document.getElementById('submitBtn');
       const txt = document.getElementById('submitText');

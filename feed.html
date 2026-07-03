@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    /* Logged-in nav (matches dashboard.html) */
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: var(--bw) solid var(--ink); background: var(--pink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: .95rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-name { font-size: .88rem; font-weight: 700; }
+
+    .feed-wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: clamp(32px,5vw,56px) clamp(20px,4vw,44px) 90px; }
+    .feed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .feed-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem,4vw,2.9rem); letter-spacing: -0.03em; line-height: 1.05; }
+    .feed-sub { font-size: .95rem; color: var(--ink-soft); font-weight: 500; margin: 6px 0 0; }
+    .feed-meta { margin: 16px 0 28px; min-height: 18px; }
+    .feed-updated { font-size: .78rem; font-weight: 600; color: var(--ink-soft); }
+
+    .feed-input {
+      background: var(--card); border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      padding: 11px 18px; font-size: .9rem; font-weight: 600; font-family: var(--font-body);
+      color: var(--ink); outline: none; box-shadow: var(--shadow-sm);
+    }
+
+    .feed-list { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+    /* Large horizontal post tile: image left, details right */
+    .post-tile {
+      display: flex; align-items: stretch;
+      background: var(--card);
+      border: var(--bw) solid var(--ink);
+      border-radius: var(--r-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform .22s var(--bounce), box-shadow .22s var(--bounce);
+    }
+    .post-tile:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
+    .post-img { flex-shrink: 0; width: 210px; background: var(--paper-deep); border-right: var(--bw) solid var(--ink); overflow: hidden; }
+    .post-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .post-img .noimg { width: 100%; height: 100%; min-height: 180px; display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
+    .post-body { flex: 1; min-width: 0; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
+    .post-owner { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .post-handle { font-size: .8rem; font-weight: 700; color: var(--ink-soft); margin-top: 1px; }
+    .post-caption { font-size: .88rem; color: var(--ink-soft); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .post-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: auto; }
+    .post-date { font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
+
+    .feed-empty { text-align: center; padding: 60px 20px; }
+    .feed-empty .ei { font-size: 3rem; margin-bottom: 12px; }
+    .feed-empty .et { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; margin-bottom: 6px; }
+    .feed-empty .es { font-size: .9rem; color: var(--ink-soft); }
+
+    @media (max-width: 900px) { .nav-name { display: none; } }
+    @media (max-width: 620px) {
+      .post-tile { flex-direction: column; }
+      .post-img { width: 100%; height: 200px; border-right: none; border-bottom: var(--bw) solid var(--ink); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">cirqle</a>
+    <div class="nav-cta">
+      <div class="nav-user">
+        <span class="nav-avatar" id="navAvatar">?</span>
+        <span class="nav-name" id="navName">Loading…</span>
+      </div>
+      <a href="dashboard.html" class="btn btn-sm">My Account</a>
+      <a href="browse.html" class="btn btn-sm">Browse deals</a>
+      <button class="btn btn-sm" onclick="signOut()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="feed-wrap">
+    <div class="feed-head">
+      <div>
+        <div class="feed-title fade-up d1">Your Cirqle posts</div>
+        <p class="feed-sub fade-up d2">Instagram posts where you tagged <strong>@cirqle</strong>.</p>
+      </div>
+      <button class="btn btn-ink fade-up d2" id="refreshBtn">↻ Refresh</button>
+    </div>
+    <div class="feed-meta"><span class="feed-updated" id="feedUpdated"></span></div>
+    <div class="feed-list" id="feedList"></div>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/ig-account.js"></script>
+  <script>
+    // ── Auth guard ──
+    const session = JSON.parse(localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session') || 'null');
+    if (!session) { window.location.href = 'signin.html'; }
+    else {
+      document.getElementById('navName').textContent = session.firstName + ' ' + session.lastName;
+      document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
+    }
+
+    const CIRQLE_ACTOR = 'shu8hvrXbJbY3Eb9W';                       // apify/instagram-scraper
+    const CIRQLE_TARGET = 'https://www.instagram.com/cirqle.ltd/';  // brand account we scrape
+    const listEl = document.getElementById('feedList');
+    const updatedEl = document.getElementById('feedUpdated');
+    let allMentions = [];   // full cirqle mentions list currently loaded
+
+    // ── Helpers ──
+    function esc(s) {
+      return (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function fmtDate(ts) {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function imgFail(img) {
+      const d = document.createElement('div');
+      d.className = 'noimg'; d.textContent = '🖼️';
+      if (img.parentNode) img.parentNode.replaceChild(d, img);
+    }
+
+    // ── Render ──
+    function renderPosts(posts) {
+      if (!posts.length) {
+        listEl.innerHTML =
+          '<div class="feed-empty">' +
+            '<div class="ei">📭</div>' +
+            '<div class="et">No posts yet</div>' +
+            '<div class="es">Tag <strong>@cirqle</strong> in an Instagram post, then hit Refresh.</div>' +
+          '</div>';
+        return;
+      }
+      listEl.innerHTML = posts.map(p => {
+        const img = p.displayUrl
+          ? '<img src="' + esc(p.displayUrl) + '" alt="Instagram post" loading="lazy" onerror="imgFail(this)" />'
+          : '<div class="noimg">🖼️</div>';
+        const caption = esc((p.caption || '').replace(/\s+/g, ' ').trim()) || '<em>No caption</em>';
+        return (
+          '<article class="post-tile">' +
+            '<div class="post-img">' + img + '</div>' +
+            '<div class="post-body">' +
+              '<div>' +
+                '<div class="post-owner">' + esc(p.ownerFullName || p.ownerUsername || 'Unknown') + '</div>' +
+                '<div class="post-handle">@' + esc(p.ownerUsername || '') + '</div>' +
+              '</div>' +
+              '<div class="post-caption">' + caption + '</div>' +
+              '<div class="post-meta">' +
+                '<span class="chip">❤️ ' + (p.likesCount || 0) + '</span>' +
+                '<span class="chip">💬 ' + (p.commentsCount || 0) + '</span>' +
+                (p.type ? '<span class="chip">' + esc(p.type) + '</span>' : '') +
+                '<span class="post-date">' + fmtDate(p.timestamp) + '</span>' +
+              '</div>' +
+              (p.url ? '<div><a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="btn btn-sm btn-ink">View on Instagram →</a></div>' : '') +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+    }
+
+    function filterByHandle(all, handle) {
+      return all.filter(p => (p.ownerUsername || '').toLowerCase() === handle);
+    }
+
+    // Show the user only their own tagged posts. If no handle stored, prompt for it.
+    function applyAndRender() {
+      const handle = window.CirqleAccount.getHandle();
+      if (!handle) { promptForHandle(); return; }
+      renderPosts(filterByHandle(allMentions, handle));
+    }
+
+    // ── Load: localStorage cache first, else the committed JSON ──
+    async function loadMentions() {
+      const cached = localStorage.getItem('cirqle_mentions');
+      if (cached) {
+        try {
+          const obj = JSON.parse(cached);
+          allMentions = obj.posts || [];
+          if (obj.updated) updatedEl.textContent = 'Last updated ' + fmtDate(obj.updated);
+          applyAndRender();
+          return;
+        } catch (e) { /* fall through to file */ }
+      }
+      try {
+        const res = await fetch('data/mentions.json', { cache: 'no-store' });
+        allMentions = await res.json();
+        updatedEl.textContent = 'Showing saved data — hit Refresh for the latest';
+      } catch (e) {
+        allMentions = [];
+        updatedEl.textContent = '';
+      }
+      applyAndRender();
+    }
+
+    // ── Live refresh: call Apify directly (dev-only token in config.js) ──
+    async function refresh() {
+      const btn = document.getElementById('refreshBtn');
+      if (!window.APIFY_TOKEN) {
+        cirqleToast('Add your Apify token to assets/config.js to enable live refresh.');
+        return;
+      }
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Refreshing…';
+      try {
+        const res = await fetch(
+          'https://api.apify.com/v2/acts/' + CIRQLE_ACTOR + '/run-sync-get-dataset-items?token=' + encodeURIComponent(window.APIFY_TOKEN),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ directUrls: [CIRQLE_TARGET], resultsType: 'mentions', resultsLimit: 50 })
+          }
+        );
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const posts = await res.json();
+        allMentions = Array.isArray(posts) ? posts : [];
+        const now = new Date().toISOString();
+        localStorage.setItem('cirqle_mentions', JSON.stringify({ posts: allMentions, updated: now }));
+        updatedEl.textContent = 'Last updated ' + fmtDate(now);
+        applyAndRender();
+        cirqleToast('Refreshed — ' + allMentions.length + ' mentions scanned');
+      } catch (e) {
+        console.error('Refresh failed:', e);
+        cirqleToast('Refresh failed: ' + e.message + ' — see console (possible CORS).');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    }
+
+    // ── Fallback: ask for the handle inline (accounts created before this feature) ──
+    function promptForHandle() {
+      listEl.innerHTML =
+        '<div class="feed-empty">' +
+          '<div class="ei">📸</div>' +
+          '<div class="et">What\'s your Instagram username?</div>' +
+          '<div class="es">We use it to find the posts where you tagged @cirqle.</div>' +
+          '<div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">' +
+            '<input id="handleInput" class="feed-input" placeholder="yourhandle" style="flex:0 1 240px" />' +
+            '<button class="btn btn-ink" onclick="saveHandle()">Save</button>' +
+          '</div>' +
+        '</div>';
+    }
+    function saveHandle() {
+      const h = window.CirqleAccount.setHandle(document.getElementById('handleInput').value);
+      if (!h) { cirqleToast('Please enter a valid username'); return; }
+      applyAndRender();
+    }
+
+    // ── Sign out (matches dashboard.html) ──
+    function signOut() {
+      localStorage.removeItem('cirqle_session');
+      sessionStorage.removeItem('cirqle_session');
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refresh);
+    if (session) loadMentions();
+  </script>
+  <script src="assets/enhance.js"></script>
+</body>
+</html>
