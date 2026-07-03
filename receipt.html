@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Receipt — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    /* Logged-in nav (matches feed.html) */
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: var(--bw) solid var(--ink); background: var(--pink);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 800; font-size: .95rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-name { font-size: .88rem; font-weight: 700; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: .84rem; font-weight: 700; color: var(--ink-soft); text-decoration: none; margin-bottom: 18px; }
+    .back-link:hover { color: var(--ink); }
+
+    .up-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem,4vw,2.6rem); letter-spacing: -0.03em; }
+    .up-sub { font-size: .95rem; color: var(--ink-soft); font-weight: 500; margin: 8px 0 26px; max-width: 520px; line-height: 1.6; }
+
+    /* Drop / choose zone */
+    .drop { display: block; cursor: pointer; text-align: center;
+      border: var(--bw) dashed var(--ink); border-radius: var(--r-card);
+      background: var(--paper-deep); padding: clamp(30px,6vw,60px) 20px;
+      transition: background .18s, transform .18s var(--bounce); }
+    .drop:hover, .drop.drag { background: var(--blue-pale); transform: translateY(-2px); }
+    .drop-icon { font-size: 2.6rem; margin-bottom: 10px; }
+    .drop-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
+    .drop-sub { font-size: .85rem; color: var(--ink-soft); margin-top: 6px; }
+
+    /* Result */
+    .result { text-align: center; }
+    .result img { max-width: 320px; width: 100%; border: var(--bw) solid var(--ink); border-radius: 16px; margin: 0 auto 22px; }
+    .result-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;
+      color: var(--blue-deep); margin-bottom: 8px;
+    }
+    .result-note { font-size: .92rem; color: var(--ink-soft); margin-bottom: 22px; }
+
+    @media (max-width: 900px) { .nav-name { display: none; } }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="index.html" class="logo">cirqle</a>
+    <div class="nav-cta">
+      <div class="nav-user">
+        <span class="nav-avatar" id="navAvatar">?</span>
+        <span class="nav-name" id="navName">Loading…</span>
+      </div>
+      <a href="feed.html" class="btn btn-sm btn-ink">Dashboard</a>
+      <a href="browse.html" class="btn btn-sm">Browse deals</a>
+      <button class="btn btn-sm" onclick="signOut()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="page">
+    <a href="feed.html" class="back-link fade-up d1">← Back to dashboard</a>
+    <h1 class="up-title fade-up d1">Upload your receipt</h1>
+    <p class="up-sub fade-up d2">Attach a photo of your receipt so we can verify your purchase. Once verified, your cashback is released automatically after the 3‑day hold.</p>
+
+    <div class="card fade-up d3" id="uploadCard">
+      <label class="drop" id="dropZone">
+        <input type="file" id="receiptInput" accept="image/*" hidden />
+        <div class="drop-icon">📄</div>
+        <div class="drop-title">Attach receipt photo</div>
+        <div class="drop-sub">Tap to choose an image — JPG, PNG or HEIC</div>
+      </label>
+    </div>
+
+    <div class="card result fade-up" id="resultCard" hidden>
+      <img id="preview" alt="Your receipt" />
+      <div class="result-badge">✅ Authenticated</div>
+      <p class="result-note">Your receipt was received and <strong>authenticated</strong>. Cashback will land in your account after the 3‑day hold.</p>
+      <a href="feed.html" class="btn btn-ink">Back to dashboard</a>
+    </div>
+  </div>
+
+  <script src="assets/enhance.js"></script>
+  <script>
+    // ── Auth guard (matches feed.html) ──
+    const session = JSON.parse(localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session') || 'null');
+    if (!session) { window.location.href = 'signin.html'; }
+    else {
+      document.getElementById('navName').textContent = session.firstName + ' ' + session.lastName;
+      document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
+    }
+
+    // Which post this receipt belongs to (so the dashboard tile can flip to complete).
+    const postId = new URLSearchParams(location.search).get('id') || '';
+
+    function markReceipt(id) {
+      if (!id) return;
+      let m;
+      try { m = JSON.parse(localStorage.getItem('cirqle_receipts') || '{}'); }
+      catch (e) { m = {}; }
+      m[id] = { uploaded: true, at: new Date().toISOString() };
+      localStorage.setItem('cirqle_receipts', JSON.stringify(m));
+    }
+
+    const input = document.getElementById('receiptInput');
+    const dropZone = document.getElementById('dropZone');
+
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        cirqleToast('Please attach an image of your receipt.');
+        return;
+      }
+      // Placeholder auth: real verification comes later.
+      document.getElementById('preview').src = URL.createObjectURL(file);
+      markReceipt(postId);
+      document.getElementById('uploadCard').hidden = true;
+      document.getElementById('resultCard').hidden = false;
+      cirqleToast('authenticated');
+    }
+
+    input.addEventListener('change', () => handleFile(input.files[0]));
+
+    // Drag-and-drop support
+    ['dragenter', 'dragover'].forEach(ev =>
+      dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach(ev =>
+      dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
+    dropZone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    // ── Sign out (matches feed.html) ──
+    function signOut() {
+      localStorage.removeItem('cirqle_session');
+      sessionStorage.removeItem('cirqle_session');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

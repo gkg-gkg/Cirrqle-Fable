@@ -53,8 +53,36 @@
     .post-owner { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; }
     .post-handle { font-size: .8rem; font-weight: 700; color: var(--ink-soft); margin-top: 1px; }
     .post-caption { font-size: .88rem; color: var(--ink-soft); line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .post-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: auto; }
+    .post-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .post-date { font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
+
+    /* Countdown chips (campaign end + 3-day cashback payout) */
+    .post-timers { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; margin-top: auto; }
+    .timer-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: .74rem; font-weight: 800;
+      padding: 5px 12px;
+      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      background: var(--blue-pale);
+    }
+    .timer-chip.cash { background: var(--lime); }
+    .timer-chip.ended, .timer-chip.cash.done { background: var(--paper-deep); color: var(--ink-soft); }
+
+    /* Right-side action rail: status icon + Upload Receipt + IG link */
+    .post-actions {
+      flex-shrink: 0; width: 194px;
+      border-left: var(--bw) dashed rgba(31,27,19,.2);
+      padding: 20px; display: flex; flex-direction: column; gap: 12px; justify-content: center;
+    }
+    .post-actions .btn { width: 100%; }
+    .tile-status {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      font-size: .76rem; font-weight: 800;
+      padding: 8px 12px;
+      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      background: var(--paper-deep); color: var(--ink-soft);
+    }
+    .tile-status.done { background: var(--lime); color: var(--ink); }
 
     .feed-empty { text-align: center; padding: 60px 20px; }
     .feed-empty .ei { font-size: 3rem; margin-bottom: 12px; }
@@ -62,9 +90,15 @@
     .feed-empty .es { font-size: .9rem; color: var(--ink-soft); }
 
     @media (max-width: 900px) { .nav-name { display: none; } }
-    @media (max-width: 620px) {
+    @media (max-width: 700px) {
       .post-tile { flex-direction: column; }
       .post-img { width: 100%; height: 200px; border-right: none; border-bottom: var(--bw) solid var(--ink); }
+      .post-actions {
+        width: 100%; border-left: none; border-top: var(--bw) dashed rgba(31,27,19,.2);
+        flex-direction: row; flex-wrap: wrap; justify-content: flex-start;
+      }
+      .post-actions .btn { width: auto; flex: 1 1 auto; }
+      .tile-status { flex: 1 1 100%; }
     }
   </style>
 </head>
@@ -127,6 +161,50 @@
       if (img.parentNode) img.parentNode.replaceChild(d, img);
     }
 
+    // ── Timing rules ──
+    const DAY_MS = 86400000, HOUR_MS = 3600000;
+    const CAMPAIGN_DAYS = 45;   // merchant campaign window, from the post date
+    const CASHBACK_DAYS = 3;    // post stays up 3 days, then cashback auto-sends
+
+    function fmtCampaign(deadline) {
+      const diff = deadline - Date.now();
+      if (diff <= 0) return 'Campaign ended';
+      const days = Math.ceil(diff / DAY_MS);
+      return 'Campaign ends in ' + days + (days === 1 ? ' day' : ' days');
+    }
+    function fmtCashback(deadline) {
+      const diff = deadline - Date.now();
+      if (diff <= 0) return 'Cashback sent';
+      const totalHours = Math.floor(diff / HOUR_MS);
+      const days = Math.floor(totalHours / 24);
+      const hours = totalHours % 24;
+      if (days > 0) return 'Cashback in ' + days + 'd ' + hours + 'hr';
+      if (hours > 0) return 'Cashback in ' + hours + 'hr';
+      return 'Cashback in ' + Math.max(1, Math.floor(diff / 60000)) + 'min';
+    }
+    // Refresh every countdown chip in place (called on render + once a minute).
+    function tickCountdowns() {
+      document.querySelectorAll('.timer-chip[data-deadline]').forEach(el => {
+        const deadline = +el.dataset.deadline;
+        const expired = deadline - Date.now() <= 0;
+        if (el.dataset.kind === 'campaign') {
+          el.textContent = '📅 ' + fmtCampaign(deadline);
+          el.classList.toggle('ended', expired);
+        } else {
+          el.textContent = (expired ? '✅ ' : '💸 ') + fmtCashback(deadline);
+          el.classList.toggle('done', expired);
+        }
+      });
+    }
+    setInterval(tickCountdowns, 60000);
+
+    // ── Receipt completion state (set by receipt.html, keyed by post id) ──
+    function receiptsMap() {
+      try { return JSON.parse(localStorage.getItem('cirqle_receipts') || '{}'); }
+      catch (e) { return {}; }
+    }
+    function hasReceipt(id) { return !!receiptsMap()[id]; }
+
     // ── Render ──
     function renderPosts(posts) {
       if (!posts.length) {
@@ -143,6 +221,28 @@
           ? '<img src="' + esc(p.displayUrl) + '" alt="Instagram post" loading="lazy" onerror="imgFail(this)" />'
           : '<div class="noimg">🖼️</div>';
         const caption = esc((p.caption || '').replace(/\s+/g, ' ').trim()) || '<em>No caption</em>';
+
+        // Countdown deadlines derived from the post date.
+        const postMs = new Date(p.timestamp).getTime();
+        let timers = '';
+        if (!isNaN(postMs)) {
+          const campaignEnd = postMs + CAMPAIGN_DAYS * DAY_MS;
+          const cashbackEnd = postMs + CASHBACK_DAYS * DAY_MS;
+          const campExpired = campaignEnd - Date.now() <= 0;
+          const cashExpired = cashbackEnd - Date.now() <= 0;
+          timers =
+            '<div class="post-timers">' +
+              '<span class="timer-chip' + (campExpired ? ' ended' : '') + '" data-kind="campaign" data-deadline="' + campaignEnd + '">📅 ' + fmtCampaign(campaignEnd) + '</span>' +
+              '<span class="timer-chip cash' + (cashExpired ? ' done' : '') + '" data-kind="cashback" data-deadline="' + cashbackEnd + '">' + (cashExpired ? '✅ ' : '💸 ') + fmtCashback(cashbackEnd) + '</span>' +
+            '</div>';
+        }
+
+        // Receipt completion icon: flips once a receipt is uploaded for this post.
+        const done = hasReceipt(p.id);
+        const status = done
+          ? '<span class="tile-status done">✅ Receipt verified</span>'
+          : '<span class="tile-status">◯ Receipt pending</span>';
+
         return (
           '<article class="post-tile">' +
             '<div class="post-img">' + img + '</div>' +
@@ -152,17 +252,22 @@
                 '<div class="post-handle">@' + esc(p.ownerUsername || '') + '</div>' +
               '</div>' +
               '<div class="post-caption">' + caption + '</div>' +
+              timers +
               '<div class="post-meta">' +
                 '<span class="chip">❤️ ' + (p.likesCount || 0) + '</span>' +
                 '<span class="chip">💬 ' + (p.commentsCount || 0) + '</span>' +
-                (p.type ? '<span class="chip">' + esc(p.type) + '</span>' : '') +
                 '<span class="post-date">' + fmtDate(p.timestamp) + '</span>' +
               '</div>' +
-              (p.url ? '<div><a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="btn btn-sm btn-ink">View on Instagram →</a></div>' : '') +
+            '</div>' +
+            '<div class="post-actions">' +
+              status +
+              '<a class="btn btn-lime btn-sm" href="receipt.html?id=' + encodeURIComponent(p.id || '') + '">Upload Receipt</a>' +
+              (p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="btn btn-sm">View on Instagram →</a>' : '') +
             '</div>' +
           '</article>'
         );
       }).join('');
+      tickCountdowns();
     }
 
     function filterByHandle(all, handle) {
