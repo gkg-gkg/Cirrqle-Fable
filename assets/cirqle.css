@@ -7,7 +7,7 @@
 /* ── Tokens ── */
 :root {
   /* color — Cirqle steel-blue theme (brand blue #487995, sampled from the logo)
-     Two-accent system: BLUE acts, TEAL supports. */
+     Two-accent system: BLUE acts, pale sky blue supports. */
   --paper:      #EBF0F5;   /* page background — cool off-white */
   --paper-deep: #DBE5EE;   /* tinted panels — cool blue-grey */
   --card:       #FFFFFF;   /* card faces — clean white */
@@ -19,11 +19,11 @@
   --blue-deep:   #35617E;  /* deeper blue — links, squiggles, focus ring (on light) */
   --blue-tint:   #7FB6DB;  /* light blue — the ONE loud fill; dark text sits on it */
   --blue-pale:   #DCEBF6;  /* palest blue — soft card faces */
-  /* complementary teal accent */
-  --teal:       #12A594;  /* teal — punchy accent that pairs with the blue */
-  --teal-tint:  #B6EDE4;  /* light teal — support fills; dark text sits on it */
+  /* complementary pale-sky-blue accent */
+  --teal:       #6FA8D6;  /* soft blue — punchy accent that pairs with the brand blue */
+  --teal-tint:  #C3DDF2;  /* pale sky — support fills; dark text sits on it */
 
-  /* legacy aliases — existing markup keeps working, now blue/teal instead of green/pink */
+  /* legacy aliases — existing markup keeps working, now blue instead of green/pink */
   --lime:       var(--blue-tint);   /* the ONE loud accent — now light blue */
   --lime-soft:  var(--blue-pale);
   --green:      var(--blue-deep);   /* was money green */
