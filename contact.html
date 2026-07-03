@@ -3,25 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact — Cirqle</title>
+  <title>Partner with Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
-    .layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 28px; align-items: start; }
-    .contact-card { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; margin-bottom: 14px; }
-    .contact-card:nth-child(odd){transform:rotate(-.5deg)} .contact-card:nth-child(even){transform:rotate(.5deg)}
-    .contact-label { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--ink-soft); }
-    .contact-val { font-family: var(--font-display); font-weight: 800; font-size: 1rem; margin: 2px 0; }
-    .contact-desc { font-size: .78rem; font-weight: 600; color: var(--ink-soft); }
-    .form-card { padding: 30px; transform: rotate(.3deg); }
-    .form-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; margin-bottom: 20px; }
+    .form-wrap { max-width: 760px; margin: 0 auto; }
+    .form-card { padding: clamp(24px,4vw,40px); }
+    .form-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; margin-bottom: 6px; }
+    .form-lead { font-size: .9rem; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.6; }
+    .form-section { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--ink-soft); margin: 28px 0 16px; padding-bottom: 8px; border-bottom: var(--bw) solid var(--ink); }
+    .form-section:first-of-type { margin-top: 4px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
     textarea { min-height: 120px; resize: vertical; }
-    .success-msg { display: none; margin-top: 16px; padding: 14px 16px; border: var(--bw) solid var(--ink); border-radius: 14px; background: var(--lime); font-size: .88rem; font-weight: 700; }
-    @media(max-width:820px){ .layout { grid-template-columns: 1fr; } }
-    @media(max-width:480px){ .form-row { grid-template-columns: 1fr; } }
+    .check-legend { font-size: .82rem; font-weight: 700; display: block; margin-bottom: 12px; }
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .check { display: flex; align-items: center; gap: 9px; font-size: .86rem; font-weight: 600; cursor: pointer; }
+    .check input { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; }
+    .req { color: var(--red); }
+    .success-msg { display: none; margin-top: 18px; padding: 16px 18px; border: var(--bw) solid var(--ink); border-radius: 14px; background: var(--lime); font-size: .9rem; font-weight: 700; }
+    @media(max-width:560px){ .form-row, .form-row-3, .check-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -29,70 +32,143 @@
     <a href="index.html" class="logo">cirqle</a>
     <div class="nav-cta">
       <a href="browse.html" class="btn btn-sm">Browse</a>
-      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Get started</a>
       <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
     </div>
   </nav>
 
-  <div class="page page-wide">
+  <div class="page">
     <div class="page-hero">
-      <span class="sticker sticker-pink fade-up">💬 Contact us</span>
-      <h1 class="h-display fade-up d1" style="margin-top:20px">We'd love to <span class="hl hl-sky">hear</span> from you</h1>
-      <p class="h-sub fade-up d2" style="margin:16px auto 0">Whether it's a question, a partnership, or just a hello — we're here and we reply fast.</p>
+      <h1 class="h-display fade-up d1">Partner with <span class="hl hl-lime">Cirqle</span></h1>
+      <p class="h-sub fade-up d2" style="margin:16px auto 0">Tell us about your brand and what you want to achieve. The more you share, the faster we can tailor a cashback campaign and get you live.</p>
     </div>
 
-    <div class="layout">
-      <div>
-        <div class="card contact-card fade-up d1">
-          <span class="coin coin-lime" style="font-size:1rem">💬</span>
-          <div><div class="contact-label">Live chat</div><div class="contact-val">Chat with support</div><div class="contact-desc">Fastest option — usually under 2 minutes</div></div>
-        </div>
-        <div class="card contact-card fade-up d2">
-          <span class="coin coin-sky" style="font-size:1rem">📧</span>
-          <div><div class="contact-label">Email us</div><div class="contact-val">hello@cirqle.co.uk</div><div class="contact-desc">We reply within 24 hours on weekdays</div></div>
-        </div>
-        <div class="card contact-card fade-up d3">
-          <span class="coin coin-pink" style="font-size:1rem">🤝</span>
-          <div><div class="contact-label">Brand partnerships</div><div class="contact-val">brands@cirqle.co.uk</div><div class="contact-desc">Want to list your brand? Let's talk.</div></div>
-        </div>
-        <div class="card contact-card fade-up d4">
-          <span class="coin" style="font-size:1rem">📰</span>
-          <div><div class="contact-label">Press enquiries</div><div class="contact-val">press@cirqle.co.uk</div><div class="contact-desc">Media kit available on request</div></div>
-        </div>
-        <div class="card contact-card fade-up d5">
-          <span class="coin coin-lime" style="font-size:1rem">🏢</span>
-          <div><div class="contact-label">Office</div><div class="contact-val">London, UK</div><div class="contact-desc">Mon–Fri, 9am–6pm GMT</div></div>
-        </div>
-      </div>
-
+    <div class="form-wrap">
       <div class="card form-card fade-up d2">
-        <div class="form-title">✍️ Send us a message</div>
+        <div class="form-title">Brand partnership application</div>
+        <div class="form-lead">Fields marked <span class="req">*</span> are required. Takes about 3 minutes — our brand team replies within one business day.</div>
+
+        <div class="form-section">About your brand</div>
         <div class="form-row">
-          <div class="field"><label for="fn">First name</label><input id="fn" type="text" placeholder="Jane" /></div>
-          <div class="field"><label for="ln">Last name</label><input id="ln" type="text" placeholder="Smith" /></div>
+          <div class="field"><label for="brand">Brand / company name <span class="req">*</span></label><input id="brand" type="text" placeholder="e.g. Nova Athletics" /></div>
+          <div class="field"><label for="website">Website <span class="req">*</span></label><input id="website" type="url" placeholder="https://" /></div>
         </div>
-        <div class="field"><label for="em">Email</label><input id="em" type="email" placeholder="jane@example.com" /></div>
+        <div class="form-row">
+          <div class="field">
+            <label for="category">Category <span class="req">*</span></label>
+            <select id="category">
+              <option value="">Select…</option>
+              <option>Fashion &amp; Beauty</option>
+              <option>Food &amp; Drink</option>
+              <option>Electronics</option>
+              <option>Travel</option>
+              <option>Home &amp; Living</option>
+              <option>Fitness</option>
+              <option>Health &amp; Wellness</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field"><label for="markets">Primary market(s) <span class="req">*</span></label><input id="markets" type="text" placeholder="e.g. UK, Ireland" /></div>
+        </div>
         <div class="field">
-          <label for="subject">Subject</label>
-          <select id="subject">
-            <option value="">Select a topic…</option>
-            <option>Cashback question</option>
-            <option>Technical issue</option>
-            <option>Brand partnership</option>
-            <option>Press enquiry</option>
-            <option>Account &amp; billing</option>
-            <option>Other</option>
+          <label for="channels">Where do you sell?</label>
+          <select id="channels">
+            <option value="">Select…</option>
+            <option>Online only</option>
+            <option>In-store only</option>
+            <option>Online &amp; in-store</option>
+            <option>Marketplace (Amazon, eBay, etc.)</option>
           </select>
         </div>
-        <div class="field"><label for="msg">Message</label><textarea id="msg" placeholder="Tell us how we can help…"></textarea></div>
-        <button class="btn btn-lg btn-lime" style="width:100%" onclick="handleSubmit()">Send message →</button>
-        <div class="success-msg" id="successMsg">✅ Message sent! We'll get back to you within 24 hours.</div>
+
+        <div class="form-section">Who should we talk to</div>
+        <div class="form-row">
+          <div class="field"><label for="fn">First name <span class="req">*</span></label><input id="fn" type="text" placeholder="Jane" /></div>
+          <div class="field"><label for="ln">Last name <span class="req">*</span></label><input id="ln" type="text" placeholder="Smith" /></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="em">Work email <span class="req">*</span></label><input id="em" type="email" placeholder="jane@brand.com" /></div>
+          <div class="field"><label for="phone">Phone</label><input id="phone" type="tel" placeholder="+44 …" /></div>
+        </div>
+        <div class="field"><label for="role">Your role</label><input id="role" type="text" placeholder="e.g. Head of Growth" /></div>
+
+        <div class="form-section">Your business</div>
+        <div class="form-row-3">
+          <div class="field">
+            <label for="revenue">Monthly online revenue</label>
+            <select id="revenue">
+              <option value="">Select…</option>
+              <option>Under £10k</option>
+              <option>£10k–£50k</option>
+              <option>£50k–£250k</option>
+              <option>£250k–£1M</option>
+              <option>£1M+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="orders">Monthly orders</label>
+            <select id="orders">
+              <option value="">Select…</option>
+              <option>Under 500</option>
+              <option>500–2,000</option>
+              <option>2,000–10,000</option>
+              <option>10,000+</option>
+            </select>
+          </div>
+          <div class="field"><label for="aov">Avg. order value (£)</label><input id="aov" type="number" min="0" placeholder="65" /></div>
+        </div>
+        <div class="form-row-3">
+          <div class="field">
+            <label for="budget">Monthly budget</label>
+            <select id="budget">
+              <option value="">Select…</option>
+              <option>Under £1k</option>
+              <option>£1k–£5k</option>
+              <option>£5k–£20k</option>
+              <option>£20k+</option>
+            </select>
+          </div>
+          <div class="field"><label for="rate">Target cashback rate (%)</label><input id="rate" type="number" min="0" max="100" placeholder="10" /></div>
+          <div class="field">
+            <label for="timeline">Timeline</label>
+            <select id="timeline">
+              <option value="">Select…</option>
+              <option>ASAP</option>
+              <option>Within a month</option>
+              <option>This quarter</option>
+              <option>Just exploring</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">Your goals</div>
+        <span class="check-legend">What do you want from a Cirqle partnership? (tick all that apply)</span>
+        <div class="check-grid">
+          <label class="check"><input type="checkbox" name="goal" value="ugc" /> Authentic user-generated content</label>
+          <label class="check"><input type="checkbox" name="goal" value="customers" /> New customer acquisition</label>
+          <label class="check"><input type="checkbox" name="goal" value="sales" /> More sales &amp; repeat orders</label>
+          <label class="check"><input type="checkbox" name="goal" value="awareness" /> Brand awareness</label>
+          <label class="check"><input type="checkbox" name="goal" value="social" /> Social proof &amp; reviews</label>
+          <label class="check"><input type="checkbox" name="goal" value="data" /> Attribution &amp; performance data</label>
+        </div>
+        <div class="field" style="margin-top:20px"><label for="heard">How did you hear about us?</label><input id="heard" type="text" placeholder="e.g. a friend, LinkedIn, search…" /></div>
+        <div class="field"><label for="msg">Anything else we should know?</label><textarea id="msg" placeholder="Tell us about your brand, current channels, and what a great partnership looks like…"></textarea></div>
+
+        <button class="btn btn-lg btn-lime" style="width:100%" onclick="handleSubmit()">Submit partnership application →</button>
+        <div class="success-msg" id="successMsg">Thanks — your partnership application is in! Our brand team will be in touch within one business day.</div>
       </div>
     </div>
   </div>
   <script>
     function handleSubmit() {
+      const required = ['brand', 'website', 'category', 'markets', 'fn', 'ln', 'em'];
+      const missing = required.filter(id => !document.getElementById(id).value.trim());
+      if (missing.length) {
+        document.getElementById(missing[0]).focus();
+        cirqleToast('Please fill in the required fields marked *');
+        return;
+      }
       document.getElementById('successMsg').style.display = 'block';
+      document.getElementById('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   </script>
   <script src="assets/enhance.js"></script>

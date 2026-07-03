@@ -106,7 +106,6 @@
   <main>
     <!-- Left panel -->
     <div class="auth-left fade-up">
-      <span class="sticker sticker-sky">👋 Welcome back</span>
       <h1 class="auth-h">Good to have you <span class="squiggle">back.</span></h1>
       <p class="auth-sub">Sign in to see your cashback earnings, active deals, and wallet balance.</p>
       <div class="stats-list">
@@ -173,9 +172,9 @@
         </div>
 
         <div class="social-btns">
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🍎 Apple</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🔵 Google</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">📘 Facebook</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Apple</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Google</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Facebook</a>
         </div>
       </form>
 
@@ -268,7 +267,7 @@
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.classList.add('success');
-      document.getElementById('submitText').textContent = `🎉 Welcome back, ${user.firstName}!`;
+      document.getElementById('submitText').textContent = `Welcome back, ${user.firstName}!`;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1400);
     });
 
@@ -301,7 +300,7 @@
     // ── Social auth toast ──
     function showSocialToast(e) {
       e.preventDefault();
-      cirqleToast('🔜 Social sign-in coming soon — use email for now');
+      cirqleToast('Social sign-in coming soon — use email for now');
     }
   </script>
   <script src="assets/enhance.js"></script>

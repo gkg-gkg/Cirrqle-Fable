@@ -120,12 +120,13 @@ body::before {
   font-size: 1.55rem;
   letter-spacing: -0.03em;
   text-decoration: none;
-  color: var(--ink);
+  color: var(--blue);
   flex-shrink: 0;
 }
 .nav-links {
   display: flex; gap: 26px; list-style: none;
   font-size: .92rem; font-weight: 600;
+  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .nav-links a {
   text-decoration: none; color: var(--ink);

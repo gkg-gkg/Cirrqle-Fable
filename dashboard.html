@@ -107,8 +107,7 @@
 
   <div class="dash">
     <div class="greeting">
-      <span class="sticker sticker-lime fade-up" id="greetingTime">Good morning</span>
-      <div class="greeting-name fade-up d1" id="greetingName">Welcome back 👋</div>
+      <div class="greeting-name fade-up d1" id="greetingName">Welcome back</div>
       <div class="greeting-sub fade-up d2">Here's your cashback overview.</div>
     </div>
 
@@ -130,7 +129,7 @@
       </div>
       <div class="card card-tang stat-card fade-up d4">
         <div class="stat-label">Day streak</div>
-        <div class="stat-val"><span class="count" data-target="7" data-dec="0">0</span> 🔥</div>
+        <div class="stat-val"><span class="count" data-target="7" data-dec="0">0</span></div>
         <div class="stat-sub">Keep it going!</div>
       </div>
     </div>
@@ -139,19 +138,19 @@
       <div>
         <!-- Wallet -->
         <div class="card wallet-card fade-up d3">
-          <div class="wallet-label">💰 Available balance</div>
+          <div class="wallet-label">Available balance</div>
           <div class="wallet-balance">£<span id="walletBal">47.80</span></div>
           <div class="wallet-sub">Ready to withdraw to your bank or PayPal</div>
           <div class="wallet-actions">
-            <button class="btn btn-ink" onclick="cirqleToast('💸 Withdrawal requested — arrives in 1–2 days')">💸 Withdraw</button>
-            <a href="browse.html" class="btn">🛍️ Find deals</a>
-            <button class="btn" onclick="cirqleToast('📤 Share link copied!')">📤 Refer a friend</button>
+            <button class="btn btn-ink" onclick="cirqleToast('Withdrawal requested — arrives in 1–2 days')">Withdraw</button>
+            <a href="browse.html" class="btn">Find deals</a>
+            <button class="btn" onclick="cirqleToast('Share link copied!')">Refer a friend</button>
           </div>
         </div>
 
         <!-- Activity -->
         <div class="card fade-up d4">
-          <div class="panel-title">⚡ Recent activity</div>
+          <div class="panel-title">Recent activity</div>
           <div class="activity-item">
             <span class="coin coin-lime" style="font-size:.95rem">✅</span>
             <div><div class="activity-name">Nike — Summer Sale cashback confirmed</div><div class="activity-date">Today, 09:14</div></div>
@@ -183,13 +182,13 @@
       <div class="right-col">
         <!-- Monthly goal -->
         <div class="card fade-up d4">
-          <div class="panel-title">🎯 Monthly goal</div>
+          <div class="panel-title">Monthly goal</div>
           <div class="goal-header">
             <span>£47.80 / £100 target</span>
             <span class="goal-val">48%</span>
           </div>
           <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:47.8%"></div></div>
-          <div class="progress-note">£52.20 to go — you're on track 🎯</div>
+          <div class="progress-note">£52.20 to go — you're on track</div>
         </div>
 
         <!-- Streak -->
@@ -203,7 +202,7 @@
 
         <!-- Active deals -->
         <div class="card fade-up d5">
-          <div class="panel-title">✨ Active deals for you</div>
+          <div class="panel-title">Active deals for you</div>
           <div class="mini-deal">
             <span class="coin coin-sky" style="font-size:1rem">👟</span>
             <div><div class="mini-deal-name">Nike</div><div class="mini-deal-cb">13% cashback</div></div>
@@ -231,7 +230,7 @@
 
         <!-- Saved deals -->
         <div class="card card-sky fade-up d6">
-          <div class="panel-title">🔖 Saved deals</div>
+          <div class="panel-title">Saved deals</div>
           <div id="savedDealsList"></div>
         </div>
       </div>
@@ -247,8 +246,8 @@
       document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
       const h = new Date().getHours();
       const time = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-      document.getElementById('greetingTime').textContent = (h < 12 ? '🌅 ' : h < 17 ? '☀️ ' : '🌙 ') + time;
-      document.getElementById('greetingName').textContent = `${time}, ${session.firstName} 👋`;
+      document.getElementById('greetingTime').textContent = (h < 12 ? '' : h < 17 ? '' : '') + time;
+      document.getElementById('greetingName').textContent = `${time}, ${session.firstName}`;
     }
 
     // ── Counters ──
@@ -273,7 +272,7 @@
       if (!list) return;
       const saved = JSON.parse(localStorage.getItem('cirqle_saved') || '[]');
       if (!saved.length) {
-        list.innerHTML = '<div style="font-size:.82rem;font-weight:600;color:var(--ink-soft);padding:4px 0">No saved deals yet. Tap “🔖 Save deal” on any offer to keep it here.</div>' +
+        list.innerHTML = '<div style="font-size:.82rem;font-weight:600;color:var(--ink-soft);padding:4px 0">No saved deals yet. Tap “Save deal” on any offer to keep it here.</div>' +
           '<div style="text-align:center;margin-top:12px"><a href="browse.html" style="font-size:.82rem;font-weight:800;color:var(--pink-deep);text-decoration:none">Browse deals →</a></div>';
         return;
       }

@@ -175,21 +175,18 @@
       <li><a href="for-brands.html">For brands</a></li>
     </ul>
     <div class="nav-cta">
-      <a href="signin.html" class="btn btn-sm" data-auth="out">Sign in</a>
-      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Get started</a>
-      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">My dashboard →</a>
+      <a href="signin.html" class="btn btn-sm" data-auth="out">Sign in</a>      <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">My dashboard →</a>
     </div>
   </nav>
 
   <!-- ══ HERO ══ -->
   <header class="hero">
     <div>
-      <span class="sticker sticker-pink fade-up">🔥 50,000+ shoppers already earning</span>
       <h1 class="hero-h fade-up d1">Get <span class="hl hl-lime">paid</span> to shop.<br>For real.</h1>
       <p class="hero-sub fade-up d2">Buy from brands you already love, post it on your socials, and watch <span class="squiggle">actual money</span> land in your wallet. No points. No vouchers. Cash.</p>
       <div class="hero-actions fade-up d3">
-        <a href="signup.html" class="btn btn-lg btn-lime">Start earning free →</a>
-        <a href="#how" class="btn btn-lg">How it works</a>
+        <a href="browse.html" class="btn btn-lg btn-lime">Browse Deals</a>
+        <a href="signup.html" class="btn btn-lg">Sign up</a>
       </div>
       <div class="hero-proof fade-up d4">
         <div class="proof-faces">
@@ -206,8 +203,8 @@
       <!-- Wallet phone -->
       <div class="wallet-phone">
         <div class="wp-top">
-          <span class="wp-hello">Morning, Alex 👋</span>
-          <span class="chip">🔥 7-day streak</span>
+          <span class="wp-hello">Morning, Alex</span>
+          <span class="chip">7-day streak</span>
         </div>
         <div class="wp-balance-card">
           <div class="wp-balance-label">Your wallet</div>
@@ -221,12 +218,12 @@
         </div>
         <div class="wp-item">
           <span class="wp-item-icon" style="background:var(--pink)">💄</span>
-          <span><span class="wp-item-name">ASOS — post shared</span><br><span class="wp-item-sub">Confirmed ✓</span></span>
+          <span><span class="wp-item-name">ASOS — post shared</span><br><span class="wp-item-sub">Confirmed</span></span>
           <span class="wp-item-cash">+£2.10</span>
         </div>
         <div class="wp-item">
           <span class="wp-item-icon" style="background:var(--tang)">☕</span>
-          <span><span class="wp-item-name">Costa — loyalty bonus</span><br><span class="wp-item-sub">Paid out ✓</span></span>
+          <span><span class="wp-item-name">Costa — loyalty bonus</span><br><span class="wp-item-sub">Paid out</span></span>
           <span class="wp-item-cash">+£0.80</span>
         </div>
       </div>
@@ -241,14 +238,9 @@
       </div>
       <div class="hero-deco deco-coin1 floaty"><span class="coin coin-lime" style="width:56px;height:56px;font-size:1.4rem">£</span></div>
       <div class="hero-deco deco-coin2 floaty" style="animation-delay:-2s"><span class="coin" style="width:44px;height:44px">£</span></div>
-      <div class="hero-deco deco-badge floaty" style="animation-delay:-3.4s"><span class="sticker sticker-lime">💸 +£4.20 cashback!</span></div>
+      <div class="hero-deco deco-badge floaty" style="animation-delay:-3.4s"><span class="sticker sticker-lime">+£4.20 cashback!</span></div>
     </div>
   </header>
-
-  <!-- ══ TICKER ══ -->
-  <div class="ticker" aria-hidden="true">
-    <div class="ticker-track" id="tickerTop"></div>
-  </div>
 
   <!-- ══ STATS ══ -->
   <section class="section" style="padding-bottom:0">
@@ -260,11 +252,15 @@
     </div>
   </section>
 
+  <!-- ══ TICKER (below the stats tiles) ══ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="tickerTop"></div>
+  </div>
+
   <!-- ══ HOW IT WORKS ══ -->
   <section class="section" id="how">
     <div class="section-inner">
       <div class="section-head center">
-        <span class="eyebrow reveal">⚡ How it works</span>
         <h2 class="h-display reveal reveal-delay-1">Three steps to<br><span class="hl hl-pink">free money.</span></h2>
         <p class="h-sub reveal reveal-delay-2">No gimmicks. No complicated points systems. Just real cashback in your pocket.</p>
       </div>
@@ -295,7 +291,6 @@
   <section class="section" id="features" style="padding-top:0">
     <div class="section-inner features-grid">
       <div>
-        <span class="eyebrow reveal">💚 Why Cirqle</span>
         <h2 class="h-display reveal reveal-delay-1" style="font-size:clamp(2rem,4.4vw,3.2rem)">Built for people<br>who <span class="squiggle squiggle-lime">actually shop.</span></h2>
         <p class="h-sub reveal reveal-delay-2">Every feature designed to make earning effortless. You shouldn't have to work hard to get money back.</p>
         <div style="margin-top:34px; display:flex; flex-direction:column; gap:8px">
@@ -321,7 +316,7 @@
       <div style="position:relative" class="reveal reveal-delay-2">
         <div class="card demo-card">
           <div class="demo-head">
-            <span class="demo-title">📈 Your earnings</span>
+            <span class="demo-title">Your earnings</span>
             <span class="chip">This week</span>
           </div>
           <div class="demo-chart" aria-hidden="true">
@@ -339,7 +334,7 @@
             <div class="demo-metric"><div class="demo-metric-val">32</div><div class="demo-metric-label">Brands</div></div>
           </div>
         </div>
-        <div class="goal-float floaty"><span class="sticker sticker-tang">🎯 £15 from your monthly goal!</span></div>
+        <div class="goal-float floaty"><span class="sticker sticker-tang">£15 from your monthly goal!</span></div>
       </div>
     </div>
   </section>
@@ -353,7 +348,6 @@
   <section class="section" id="reviews">
     <div class="section-inner">
       <div class="section-head center">
-        <span class="eyebrow reveal">💬 Real people, real money</span>
         <h2 class="h-display reveal reveal-delay-1">Shoppers <span class="hl hl-sky">love</span> Cirqle.</h2>
       </div>
       <div class="testi-grid">
@@ -367,7 +361,7 @@
               <div class="testi-role">Fashion lover, London</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">💰 Earned £320 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">Earned £320 total</span></div>
         </div>
         <div class="card card-hover testi-card card-lime reveal reveal-delay-1">
           <div class="testi-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
@@ -379,7 +373,7 @@
               <div class="testi-role">Gym enthusiast, Manchester</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--card)">💰 Earned £215 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--card)">Earned £215 total</span></div>
         </div>
         <div class="card card-hover testi-card reveal reveal-delay-2">
           <div class="testi-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
@@ -391,7 +385,7 @@
               <div class="testi-role">Content creator, Birmingham</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">💰 Earned £540 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">Earned £540 total</span></div>
         </div>
       </div>
     </div>
@@ -413,7 +407,6 @@
             <text><textPath href="#ctaRing2">SHOP • POST • EARN • REPEAT •</textPath></text>
           </svg>
         </div>
-        <span class="sticker sticker-lime" style="margin-bottom:22px">🚀 Free forever</span>
         <h2 class="h-display">Ready to get <span class="hl hl-lime">paid</span><br>to shop?</h2>
         <p class="cta-sub">Join 50,000+ members already earning cashback. Signing up takes 60 seconds.</p>
         <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap">
@@ -429,7 +422,7 @@
     <div class="footer-inner">
       <div class="footer-top">
         <div>
-          <a href="index.html" class="footer-logo">⭕ cirqle</a>
+          <a href="index.html" class="footer-logo">cirqle</a>
           <p class="footer-desc">The smarter way to shop. Earn real cashback every time you buy from your favourite brands.</p>
           <div class="footer-social">
             <a href="#" class="social-link" aria-label="X / Twitter">𝕏</a>
@@ -468,7 +461,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2026 Cirqle Ltd. All rights reserved. Made with 💚 in London.</p>
+        <p>© 2026 Cirqle Ltd. All rights reserved. Made in London.</p>
         <div class="footer-legal">
           <a href="privacy.html">Privacy</a>
           <a href="terms.html">Terms</a>

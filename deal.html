@@ -125,14 +125,14 @@
 
         <!-- Tags -->
         <div class="card info-card fade-up d2">
-          <div class="panel-title">🏷️ Deal details</div>
+          <div class="panel-title">Deal details</div>
           <div class="info-row" id="infoTags"></div>
-          <div class="expiry-note" id="expiry">⏰ Offer expires 30 Jun 2026 — don't miss out</div>
+          <div class="expiry-note" id="expiry">Offer expires 30 Jun 2026 — don't miss out</div>
         </div>
 
         <!-- Steps -->
         <div class="card fade-up d3">
-          <div class="panel-title">💰 How to earn cashback</div>
+          <div class="panel-title">How to earn cashback</div>
           <div class="how-step">
             <span class="coin coin-sky">1</span>
             <p class="how-text"><strong>Sign up or sign in</strong> to your Cirqle account — it's free and takes 30 seconds.</p>
@@ -160,8 +160,8 @@
             <div class="cashback-big" id="earnBig">£13.00</div>
             <div class="cashback-desc" id="earnDesc">on a £100 spend</div>
             <div class="cashback-total" id="totalPaid">£112,705 paid to members</div>
-            <button class="btn btn-lg btn-ink shop-big-btn" id="shopBtn" onclick="handleShop()">🛍️ Shop &amp; Earn</button>
-            <button class="btn save-btn" onclick="handleSave()">🔖 Save deal</button>
+            <button class="btn btn-lg btn-ink shop-big-btn" id="shopBtn" onclick="handleShop()">Shop &amp; Earn</button>
+            <button class="btn save-btn" onclick="handleSave()">Save deal</button>
             <div class="action-note">Opens the brand's website in a new tab. Shop as normal, then post to unlock your cashback.</div>
           </div>
 
@@ -177,7 +177,7 @@
           </div>
 
           <div class="card terms-card fade-up d4">
-            <div class="terms-title">📋 Terms</div>
+            <div class="terms-title">Terms</div>
             <div class="terms-list" id="termsList"></div>
           </div>
         </div>
@@ -223,10 +223,10 @@
       11:['☕','🥤','🍰','🧋','🫖'], 12:['💪','🏃','🧘','🥇','🚴'],
     };
     const dealLocations = {
-      1:'📍 Online · UK',        2:'📍 Online · UK',        3:'📍 Online · UK',
-      4:'📍 Online · UK',        5:'📍 In-store & online',  6:'📍 Online · UK',
-      7:'📍 App & online',       8:'📍 In-store & online',  9:'📍 UK departures',
-      10:'📍 In-store & online', 11:'📍 In-store · UK',     12:'📍 UK wide',
+      1:'Online · UK',        2:'Online · UK',        3:'Online · UK',
+      4:'Online · UK',        5:'In-store & online',  6:'Online · UK',
+      7:'App & online',       8:'In-store & online',  9:'UK departures',
+      10:'In-store & online', 11:'In-store · UK',     12:'UK wide',
     };
 
     // Load deal from URL param
@@ -251,9 +251,9 @@
     document.getElementById('rateVal').textContent = d.rate + '%';
     document.getElementById('membersVal').textContent = d.members;
     document.getElementById('termsList').innerHTML = d.terms;
-    document.getElementById('expiry').textContent = d.expiry === 'Ongoing' ? '✅ Ongoing offer — available now'
-      : d.expiry.includes('members') ? '✨ ' + d.expiry
-      : `⏰ Offer expires ${d.expiry} — don't miss out`;
+    document.getElementById('expiry').textContent = d.expiry === 'Ongoing' ? 'Ongoing offer — available now'
+      : d.expiry.includes('members') ? '' + d.expiry
+      : `Offer expires ${d.expiry} — don't miss out`;
     document.getElementById('infoTags').innerHTML =
       `<span class="chip">${dealLocations[id] || ''}</span>` + d.tags.map(t => `<span class="chip">${t}</span>`).join('');
 
@@ -298,7 +298,7 @@
       }
       const url = brandUrls[id];
       if (url) {
-        cirqleToast(`🛍️ Opening ${d.brand} in a new tab — shop as normal`);
+        cirqleToast(`Opening ${d.brand} in a new tab — shop as normal`);
         window.open(url, '_blank', 'noopener');
       } else {
         cirqleToast(`Shop ${d.brand} as normal, then post to unlock cashback`);
@@ -321,13 +321,13 @@
         saved.push({ id, brand: d.brand, emoji: d.emoji, rate: d.rate, title: d.title });
         localStorage.setItem('cirqle_saved', JSON.stringify(saved));
         updateSaveBtn(true);
-        cirqleToast('🔖 Saved — view it on your dashboard');
+        cirqleToast('Saved — view it on your dashboard');
       }
     }
     function updateSaveBtn(isSaved) {
       const btn = document.querySelector('.save-btn');
       if (!btn) return;
-      btn.textContent = isSaved ? '✓ Saved to your list' : '🔖 Save deal';
+      btn.textContent = isSaved ? 'Saved to your list' : 'Save deal';
       btn.classList.toggle('saved', isSaved);
     }
   </script>

@@ -74,7 +74,6 @@
   <main>
     <!-- LEFT: value prop -->
     <div class="auth-left fade-up">
-      <span class="sticker sticker-lime">🎉 Free to join, forever</span>
       <h1 class="auth-h">Start earning <span class="hl hl-pink">real cash</span> today.</h1>
       <p class="auth-sub">Join 50,000+ members who earn money back on their everyday shopping. No gimmicks, no fees.</p>
       <div class="perks-list">
@@ -88,7 +87,7 @@
     <!-- RIGHT: form -->
     <div class="card auth-card fade-up d2">
       <div class="card-title">Create your account</div>
-      <div class="card-sub">Takes less than 60 seconds. ⏱️</div>
+      <div class="card-sub">Takes less than 60 seconds.</div>
 
       <form id="signupForm" novalidate>
         <div class="form-row">
@@ -163,9 +162,9 @@
         </div>
 
         <div class="social-btns">
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🍎 Apple</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">🔵 Google</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">📘 Facebook</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Apple</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Google</a>
+          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Facebook</a>
         </div>
       </form>
 
@@ -195,10 +194,10 @@
     const segs = [document.getElementById('seg1'), document.getElementById('seg2'), document.getElementById('seg3'), document.getElementById('seg4')];
     const strengthLabel = document.getElementById('strengthLabel');
     const levels = [
-      { label: '😬 Weak', cls: 'weak' },
-      { label: '🙂 Fair', cls: 'fair' },
-      { label: '😎 Good', cls: 'good' },
-      { label: '🔥 Strong', cls: 'strong' },
+      { label: 'Weak', cls: 'weak' },
+      { label: 'Fair', cls: 'fair' },
+      { label: 'Good', cls: 'good' },
+      { label: 'Strong', cls: 'strong' },
     ];
     function getStrength(p) {
       let s = 0;
@@ -264,14 +263,14 @@
       const txt = document.getElementById('submitText');
       btn.disabled = true;
       btn.classList.add('success');
-      txt.textContent = `🎉 Welcome to Cirqle, ${fn}!`;
+      txt.textContent = `Welcome to Cirqle, ${fn}!`;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1600);
     });
 
     // ── Social auth toast ──
     function showSocialToast(e) {
       e.preventDefault();
-      cirqleToast('🔜 Social sign-in coming soon — use email for now');
+      cirqleToast('Social sign-in coming soon — use email for now');
     }
   </script>
   <script src="assets/enhance.js"></script>
