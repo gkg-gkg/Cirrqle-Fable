@@ -67,8 +67,7 @@
       border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
       background: var(--blue-pale);
     }
-    .timer-chip.cash { background: var(--lime); }
-    .timer-chip.ended, .timer-chip.cash.done { background: var(--paper-deep); color: var(--ink-soft); }
+    .timer-chip.cash { background: var(--blue); color: #fff; }
 
     /* Right-side action rail: status icon + Upload Receipt + IG link */
     .post-actions {
@@ -165,15 +164,8 @@
 
     // ── Timing rules ──
     const DAY_MS = 86400000, HOUR_MS = 3600000;
-    const CAMPAIGN_DAYS = 45;   // merchant campaign window, from the post date
     const CASHBACK_DAYS = 3;    // post stays up 3 days, then cashback auto-sends
 
-    function fmtCampaign(deadline) {
-      const diff = deadline - Date.now();
-      if (diff <= 0) return 'Campaign ended';
-      const days = Math.ceil(diff / DAY_MS);
-      return 'Campaign ends in ' + days + (days === 1 ? ' day' : ' days');
-    }
     function fmtCashback(deadline) {
       const diff = deadline - Date.now();
       if (diff <= 0) return 'Cashback sent';
@@ -187,15 +179,7 @@
     // Refresh every countdown chip in place (called on render + once a minute).
     function tickCountdowns() {
       document.querySelectorAll('.timer-chip[data-deadline]').forEach(el => {
-        const deadline = +el.dataset.deadline;
-        const expired = deadline - Date.now() <= 0;
-        if (el.dataset.kind === 'campaign') {
-          el.textContent = fmtCampaign(deadline);
-          el.classList.toggle('ended', expired);
-        } else {
-          el.textContent = fmtCashback(deadline);
-          el.classList.toggle('done', expired);
-        }
+        el.textContent = fmtCashback(+el.dataset.deadline);
       });
     }
     setInterval(tickCountdowns, 60000);
@@ -223,18 +207,14 @@
           : '<div class="noimg">No image</div>';
         const caption = esc((p.caption || '').replace(/\s+/g, ' ').trim()) || '<em>No caption</em>';
 
-        // Countdown deadlines derived from the post date.
+        // Cashback countdown (3-day payout hold), derived from the post date.
         const postMs = new Date(p.timestamp).getTime();
         let timers = '';
         if (!isNaN(postMs)) {
-          const campaignEnd = postMs + CAMPAIGN_DAYS * DAY_MS;
           const cashbackEnd = postMs + CASHBACK_DAYS * DAY_MS;
-          const campExpired = campaignEnd - Date.now() <= 0;
-          const cashExpired = cashbackEnd - Date.now() <= 0;
           timers =
             '<div class="post-timers">' +
-              '<span class="timer-chip' + (campExpired ? ' ended' : '') + '" data-kind="campaign" data-deadline="' + campaignEnd + '">' + fmtCampaign(campaignEnd) + '</span>' +
-              '<span class="timer-chip cash' + (cashExpired ? ' done' : '') + '" data-kind="cashback" data-deadline="' + cashbackEnd + '">' + fmtCashback(cashbackEnd) + '</span>' +
+              '<span class="timer-chip cash" data-deadline="' + cashbackEnd + '">' + fmtCashback(cashbackEnd) + '</span>' +
             '</div>';
         }
 
