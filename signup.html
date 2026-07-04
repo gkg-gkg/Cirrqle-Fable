@@ -183,6 +183,7 @@
     </div>
   </main>
 
+  <script src="assets/api.js"></script>
   <script>
     // ── If already signed in, go to dashboard ──
     if (localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session')) {
@@ -234,7 +235,7 @@
       el.classList.remove('error'); err.classList.remove('visible'); return true;
     }
 
-    document.getElementById('signupForm').addEventListener('submit', e => {
+    document.getElementById('signupForm').addEventListener('submit', async e => {
       e.preventDefault();
       const fn = document.getElementById('firstName').value.trim();
       const ln = document.getElementById('lastName').value.trim();
@@ -254,27 +255,48 @@
       termsErr.classList.toggle('visible', !tc);
       if (!v1 || !v2 || !v3 || !vig || !v4 || !v5 || !tc) return;
 
-      // Check email not already registered
-      const users = JSON.parse(localStorage.getItem('cirqle_users') || '[]');
-      if (users.find(u => u.email.toLowerCase() === em.toLowerCase())) {
-        document.getElementById('email').classList.add('error');
-        document.getElementById('emailErr').textContent = 'An account with this email already exists.';
-        document.getElementById('emailErr').classList.add('visible');
-        return;
-      }
-
-      // Save new user
-      users.push({ firstName: fn, lastName: ln, email: em, password: pw, instagramHandle: ig });
-      localStorage.setItem('cirqle_users', JSON.stringify(users));
-
-      // Set session
-      localStorage.setItem('cirqle_session', JSON.stringify({ firstName: fn, lastName: ln, email: em, instagramHandle: ig }));
-
+      // ── Create the account via the backend API ──
       const btn = document.getElementById('submitBtn');
       const txt = document.getElementById('submitText');
       btn.disabled = true;
+      txt.textContent = 'Creating your account…';
+
+      let data;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName: fn, lastName: ln, email: em, password: pw, instagramHandle: ig }),
+        });
+
+        if (res.status === 409) {
+          btn.disabled = false;
+          txt.textContent = 'Create free account →';
+          document.getElementById('email').classList.add('error');
+          document.getElementById('emailErr').textContent = 'An account with this email already exists.';
+          document.getElementById('emailErr').classList.add('visible');
+          return;
+        }
+        if (!res.ok) throw new Error('Signup failed');
+        data = await res.json();
+      } catch (err) {
+        btn.disabled = false;
+        txt.textContent = 'Create free account →';
+        cirqleToast('Could not reach the server. Please try again.');
+        return;
+      }
+
+      // Store the login token + profile as the session the other pages read.
+      localStorage.setItem('cirqle_session', JSON.stringify({
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        email: data.user.email,
+        instagramHandle: data.user.instagramHandle,
+        token: data.token,
+      }));
+
       btn.classList.add('success');
-      txt.textContent = `Welcome to Cirqle, ${fn}!`;
+      txt.textContent = `Welcome to Cirqle, ${data.user.firstName}!`;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1600);
     });
 

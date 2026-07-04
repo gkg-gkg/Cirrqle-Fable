@@ -208,6 +208,7 @@
     </div>
   </div>
 
+  <script src="assets/api.js"></script>
   <script>
     // ── If already signed in, go to dashboard ──
     if (localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session')) {
@@ -223,7 +224,7 @@
     });
 
     // ── Sign in form ──
-    document.getElementById('signinForm').addEventListener('submit', function(e) {
+    document.getElementById('signinForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -243,31 +244,54 @@
 
       if (!valid) return;
 
-      // Check against stored users
-      const users = JSON.parse(localStorage.getItem('cirqle_users') || '[]');
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      // ── Authenticate via the backend API ──
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      document.getElementById('submitText').textContent = 'Signing in…';
 
-      if (!user) {
-        banner.classList.add('visible');
-        document.getElementById('email').classList.add('error');
-        document.getElementById('password').classList.add('error');
+      let data;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/signin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (res.status === 401) {
+          btn.disabled = false;
+          document.getElementById('submitText').textContent = 'Sign in →';
+          banner.classList.add('visible');
+          document.getElementById('email').classList.add('error');
+          document.getElementById('password').classList.add('error');
+          return;
+        }
+        if (!res.ok) throw new Error('Signin failed');
+        data = await res.json();
+      } catch (err) {
+        btn.disabled = false;
+        document.getElementById('submitText').textContent = 'Sign in →';
+        cirqleToast('Could not reach the server. Please try again.');
         return;
       }
 
       banner.classList.remove('visible');
 
-      // Set session
-      const session = { firstName: user.firstName, lastName: user.lastName, email: user.email };
+      // Store the login token + profile as the session the other pages read.
+      const session = {
+        firstName: data.user.firstName,
+        lastName: data.user.lastName,
+        email: data.user.email,
+        instagramHandle: data.user.instagramHandle,
+        token: data.token,
+      };
       if (remember) {
         localStorage.setItem('cirqle_session', JSON.stringify(session));
       } else {
         sessionStorage.setItem('cirqle_session', JSON.stringify(session));
       }
 
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
       btn.classList.add('success');
-      document.getElementById('submitText').textContent = `Welcome back, ${user.firstName}!`;
+      document.getElementById('submitText').textContent = `Welcome back, ${data.user.firstName}!`;
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1400);
     });
 
