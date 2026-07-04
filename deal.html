@@ -148,7 +148,7 @@
           </div>
           <div class="how-step">
             <span class="coin">4</span>
-            <p class="how-text"><strong>Post on social</strong> about your purchase to unlock full cashback — then watch the money hit your wallet.</p>
+            <p class="how-text"><strong>Post on social</strong> about your purchase and tag both <strong>@cirqle</strong> and <strong id="tagBrand">the brand</strong> in your caption — that's how we match your post to this deal and unlock your cashback.</p>
           </div>
         </div>
       </div>
@@ -242,6 +242,7 @@
     document.getElementById('heroBadge').textContent = d.rate + '% cashback';
     document.getElementById('heroChip').textContent = d.brand;
     document.getElementById('heroBrand').textContent = d.brand;
+    document.getElementById('tagBrand').textContent = '@' + d.brand.toLowerCase().replace(/\s+/g, '');
     document.getElementById('heroTitle').textContent = d.title;
     document.getElementById('heroDesc').textContent = d.desc2;
     document.getElementById('bcCategory').textContent = d.cat;
