@@ -1,0 +1,17 @@
+# systemd service: keeps the Cirqle API running 24/7 and restarts it on
+# crash or server reboot. Installed to /etc/systemd/system/ by setup.sh.
+# Paths assume Amazon Linux 2023 (login user "ec2-user").
+[Unit]
+Description=Cirqle FastAPI backend
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/cirqle/backend
+EnvironmentFile=/home/ec2-user/cirqle/backend/.env
+ExecStart=/home/ec2-user/cirqle/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
