@@ -52,10 +52,16 @@ if [ ! -f "$BACKEND_DIR/.env" ]; then
 CIRQLE_SECRET_KEY=$SECRET
 CIRQLE_DB_PATH=$BACKEND_DIR/cirqle.db
 CIRQLE_CORS_ORIGINS=*
+# Fill this in to enable the Instagram feed (Apify → Settings → API tokens),
+# then: sudo systemctl restart cirqle-api
+APIFY_TOKEN=
+CIRQLE_BRAND_HANDLE=cirqle.ltd
 EOF
   echo "   .env created with a fresh random secret key."
+  echo "   NOTE: set APIFY_TOKEN in $BACKEND_DIR/.env to enable the feed, then restart."
 else
   echo "   .env already exists — keeping it (and your users) untouched."
+  echo "   NOTE: if the feed is new to you, add APIFY_TOKEN=... to $BACKEND_DIR/.env and restart."
 fi
 
 echo "== 5/6 Installing + starting the systemd service =="

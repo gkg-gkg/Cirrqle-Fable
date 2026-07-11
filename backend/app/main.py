@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()  # read backend/.env if present
 
 from .db import init_db  # noqa: E402  (import after load_dotenv so env is set)
-from .routers import auth  # noqa: E402
+from .routers import auth, feed  # noqa: E402
 
 app = FastAPI(title="Cirqle API")
 
@@ -27,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(feed.router)
 
 
 @app.on_event("startup")

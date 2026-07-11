@@ -46,3 +46,23 @@ class UserOut(BaseModel):
 class AuthOut(BaseModel):
     token: str
     user: UserOut
+
+
+# ── Instagram feed (Phase 2) ──
+# A trimmed post shape: only the fields the feed page renders, so we never leak
+# the rest of the raw scrape to the browser.
+class FeedPost(BaseModel):
+    id: Optional[str] = None
+    url: Optional[str] = None
+    displayUrl: Optional[str] = None
+    caption: Optional[str] = None
+    timestamp: Optional[str] = None
+    ownerUsername: Optional[str] = None
+    ownerFullName: Optional[str] = None
+    likesCount: Optional[int] = None
+    commentsCount: Optional[int] = None
+
+
+class FeedRefreshOut(BaseModel):
+    posts: list[FeedPost]
+    updated: datetime

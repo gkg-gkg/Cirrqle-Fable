@@ -93,6 +93,19 @@ sudo systemctl restart cirqle-api    # restart it
 journalctl -u cirqle-api -n 50 --no-pager   # last 50 log lines
 ```
 
+## Enabling the Instagram feed (Apify token)
+
+The feed's Refresh button scrapes Instagram **server-side**, so the Apify token
+lives only in the backend `.env` — never in the browser. On the server:
+
+```bash
+nano ~/cirqle/backend/.env         # add:  APIFY_TOKEN=apify_api_...
+sudo systemctl restart cirqle-api  # pick up the new value
+```
+
+Fresh installs already have a blank `APIFY_TOKEN=` line ready to fill in. Until a
+token is set, `POST /feed/refresh` returns 503 with a clear message.
+
 ## Deploying a code update later
 
 Re-run the same one-liner from Stage 3 — it pulls the latest code and restarts the

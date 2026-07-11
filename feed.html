@@ -131,7 +131,7 @@
     <div class="feed-list" id="feedList"></div>
   </div>
 
-  <script src="assets/config.js"></script>
+  <script src="assets/api.js"></script>
   <script src="assets/ig-account.js"></script>
   <script>
     // ── Auth guard ──
@@ -142,8 +142,6 @@
       document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
     }
 
-    const CIRQLE_ACTOR = 'shu8hvrXbJbY3Eb9W';                       // apify/instagram-scraper
-    const CIRQLE_TARGET = 'https://www.instagram.com/cirqle.ltd/';  // brand account we scrape
     const listEl = document.getElementById('feedList');
     const updatedEl = document.getElementById('feedUpdated');
     let allMentions = [];   // full cirqle mentions list currently loaded
@@ -286,36 +284,34 @@
       applyAndRender();
     }
 
-    // ── Live refresh: call Apify directly (dev-only token in config.js) ──
+    // ── Live refresh: our backend scrapes server-side (token stays on the server)
+    // and returns only THIS user's tagged posts, keyed off their login token. ──
     async function refresh() {
       const btn = document.getElementById('refreshBtn');
-      if (!window.APIFY_TOKEN) {
-        cirqleToast('Add your Apify token to assets/config.js to enable live refresh.');
-        return;
-      }
       const label = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Refreshing…';
       try {
-        const res = await fetch(
-          'https://api.apify.com/v2/acts/' + CIRQLE_ACTOR + '/run-sync-get-dataset-items?token=' + encodeURIComponent(window.APIFY_TOKEN),
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ directUrls: [CIRQLE_TARGET], resultsType: 'mentions', resultsLimit: 50 })
-          }
-        );
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const posts = await res.json();
-        allMentions = Array.isArray(posts) ? posts : [];
-        const now = new Date().toISOString();
+        const res = await fetch(`${window.CIRQLE_API_BASE}/feed/refresh`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) {
+          let msg = 'HTTP ' + res.status;
+          try { msg = (await res.json()).detail || msg; } catch (e) { /* keep msg */ }
+          throw new Error(msg);
+        }
+        const data = await res.json();
+        allMentions = Array.isArray(data.posts) ? data.posts : [];
+        const now = data.updated || new Date().toISOString();
         localStorage.setItem('cirqle_mentions', JSON.stringify({ posts: allMentions, updated: now }));
         updatedEl.textContent = 'Last updated ' + fmtDate(now);
         applyAndRender();
-        cirqleToast('Refreshed — ' + allMentions.length + ' mentions scanned');
+        cirqleToast('Refreshed — ' + allMentions.length + ' of your posts found');
       } catch (e) {
         console.error('Refresh failed:', e);
-        cirqleToast('Refresh failed: ' + e.message + ' — see console (possible CORS).');
+        cirqleToast('Refresh failed: ' + e.message);
       } finally {
         btn.disabled = false;
         btn.textContent = label;
