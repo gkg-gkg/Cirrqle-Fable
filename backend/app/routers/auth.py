@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from ..db import get_session
-from ..models import AuthOut, SigninIn, SignupIn, User, UserOut
+from ..models import AuthOut, ProfileUpdateIn, SigninIn, SignupIn, User, UserOut
 from ..security import create_token, get_current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -55,4 +55,23 @@ def signin(data: SigninIn, session: Session = Depends(get_session)):
 
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
+    return _user_out(user)
+
+
+@router.patch("/me", response_model=UserOut)
+def update_me(
+    data: ProfileUpdateIn,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Let a logged-in user update their own profile (currently: Instagram handle)."""
+    if data.instagramHandle is not None:
+        handle = _normalize_handle(data.instagramHandle)
+        if not handle:
+            raise HTTPException(status_code=422, detail="Instagram handle can't be empty.")
+        user.instagram_handle = handle
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
     return _user_out(user)

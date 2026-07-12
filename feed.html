@@ -341,10 +341,25 @@
           '</div>' +
         '</div>';
     }
-    function saveHandle() {
-      const h = window.CirqleAccount.setHandle(document.getElementById('handleInput').value);
-      if (!h) { cirqleToast('Please enter a valid username'); return; }
-      applyAndRender();
+    // Save the handle to the SERVER (so scraping uses it), then mirror locally.
+    async function saveHandle() {
+      const handle = window.CirqleAccount.normalizeHandle(document.getElementById('handleInput').value);
+      if (!handle) { cirqleToast('Please enter a valid username'); return; }
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/me`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+          body: JSON.stringify({ instagramHandle: handle })
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) throw new Error('save failed');
+        const user = await res.json();
+        window.CirqleAccount.setHandle(user.instagramHandle);   // mirror into session + registry
+        cirqleToast('Saved @' + user.instagramHandle + ' — hit Refresh to load your posts');
+        applyAndRender();
+      } catch (e) {
+        cirqleToast('Could not save your handle — try again');
+      }
     }
 
     // ── Sign out (matches dashboard.html) ──

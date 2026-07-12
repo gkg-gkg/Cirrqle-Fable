@@ -55,6 +55,12 @@ class SigninIn(BaseModel):
     password: str
 
 
+class ProfileUpdateIn(BaseModel):
+    # Only fields the user is allowed to change. Optional -> PATCH semantics
+    # (send just what you want to update).
+    instagramHandle: Optional[str] = None
+
+
 # ── What the API returns (never includes the password hash) ──
 class UserOut(BaseModel):
     firstName: str
