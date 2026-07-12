@@ -1,20 +1,29 @@
-"""Database setup: a single SQLite file, accessed through SQLModel.
+"""Database setup, accessed through SQLModel.
 
-SQLite is a database that lives in one file on disk — no separate database
-server to run. It is perfect for getting started; we can move to Postgres later
-without changing any of the calling code, only this file.
+Two modes, chosen by whether DATABASE_URL is set:
+  • DATABASE_URL set  -> production: Amazon RDS PostgreSQL (a managed database
+    server AWS runs for us — automatic backups, survives instance changes).
+  • DATABASE_URL unset -> local dev: a single SQLite file on disk (no server).
+
+All the calling code is identical either way — only the engine below differs.
 """
 import os
 
 from sqlmodel import SQLModel, Session, create_engine
 
-DB_PATH = os.environ.get("CIRQLE_DB_PATH", "cirqle.db")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# check_same_thread=False lets FastAPI's worker threads share the connection.
-engine = create_engine(
-    f"sqlite:///{DB_PATH}",
-    connect_args={"check_same_thread": False},
-)
+if DATABASE_URL:
+    # Postgres (RDS). pool_pre_ping quietly drops dead connections so a
+    # long-idle server doesn't error on its next query.
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+else:
+    # SQLite. check_same_thread=False lets FastAPI's worker threads share it.
+    DB_PATH = os.environ.get("CIRQLE_DB_PATH", "cirqle.db")
+    engine = create_engine(
+        f"sqlite:///{DB_PATH}",
+        connect_args={"check_same_thread": False},
+    )
 
 
 def init_db() -> None:

@@ -6,3 +6,4 @@ pyjwt
 pydantic[email]
 python-dotenv
 apify-client
+psycopg2-binary

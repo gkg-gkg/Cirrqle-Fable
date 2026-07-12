@@ -261,25 +261,36 @@
       renderPosts(filterByHandle(allMentions, handle));
     }
 
-    // ── Load: localStorage cache first, else the committed JSON ──
+    // ── Load: the server is the source of truth (each user's stored posts).
+    // localStorage is only an offline fallback for instant paint if it's down. ──
     async function loadMentions() {
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/feed`, {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (res.ok) {
+          const data = await res.json();
+          allMentions = Array.isArray(data.posts) ? data.posts : [];
+          localStorage.setItem('cirqle_mentions', JSON.stringify({ posts: allMentions, updated: data.updated }));
+          updatedEl.textContent = data.updated
+            ? 'Last updated ' + fmtDate(data.updated)
+            : 'Hit Refresh to load your posts';
+          applyAndRender();
+          return;
+        }
+      } catch (e) { /* offline — fall back to the browser cache below */ }
+
       const cached = localStorage.getItem('cirqle_mentions');
       if (cached) {
         try {
           const obj = JSON.parse(cached);
           allMentions = obj.posts || [];
-          if (obj.updated) updatedEl.textContent = 'Last updated ' + fmtDate(obj.updated);
-          applyAndRender();
-          return;
-        } catch (e) { /* fall through to file */ }
-      }
-      try {
-        const res = await fetch('data/mentions.json', { cache: 'no-store' });
-        allMentions = await res.json();
-        updatedEl.textContent = 'Showing saved data — hit Refresh for the latest';
-      } catch (e) {
+          updatedEl.textContent = (obj.updated ? 'Last updated ' + fmtDate(obj.updated) + ' ' : '') + '(offline)';
+        } catch (e) { allMentions = []; }
+      } else {
         allMentions = [];
-        updatedEl.textContent = '';
+        updatedEl.textContent = 'Could not reach the server — try again';
       }
       applyAndRender();
     }

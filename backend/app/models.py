@@ -21,6 +21,26 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class Mention(SQLModel, table=True):
+    """One Instagram post that tags the brand, owned by one user.
+
+    PK is the Instagram post id (a post has a single owner, so it maps to one
+    user). `user_id` links it back to its owner — the standard "one table per
+    kind of user data, keyed by user_id" pattern.
+    """
+    id: str = Field(primary_key=True)                    # Instagram post id
+    user_id: int = Field(index=True, foreign_key="user.id")
+    url: Optional[str] = None
+    display_url: Optional[str] = None
+    caption: Optional[str] = None
+    timestamp: Optional[str] = None
+    owner_username: Optional[str] = None
+    owner_full_name: Optional[str] = None
+    likes_count: Optional[int] = None
+    comments_count: Optional[int] = None
+    scraped_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -65,4 +85,4 @@ class FeedPost(BaseModel):
 
 class FeedRefreshOut(BaseModel):
     posts: list[FeedPost]
-    updated: datetime
+    updated: Optional[datetime] = None   # None when the user has no stored posts yet

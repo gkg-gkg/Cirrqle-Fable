@@ -1,39 +1,66 @@
-"""Instagram feed endpoint (Phase 2).
+"""Instagram feed endpoints (Phase 2).
 
-`POST /feed/refresh` scrapes the brand's Instagram mentions server-side (using
-the server's Apify token) and returns only the posts belonging to the signed-in
-user. The browser never sees the token, and each user only sees their own posts.
+- `POST /feed/refresh` scrapes the brand's Instagram mentions server-side (using
+  the server's Apify token), keeps only the signed-in user's posts, **saves them
+  to the database** keyed by user, and returns them.
+- `GET /feed` returns that user's stored posts (no scrape) — used on page load so
+  each user's list is durable and follows their account, not just their browser.
+
+The browser never sees the Apify token, and each user only sees their own posts.
 """
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
 
+from ..db import get_session
 from ..instagram import ScrapeError, scrape_brand_mentions
-from ..models import FeedPost, FeedRefreshOut, User
+from ..models import FeedPost, FeedRefreshOut, Mention, User
 from ..security import get_current_user
 
 router = APIRouter(prefix="/feed", tags=["feed"])
 
 
-def _to_feed_post(raw: dict) -> FeedPost:
-    """Keep only the fields the feed page renders."""
+def _user_handle(user: User) -> str:
+    """This user's normalised Instagram handle, or '' if none set."""
+    return (user.instagram_handle or "").strip().lstrip("@").lower()
+
+
+def _mention_to_post(m: Mention) -> FeedPost:
+    """A stored row -> the shape the feed page renders."""
     return FeedPost(
-        id=raw.get("id"),
-        url=raw.get("url"),
-        displayUrl=raw.get("displayUrl"),
-        caption=raw.get("caption"),
-        timestamp=raw.get("timestamp"),
-        ownerUsername=raw.get("ownerUsername"),
-        ownerFullName=raw.get("ownerFullName"),
-        likesCount=raw.get("likesCount"),
-        commentsCount=raw.get("commentsCount"),
+        id=m.id,
+        url=m.url,
+        displayUrl=m.display_url,
+        caption=m.caption,
+        timestamp=m.timestamp,
+        ownerUsername=m.owner_username,
+        ownerFullName=m.owner_full_name,
+        likesCount=m.likes_count,
+        commentsCount=m.comments_count,
     )
 
 
+@router.get("", response_model=FeedRefreshOut)
+def get_feed(
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Return this user's stored posts (no scrape)."""
+    rows = session.exec(
+        select(Mention).where(Mention.user_id == user.id)
+    ).all()
+    updated = max((m.scraped_at for m in rows), default=None)
+    return FeedRefreshOut(posts=[_mention_to_post(m) for m in rows], updated=updated)
+
+
 @router.post("/refresh", response_model=FeedRefreshOut)
-def refresh(user: User = Depends(get_current_user)):
-    """Scrape brand mentions and return this user's own tagged posts."""
-    handle = (user.instagram_handle or "").strip().lstrip("@").lower()
+def refresh(
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Scrape brand mentions, save this user's posts, and return them."""
+    handle = _user_handle(user)
     if not handle:
         raise HTTPException(
             status_code=400,
@@ -46,9 +73,44 @@ def refresh(user: User = Depends(get_current_user)):
         # 503: the scrape (an upstream dependency) is unavailable/misconfigured.
         raise HTTPException(status_code=503, detail=str(exc))
 
-    mine = [
-        _to_feed_post(p)
-        for p in raw_posts
-        if (p.get("ownerUsername") or "").lower() == handle
-    ]
-    return FeedRefreshOut(posts=mine, updated=datetime.now(timezone.utc))
+    mine = [p for p in raw_posts if (p.get("ownerUsername") or "").lower() == handle]
+    now = datetime.now(timezone.utc)
+
+    # Replace this user's stored set with the fresh scrape (delete-then-insert,
+    # flushed in between so re-using the same post id doesn't clash).
+    for old in session.exec(select(Mention).where(Mention.user_id == user.id)).all():
+        session.delete(old)
+    session.flush()
+
+    posts: list[FeedPost] = []
+    for p in mine:
+        post_id = p.get("id")
+        fp = FeedPost(
+            id=post_id,
+            url=p.get("url"),
+            displayUrl=p.get("displayUrl"),
+            caption=p.get("caption"),
+            timestamp=p.get("timestamp"),
+            ownerUsername=p.get("ownerUsername"),
+            ownerFullName=p.get("ownerFullName"),
+            likesCount=p.get("likesCount"),
+            commentsCount=p.get("commentsCount"),
+        )
+        posts.append(fp)
+        if post_id:  # need an id to store it (it's the primary key)
+            session.add(Mention(
+                id=post_id,
+                user_id=user.id,
+                url=fp.url,
+                display_url=fp.displayUrl,
+                caption=fp.caption,
+                timestamp=fp.timestamp,
+                owner_username=fp.ownerUsername,
+                owner_full_name=fp.ownerFullName,
+                likes_count=fp.likesCount,
+                comments_count=fp.commentsCount,
+                scraped_at=now,
+            ))
+    session.commit()
+
+    return FeedRefreshOut(posts=posts, updated=now)
