@@ -20,9 +20,9 @@
     }
     .hero-h {
       font-family: var(--font-display);
-      font-weight: 800;
-      font-size: clamp(3rem, 7.2vw, 5.6rem);
-      line-height: .98;
+      font-weight: 700;
+      font-size: clamp(2.6rem, 6vw, 4.6rem);
+      line-height: 1.04;
       letter-spacing: -0.035em;
       margin: 22px 0 20px;
     }
@@ -44,113 +44,92 @@
     .wallet-phone {
       width: min(310px, 80vw);
       background: var(--card);
-      border: var(--bw) solid var(--ink);
-      border-radius: 34px;
-      box-shadow: 9px 9px 0 var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow-lg);
       padding: 18px;
-      transform: rotate(2.5deg);
       position: relative; z-index: 2;
     }
     .wp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .wp-hello { font-size: .74rem; font-weight: 700; color: var(--ink-soft); }
+    .wp-hello { font-size: .76rem; font-weight: 600; color: var(--ink-soft); }
     .wp-balance-card {
-      background: var(--lime);
-      border: var(--bw) solid var(--ink);
-      border-radius: 18px;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 16px;
       padding: 16px 18px;
       margin-bottom: 12px;
-      box-shadow: var(--shadow-sm);
     }
-    .wp-balance-label { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; }
-    .wp-balance { font-family: var(--font-display); font-weight: 800; font-size: 2.3rem; letter-spacing: -0.03em; line-height: 1.1; }
-    .wp-balance-up { font-size: .72rem; font-weight: 800; color: var(--green); }
+    .wp-balance-label { font-size: .62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; opacity: .8; }
+    .wp-balance { font-family: var(--font-display); font-weight: 700; font-size: 2.2rem; letter-spacing: -0.03em; line-height: 1.15; }
+    .wp-balance-up { font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.85); }
     .wp-item {
       display: flex; align-items: center; gap: 10px;
-      border: var(--bw) solid var(--ink); border-radius: 14px;
+      border: 1px solid var(--line); border-radius: 12px;
       padding: 10px 12px; margin-bottom: 9px;
       background: var(--paper);
     }
     .wp-item-icon {
       width: 34px; height: 34px; border-radius: 50%;
-      border: var(--bw) solid var(--ink);
+      background: var(--paper-deep);
       display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0;
     }
-    .wp-item-name { font-size: .74rem; font-weight: 700; line-height: 1.25; }
-    .wp-item-sub { font-size: .62rem; color: var(--ink-soft); font-weight: 600; }
-    .wp-item-cash { margin-left: auto; font-family: var(--font-display); font-weight: 800; font-size: .88rem; color: var(--green); }
-
-    /* floating decorations */
-    .hero-deco { position: absolute; z-index: 3; }
-    .deco-ring { top: -34px; right: -8px; }
-    .deco-coin1 { bottom: 60px; left: -14px; --tilt: -6deg; }
-    .deco-coin2 { top: 90px; left: -34px; --tilt: 5deg; }
-    .deco-badge { bottom: -18px; right: -6px; --tilt: -3deg; }
+    .wp-item-name { font-size: .76rem; font-weight: 600; line-height: 1.25; }
+    .wp-item-sub { font-size: .64rem; color: var(--ink-soft); font-weight: 500; }
+    .wp-item-cash { margin-left: auto; font-family: var(--font-display); font-weight: 700; font-size: .88rem; color: var(--blue-deep); }
 
     /* ── Stats row ── */
     .stats-strip { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) clamp(56px,7vw,90px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; position: relative; z-index: 1; }
     .stat-card { text-align: center; padding: 26px 14px; }
-    .stat-card:nth-child(odd)  { transform: rotate(-1deg); }
-    .stat-card:nth-child(even) { transform: rotate(1deg); }
-    .stat-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem, 3.4vw, 2.7rem); letter-spacing: -0.03em; line-height: 1; display: block; }
-    .stat-label { font-size: .8rem; font-weight: 700; color: var(--ink-soft); margin-top: 8px; display: block; }
+    .stat-num { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.9rem, 3.4vw, 2.6rem); letter-spacing: -0.03em; line-height: 1; display: block; }
+    .stat-label { font-size: .82rem; font-weight: 500; color: var(--ink-soft); margin-top: 8px; display: block; }
 
     /* ── How it works ── */
     .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
     .step-card { padding: 34px 26px 30px; }
-    .step-card:nth-child(1) { transform: rotate(-1.1deg); }
-    .step-card:nth-child(2) { transform: rotate(.9deg); }
-    .step-card:nth-child(3) { transform: rotate(-.7deg); }
-    .step-emoji { font-size: 2.6rem; display: block; margin: 14px 0 10px; }
-    .step-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; }
+    .step-emoji { font-size: 2.2rem; display: block; margin: 14px 0 10px; }
+    .step-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 10px; }
     .step-desc { font-size: .9rem; color: var(--ink-soft); line-height: 1.7; }
 
     /* ── Features / wallet demo ── */
     .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
-    .feature-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; border-radius: 18px; border: var(--bw) solid transparent; transition: all .2s var(--snap); }
-    .feature-row:hover { border-color: var(--ink); background: var(--card); box-shadow: var(--shadow-sm); transform: translate(-2px,-2px); }
-    .feature-title { font-size: 1rem; font-weight: 800; margin-bottom: 3px; }
+    .feature-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; border: 1px solid transparent; transition: all .2s var(--snap); }
+    .feature-row:hover { border-color: var(--line); background: var(--card); box-shadow: var(--shadow-sm); }
+    .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: 3px; }
     .feature-desc { font-size: .86rem; color: var(--ink-soft); line-height: 1.6; }
 
-    .demo-card { padding: 26px; transform: rotate(1deg); }
+    .demo-card { padding: 26px; }
     .demo-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .demo-title { font-family: var(--font-display); font-weight: 800; font-size: 1rem; }
+    .demo-title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
     .demo-chart { display: flex; align-items: flex-end; gap: 9px; height: 120px; margin-bottom: 20px; padding-top: 20px; }
-    .demo-bar { flex: 1; border: var(--bw) solid var(--ink); border-radius: 8px 8px 0 0; position: relative; min-height: 12px; transform-origin: bottom; animation: growBar .8s var(--bounce) both; }
-    .demo-bar::after { content: attr(data-val); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: .62rem; font-weight: 800; }
+    .demo-bar { flex: 1; border-radius: 6px 6px 0 0; position: relative; min-height: 12px; transform-origin: bottom; animation: growBar .8s var(--snap) both; }
+    .demo-bar::after { content: attr(data-val); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: .62rem; font-weight: 600; color: var(--ink-soft); }
     @keyframes growBar { from { transform: scaleY(0); } }
     .demo-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .demo-metric { border: var(--bw) solid var(--ink); border-radius: 14px; padding: 12px 8px; text-align: center; background: var(--paper); }
-    .demo-metric-val { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; }
-    .demo-metric-label { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: var(--ink-soft); margin-top: 2px; }
-    .goal-float { position: absolute; bottom: -24px; right: -12px; --tilt: -2deg; }
+    .demo-metric { border: 1px solid var(--line); border-radius: 12px; padding: 12px 8px; text-align: center; background: var(--paper); }
+    .demo-metric-val { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; }
+    .demo-metric-label { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--ink-soft); margin-top: 2px; }
+    .goal-float { position: absolute; bottom: -18px; right: -12px; }
 
     /* ── Testimonials ── */
     .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
     .testi-card { padding: 28px 24px 24px; }
-    .testi-card:nth-child(1) { transform: rotate(-.8deg); }
-    .testi-card:nth-child(2) { transform: rotate(.9deg); }
-    .testi-card:nth-child(3) { transform: rotate(-.5deg); }
-    .testi-stars { font-size: .95rem; letter-spacing: 3px; margin-bottom: 14px; }
-    .testi-text { font-size: .92rem; line-height: 1.7; margin-bottom: 20px; font-weight: 500; }
+    .testi-stars { font-size: .9rem; letter-spacing: 2px; margin-bottom: 14px; }
+    .testi-text { font-size: .92rem; line-height: 1.7; margin-bottom: 20px; font-weight: 400; color: var(--ink); }
     .testi-author { display: flex; align-items: center; gap: 12px; }
     .testi-avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      border: var(--bw) solid var(--ink);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--blue-tint); color: var(--blue-deep);
       display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; flex-shrink: 0;
+      font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
     }
-    .testi-name { font-size: .88rem; font-weight: 800; }
-    .testi-role { font-size: .74rem; color: var(--ink-soft); font-weight: 600; }
+    .testi-name { font-size: .88rem; font-weight: 600; }
+    .testi-role { font-size: .76rem; color: var(--ink-soft); font-weight: 400; }
 
     /* ── Big CTA ── */
-    .cta-slab { padding: clamp(44px, 6vw, 72px) clamp(24px, 5vw, 64px); text-align: center; overflow: hidden; }
-    .cta-slab .h-display { color: var(--paper); }
-    .cta-slab .hl-lime { color: var(--ink); }
-    .cta-sub { color: rgba(255,246,233,.7); font-size: 1.02rem; margin: 18px auto 34px; max-width: 460px; }
-    .cta-ring { position: absolute; opacity: .9; }
-    .cta-ring-1 { top: -46px; left: -30px; transform: rotate(12deg); }
-    .cta-ring-2 { bottom: -52px; right: -26px; transform: rotate(-9deg); }
-    .cta-ring text { fill: var(--lime); }
+    .cta-slab { padding: clamp(48px, 6vw, 80px) clamp(24px, 5vw, 64px); text-align: center; overflow: hidden; }
+    .cta-slab .h-display { color: #fff; }
+    .cta-slab .hl-lime { color: #fff; background: rgba(255,255,255,.14); }
+    .cta-sub { color: rgba(255,255,255,.66); font-size: 1.02rem; margin: 18px auto 34px; max-width: 460px; }
 
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; text-align: center; padding-top: 40px; }
@@ -229,17 +208,6 @@
         </div>
       </div>
 
-      <!-- Decorations -->
-      <div class="hero-deco deco-ring spin-ring" aria-hidden="true">
-        <svg viewBox="0 0 100 100">
-          <defs><path id="ringPath" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/></defs>
-          <circle cx="50" cy="50" r="26" fill="var(--pink)" stroke="var(--ink)" stroke-width="2"/>
-          <text><textPath href="#ringPath">SHOP • POST • EARN • REPEAT •</textPath></text>
-        </svg>
-      </div>
-      <div class="hero-deco deco-coin1 floaty"><span class="coin coin-lime" style="width:56px;height:56px;font-size:1.4rem">£</span></div>
-      <div class="hero-deco deco-coin2 floaty" style="animation-delay:-2s"><span class="coin" style="width:44px;height:44px">£</span></div>
-      <div class="hero-deco deco-badge floaty" style="animation-delay:-3.4s"><span class="sticker sticker-lime">+£4.20 cashback!</span></div>
     </div>
   </header>
 
@@ -321,13 +289,13 @@
             <span class="chip">This week</span>
           </div>
           <div class="demo-chart" aria-hidden="true">
-            <div class="demo-bar" style="height:45%;background:var(--sky);animation-delay:.05s" data-val="£8"></div>
-            <div class="demo-bar" style="height:60%;background:var(--pink);animation-delay:.12s" data-val="£12"></div>
-            <div class="demo-bar" style="height:35%;background:var(--sky);animation-delay:.19s" data-val="£6"></div>
-            <div class="demo-bar" style="height:80%;background:var(--tang);animation-delay:.26s" data-val="£16"></div>
-            <div class="demo-bar" style="height:55%;background:var(--pink);animation-delay:.33s" data-val="£11"></div>
-            <div class="demo-bar" style="height:70%;background:var(--sky);animation-delay:.40s" data-val="£14"></div>
-            <div class="demo-bar" style="height:92%;background:var(--lime);animation-delay:.47s" data-val="£18"></div>
+            <div class="demo-bar" style="height:45%;background:#CFE0EE;animation-delay:.05s" data-val="£8"></div>
+            <div class="demo-bar" style="height:60%;background:#AFCEE4;animation-delay:.12s" data-val="£12"></div>
+            <div class="demo-bar" style="height:35%;background:#CFE0EE;animation-delay:.19s" data-val="£6"></div>
+            <div class="demo-bar" style="height:80%;background:#7FB0D2;animation-delay:.26s" data-val="£16"></div>
+            <div class="demo-bar" style="height:55%;background:#AFCEE4;animation-delay:.33s" data-val="£11"></div>
+            <div class="demo-bar" style="height:70%;background:#7FB0D2;animation-delay:.40s" data-val="£14"></div>
+            <div class="demo-bar" style="height:92%;background:var(--blue);animation-delay:.47s" data-val="£18"></div>
           </div>
           <div class="demo-metrics">
             <div class="demo-metric"><div class="demo-metric-val">£85</div><div class="demo-metric-label">This month</div></div>
@@ -362,7 +330,7 @@
               <div class="testi-role">Fashion lover, London</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">Earned £320 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--blue-tint); color:var(--blue-deep)">Earned £320 total</span></div>
         </div>
         <div class="card card-hover testi-card card-lime reveal reveal-delay-1">
           <div class="testi-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
@@ -374,7 +342,7 @@
               <div class="testi-role">Gym enthusiast, Manchester</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--card)">Earned £215 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--blue-tint); color:var(--blue-deep)">Earned £215 total</span></div>
         </div>
         <div class="card card-hover testi-card reveal reveal-delay-2">
           <div class="testi-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
@@ -386,7 +354,7 @@
               <div class="testi-role">Content creator, Birmingham</div>
             </div>
           </div>
-          <div style="margin-top:14px"><span class="chip" style="background:var(--lime)">Earned £540 total</span></div>
+          <div style="margin-top:14px"><span class="chip" style="background:var(--blue-tint); color:var(--blue-deep)">Earned £540 total</span></div>
         </div>
       </div>
     </div>
@@ -396,23 +364,11 @@
   <section class="section" id="cta" style="padding-top:0">
     <div class="section-inner">
       <div class="card card-ink cta-slab reveal">
-        <div class="cta-ring cta-ring-1 spin-ring" aria-hidden="true">
-          <svg viewBox="0 0 100 100">
-            <defs><path id="ctaRing1" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/></defs>
-            <text><textPath href="#ctaRing1">CASHBACK • CASHBACK • CASHBACK •</textPath></text>
-          </svg>
-        </div>
-        <div class="cta-ring cta-ring-2 spin-ring" aria-hidden="true">
-          <svg viewBox="0 0 100 100" style="animation-direction:reverse">
-            <defs><path id="ctaRing2" d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/></defs>
-            <text><textPath href="#ctaRing2">SHOP • POST • EARN • REPEAT •</textPath></text>
-          </svg>
-        </div>
         <h2 class="h-display">Ready to get <span class="hl hl-lime">paid</span><br>to shop?</h2>
         <p class="cta-sub">Join 50,000+ members already earning cashback. Signing up takes 60 seconds.</p>
         <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap">
-          <a href="signup.html" class="btn btn-lg btn-lime" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Sign up free →</a>
-          <a href="browse.html" class="btn btn-lg" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Browse deals</a>
+          <a href="signup.html" class="btn btn-lg btn-lime">Sign up free →</a>
+          <a href="browse.html" class="btn btn-lg">Browse deals</a>
         </div>
       </div>
     </div>
