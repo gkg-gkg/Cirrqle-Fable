@@ -41,6 +41,38 @@ class Mention(SQLModel, table=True):
     scraped_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class Campaign(SQLModel, table=True):
+    """A cashback deal shown to everyone — the global catalog (Phase 3).
+
+    Unlike `Mention` this is NOT keyed by user; it's shared content authored
+    through the admin form. `tags` and `images` hold JSON-encoded lists as TEXT
+    so the shape is identical on SQLite and Postgres (no DB-specific JSON type).
+    Columns are the union of what `deal.html` and `browse.html` render.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    brand: str = ""
+    title: str = ""            # long detail title (deal.html hero)
+    card_title: str = ""       # short listing title (browse card)
+    card_desc: str = ""        # short listing description (browse card)
+    long_desc: str = ""        # deal.html desc2
+    emoji: str = ""            # fallback thumbnail when no images yet
+    category: str = ""
+    rate: float = 0            # cashback %
+    earn: str = ""             # e.g. "£13.00"
+    spend_desc: str = ""       # deal.html desc, e.g. "on a £100 spend"
+    total_paid: str = ""       # e.g. "£112,705 paid to members"
+    members: str = ""          # e.g. "1.8k"
+    claims: int = 0            # browse "claims" count
+    expiry: str = ""           # "30 Jun 2026" / "Ongoing" / "New members only"
+    location: str = ""         # e.g. "Online · UK"
+    terms: str = ""            # HTML string
+    brand_url: str = ""        # outbound shop link
+    bg: str = "var(--paper-deep)"
+    tags: str = "[]"           # JSON-encoded list[str]
+    images: str = "[]"         # JSON-encoded list[str] of image URLs
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -92,3 +124,54 @@ class FeedPost(BaseModel):
 class FeedRefreshOut(BaseModel):
     posts: list[FeedPost]
     updated: Optional[datetime] = None   # None when the user has no stored posts yet
+
+
+# ── Campaigns (Phase 3) ──
+class CampaignIn(BaseModel):
+    """The text fields the admin form sends (as a JSON payload alongside the
+    uploaded image files). Every field is optional so PATCH can send a partial
+    update — the router only applies the fields that were actually provided.
+    """
+    brand: Optional[str] = None
+    title: Optional[str] = None
+    cardTitle: Optional[str] = None
+    cardDesc: Optional[str] = None
+    longDesc: Optional[str] = None
+    emoji: Optional[str] = None
+    category: Optional[str] = None
+    rate: Optional[float] = None
+    earn: Optional[str] = None
+    spendDesc: Optional[str] = None
+    totalPaid: Optional[str] = None
+    members: Optional[str] = None
+    claims: Optional[int] = None
+    expiry: Optional[str] = None
+    location: Optional[str] = None
+    terms: Optional[str] = None
+    brandUrl: Optional[str] = None
+    bg: Optional[str] = None
+    tags: Optional[list[str]] = None
+
+
+class CampaignOut(BaseModel):
+    id: int
+    brand: str
+    title: str
+    cardTitle: str
+    cardDesc: str
+    longDesc: str
+    emoji: str
+    category: str
+    rate: float
+    earn: str
+    spendDesc: str
+    totalPaid: str
+    members: str
+    claims: int
+    expiry: str
+    location: str
+    terms: str
+    brandUrl: str
+    bg: str
+    tags: list[str]
+    images: list[str]

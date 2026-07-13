@@ -8,11 +8,13 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 load_dotenv()  # read backend/.env if present
 
 from .db import init_db  # noqa: E402  (import after load_dotenv so env is set)
-from .routers import auth, feed  # noqa: E402
+from .routers import auth, campaigns, feed  # noqa: E402
+from .storage import MEDIA_DIR  # noqa: E402
 
 app = FastAPI(title="Cirqle API")
 
@@ -28,6 +30,12 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(feed.router)
+app.include_router(campaigns.router)
+
+# Serve locally-stored campaign images (only used when S3_BUCKET is unset; in
+# prod images live on S3 and are served by AWS). mkdir so the mount never fails.
+MEDIA_DIR.mkdir(exist_ok=True)
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 
 @app.on_event("startup")

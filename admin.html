@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campaign Admin — Cirqle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/cirqle.css" />
+  <style>
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 22px 80px; }
+    .admin-wrap h1 { font-family: var(--font-display); font-weight: 800; font-size: 2rem; letter-spacing: -0.02em; }
+    .muted { color: var(--ink-soft); font-size: .9rem; margin: 6px 0 20px; }
+    .admin-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start; }
+    @media (max-width: 860px) { .admin-grid { grid-template-columns: 1fr; } }
+    .pad { padding: 24px; }
+    .pad h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-bottom: 16px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
+    .field input, .field textarea, .field select {
+      width: 100%; padding: 9px 11px; border: var(--bw) solid var(--ink);
+      border-radius: 12px; font: inherit; font-size: .88rem; background: var(--card); color: var(--ink);
+    }
+    .field textarea { min-height: 60px; resize: vertical; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .keybar { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 22px; max-width: 460px; }
+    .keybar .field { flex: 1; margin: 0; }
+    #msg { margin-top: 12px; font-size: .85rem; font-weight: 600; min-height: 1.2em; }
+    #msg.ok { color: #1c7c3a; }
+    #msg.err { color: var(--red); }
+    .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+    .clist-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.08); }
+    .clist-thumb { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: var(--paper-deep); overflow: hidden; flex: none; }
+    .clist-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .clist-main { flex: 1; min-width: 0; }
+    .clist-title { font-weight: 700; font-size: .9rem; }
+    .clist-sub { font-size: .76rem; color: var(--ink-soft); }
+    .clist-actions { display: flex; gap: 6px; }
+    .mini { padding: 5px 11px; font-size: .78rem; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+    <h1>Campaign admin</h1>
+    <p class="muted">Create, edit and delete the cashback catalog. All changes require the admin key (sent as the <code>X-Admin-Key</code> header). Not linked from the public site.</p>
+
+    <div class="keybar">
+      <div class="field">
+        <label for="adminKey">Admin key</label>
+        <input id="adminKey" type="password" placeholder="Paste the admin key" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="admin-grid">
+      <!-- FORM -->
+      <div class="card pad">
+        <h2 id="formTitle">New campaign</h2>
+        <form id="campaignForm">
+          <input type="hidden" id="editId" />
+          <div class="two">
+            <div class="field"><label>Brand *</label><input id="f_brand" required /></div>
+            <div class="field"><label>Emoji (fallback thumbnail)</label><input id="f_emoji" placeholder="👟" /></div>
+          </div>
+          <div class="field"><label>Detail title *</label><input id="f_title" required placeholder="Nike Summer Sale — up to 13% back" /></div>
+          <div class="two">
+            <div class="field"><label>Card title (short)</label><input id="f_cardTitle" placeholder="Nike Summer Sale" /></div>
+            <div class="field"><label>Category</label>
+              <select id="f_category">
+                <option>Fashion &amp; Beauty</option>
+                <option>Food &amp; Drink</option>
+                <option>Electronics</option>
+                <option>Travel</option>
+                <option>Home &amp; Living</option>
+                <option>Fitness</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Card description (short)</label><textarea id="f_cardDesc"></textarea></div>
+          <div class="field"><label>Long description</label><textarea id="f_longDesc"></textarea></div>
+          <div class="two">
+            <div class="field"><label>Cashback rate (%)</label><input id="f_rate" type="number" step="0.1" placeholder="13" /></div>
+            <div class="field"><label>Earn (e.g. £13.00)</label><input id="f_earn" placeholder="£13.00" /></div>
+          </div>
+          <div class="two">
+            <div class="field"><label>Spend description</label><input id="f_spendDesc" placeholder="on a £100 spend" /></div>
+            <div class="field"><label>Total paid</label><input id="f_totalPaid" placeholder="£112,705 paid to members" /></div>
+          </div>
+          <div class="two">
+            <div class="field"><label>Members</label><input id="f_members" placeholder="1.8k" /></div>
+            <div class="field"><label>Claims</label><input id="f_claims" type="number" placeholder="1840" /></div>
+          </div>
+          <div class="two">
+            <div class="field"><label>Expiry</label><input id="f_expiry" placeholder="30 Jun 2026 / Ongoing / New members only" /></div>
+            <div class="field"><label>Location</label><input id="f_location" placeholder="Online · UK" /></div>
+          </div>
+          <div class="field"><label>Brand URL</label><input id="f_brandUrl" placeholder="https://www.nike.com/gb" /></div>
+          <div class="field"><label>Tags (comma-separated)</label><input id="f_tags" placeholder="Fashion & Beauty, Footwear, Sale" /></div>
+          <div class="field"><label>Terms (HTML allowed)</label><textarea id="f_terms"></textarea></div>
+          <div class="field">
+            <label>Images (select up to 5)</label>
+            <input id="f_images" type="file" accept="image/*" multiple />
+            <div class="muted" id="imgNote" style="margin:6px 0 0">On edit, leave empty to keep the current images.</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-ink" type="submit" id="saveBtn">Create campaign</button>
+            <button class="btn" type="button" id="resetBtn">Clear</button>
+          </div>
+          <div id="msg"></div>
+        </form>
+      </div>
+
+      <!-- LIST -->
+      <div class="card pad">
+        <h2>Existing campaigns (<span id="count">0</span>)</h2>
+        <div id="list"><p class="muted">Loading…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    const API = window.CIRQLE_API_BASE;
+    const $ = id => document.getElementById(id);
+    const keyInput = $('adminKey');
+
+    // Remember the admin key for this tab so you don't retype it.
+    keyInput.value = sessionStorage.getItem('cirqle_admin_key') || '';
+    keyInput.addEventListener('input', () => sessionStorage.setItem('cirqle_admin_key', keyInput.value));
+
+    const FIELDS = ['brand','title','cardTitle','cardDesc','longDesc','emoji','category','rate',
+                    'earn','spendDesc','totalPaid','members','claims','expiry','location','brandUrl','terms'];
+
+    function setMsg(text, ok) {
+      const m = $('msg');
+      m.textContent = text;
+      m.className = ok ? 'ok' : 'err';
+    }
+
+    function resetForm() {
+      $('editId').value = '';
+      FIELDS.forEach(f => { const el = $('f_' + f); if (el) el.value = ''; });
+      $('f_tags').value = '';
+      $('f_images').value = '';
+      $('f_category').value = 'Fashion & Beauty';
+      $('formTitle').textContent = 'New campaign';
+      $('saveBtn').textContent = 'Create campaign';
+      setMsg('', true);
+    }
+    $('resetBtn').addEventListener('click', resetForm);
+
+    function fillForm(c) {
+      $('editId').value = c.id;
+      FIELDS.forEach(f => { const el = $('f_' + f); if (el) el.value = c[f] ?? ''; });
+      $('f_tags').value = (c.tags || []).join(', ');
+      $('f_images').value = '';
+      $('formTitle').textContent = `Edit #${c.id} — ${c.brand}`;
+      $('saveBtn').textContent = 'Save changes';
+      setMsg('', true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadList() {
+      const res = await fetch(`${API}/campaigns`);
+      const data = await res.json();
+      $('count').textContent = data.length;
+      const list = $('list');
+      if (!data.length) { list.innerHTML = '<p class="muted">No campaigns yet.</p>'; return; }
+      list.innerHTML = '';
+      data.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'clist-item';
+        const thumb = (c.images && c.images.length)
+          ? `<img src="${c.images[0]}" alt="" onerror="this.replaceWith(document.createTextNode('${c.emoji || '📦'}'))">`
+          : (c.emoji || '📦');
+        row.innerHTML = `
+          <div class="clist-thumb">${thumb}</div>
+          <div class="clist-main">
+            <div class="clist-title">${c.brand} — ${c.rate}%</div>
+            <div class="clist-sub">${c.cardTitle || c.title} · ${c.images.length} image(s)</div>
+          </div>
+          <div class="clist-actions">
+            <button class="btn mini" data-edit="${c.id}">Edit</button>
+            <button class="btn mini btn-pink" data-del="${c.id}">Delete</button>
+          </div>`;
+        row.querySelector('[data-edit]').addEventListener('click', () => fillForm(c));
+        row.querySelector('[data-del]').addEventListener('click', () => del(c.id, c.brand));
+        list.appendChild(row);
+      });
+    }
+
+    async function del(id, brand) {
+      if (!confirm(`Delete campaign #${id} (${brand})?`)) return;
+      const res = await fetch(`${API}/campaigns/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Key': keyInput.value },
+      });
+      if (res.status === 204) { setMsg(`Deleted #${id}.`, true); loadList(); }
+      else if (res.status === 401) setMsg('Invalid admin key.', false);
+      else setMsg(`Delete failed (${res.status}).`, false);
+    }
+
+    $('campaignForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!keyInput.value) { setMsg('Enter the admin key first.', false); return; }
+
+      const payload = {};
+      FIELDS.forEach(f => {
+        const el = $('f_' + f);
+        if (!el) return;
+        let v = el.value.trim();
+        if (v === '') return;
+        if (f === 'rate') v = parseFloat(v);
+        else if (f === 'claims') v = parseInt(v, 10);
+        payload[f] = v;
+      });
+      const tags = $('f_tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      if (tags.length) payload.tags = tags;
+
+      const fd = new FormData();
+      fd.append('payload', JSON.stringify(payload));
+      for (const file of $('f_images').files) fd.append('images', file);
+
+      const editId = $('editId').value;
+      const url = editId ? `${API}/campaigns/${editId}` : `${API}/campaigns`;
+      const method = editId ? 'PATCH' : 'POST';
+
+      $('saveBtn').disabled = true;
+      try {
+        const res = await fetch(url, { method, headers: { 'X-Admin-Key': keyInput.value }, body: fd });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setMsg(editId ? `Saved changes to #${editId}.` : `Created campaign #${body.id}.`, true);
+          resetForm();
+          loadList();
+        } else if (res.status === 401) {
+          setMsg('Invalid admin key.', false);
+        } else {
+          setMsg(`Error (${res.status}): ${body.detail || 'request failed'}`, false);
+        }
+      } catch (err) {
+        setMsg('Network error — is the API reachable?', false);
+      } finally {
+        $('saveBtn').disabled = false;
+      }
+    });
+
+    resetForm();
+    loadList();
+  </script>
+</body>
+</html>

@@ -7,3 +7,5 @@ pydantic[email]
 python-dotenv
 apify-client
 psycopg2-binary
+python-multipart
+boto3
