@@ -16,10 +16,10 @@
   --line-soft:  #EFF2F6;   /* faintest dividers */
 
   /* brand — steel-blue from the Cirqle logo, refined */
-  --blue:        #3C7DA6;  /* primary — buttons, brand marks, links */
-  --blue-deep:   #2E6488;  /* hover / active / focus */
-  --blue-tint:   #E9F2F8;  /* palest blue — soft surfaces & highlights */
-  --blue-pale:   #F2F7FB;  /* barely-there blue panel */
+  --blue:        #437D9E;  /* primary — buttons, brand marks, links (slightly softer) */
+  --blue-deep:   #35637F;  /* hover / active / focus */
+  --blue-tint:   #E3EDF5;  /* palest blue — soft surfaces & highlights (a touch darker) */
+  --blue-pale:   #EEF4FA;  /* barely-there blue panel */
 
   /* soft accent — used sparingly */
   --teal:       #4B9CC9;
@@ -113,7 +113,7 @@ img { max-width: 100%; display: block; }
   font-size: 1.4rem;
   letter-spacing: -0.03em;
   text-decoration: none;
-  color: var(--ink);
+  color: var(--blue);
   flex-shrink: 0;
 }
 .nav-links {

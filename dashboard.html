@@ -310,25 +310,10 @@
         renderActivity(s.activity);
       } catch (e) { /* leave zeros */ }
     }
-    async function withdraw() {
-      const btn = document.getElementById('withdrawBtn');
-      const bal = parseFloat(document.getElementById('walletBal').textContent) || 0;
-      if (bal <= 0) { cirqleToast('No confirmed balance to withdraw yet'); return; }
-      btn.disabled = true;
-      try {
-        const res = await fetch(`${window.CIRQLE_API_BASE}/account/withdraw`, {
-          method: 'POST', headers: { 'Authorization': 'Bearer ' + session.token }
-        });
-        if (res.status === 401) { signOut(); return; }
-        if (!res.ok) throw new Error('failed');
-        const s = await res.json();
-        document.getElementById('walletBal').textContent = Number(s.wallet).toFixed(2);
-        document.getElementById('earnedVal').textContent = Number(s.totalEarned).toFixed(2);
-        renderActivity(s.activity);
-        cirqleToast('£' + bal.toFixed(2) + ' withdrawn — arrives in 1–2 days');
-      } catch (e) {
-        cirqleToast('Withdrawal failed — try again');
-      } finally { btn.disabled = false; }
+    function withdraw() {
+      // Withdrawals aren't live yet. Intentionally do NOT call /account/withdraw,
+      // so the user's balance is never touched — just show a "coming soon" message.
+      cirqleToast('Withdrawals are coming soon — your balance stays put for now 💸');
     }
     // ── Active deals from the live catalog ──
     async function loadActiveDeals() {

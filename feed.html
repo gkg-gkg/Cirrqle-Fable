@@ -100,7 +100,7 @@
       border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
       background: var(--tile-pending); color: var(--ink);
     }
-    .tile-status.done { background: var(--tile-done); color: #fff; }
+    .tile-status.done { background: var(--blue); color: #fff; }
 
     .feed-empty { text-align: center; padding: 60px 20px; }
     .feed-empty .ei { font-size: 3rem; margin-bottom: 12px; }
@@ -253,8 +253,8 @@
         // Receipt state: flips the tile's status chip + border once verified.
         const done = hasReceipt(p.id);
         const status = done
-          ? '<span class="tile-status done">Receipt uploaded</span>'
-          : '<span class="tile-status">Receipt pending</span>';
+          ? '<span class="tile-status done">Receipt Verified</span>'
+          : '<span class="tile-status">Upload receipt</span>';
 
         return (
           '<article class="post-tile">' +
