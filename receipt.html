@@ -45,6 +45,10 @@
     }
     .result-note { font-size: .92rem; color: var(--ink-soft); margin-bottom: 22px; }
 
+    .deal-field { margin-bottom: 18px; }
+    .deal-field label { display: block; font-size: .82rem; font-weight: 800; color: var(--ink-soft); margin-bottom: 8px; }
+    .deal-field select { width: 100%; padding: 11px 13px; border: var(--bw) solid var(--ink); border-radius: 14px; font: inherit; font-size: .9rem; background: var(--card); color: var(--ink); }
+
     @media (max-width: 900px) { .nav-name { display: none; } }
   </style>
 </head>
@@ -69,6 +73,10 @@
     <p class="up-sub fade-up d2">Attach a photo of your receipt so we can verify your purchase. Once verified, your cashback is released automatically after the 3‑day hold.</p>
 
     <div class="card fade-up d3" id="uploadCard">
+      <div class="deal-field">
+        <label for="dealSelect">Which deal is this receipt for?</label>
+        <select id="dealSelect"><option value="">Loading deals…</option></select>
+      </div>
       <label class="drop" id="dropZone">
         <input type="file" id="receiptInput" accept="image/*" hidden />
         <div class="drop-title">Attach receipt photo</div>
@@ -103,17 +111,34 @@
 
     // Upload the receipt image to the server (stored privately on S3), keyed to
     // this post. The feed reads /receipts to flip the tile to "uploaded".
+    // Load the deal list so the user can say which deal this receipt is for
+    // (that's how we know the cashback amount).
+    async function loadDeals() {
+      const sel = document.getElementById('dealSelect');
+      try {
+        const deals = await (await fetch(`${window.CIRQLE_API_BASE}/campaigns`)).json();
+        sel.innerHTML = '<option value="">Choose a deal…</option>' +
+          deals.map(c => `<option value="${c.id}">${c.brand} — ${c.rate}% back</option>`).join('');
+      } catch (e) {
+        sel.innerHTML = '<option value="">Could not load deals</option>';
+      }
+    }
+    loadDeals();
+
     async function handleFile(file) {
       if (!file || !file.type.startsWith('image/')) {
         cirqleToast('Please attach an image of your receipt.');
         return;
       }
+      const campaignId = document.getElementById('dealSelect').value;
+      if (!campaignId) { cirqleToast('First choose which deal this receipt is for.'); return; }
       document.getElementById('preview').src = URL.createObjectURL(file);
       dropZone.style.pointerEvents = 'none';
       cirqleToast('Uploading…');
       try {
         const fd = new FormData();
         fd.append('post_id', postId);
+        fd.append('campaign_id', campaignId);
         fd.append('image', file);
         const res = await fetch(`${window.CIRQLE_API_BASE}/receipts`, {
           method: 'POST',

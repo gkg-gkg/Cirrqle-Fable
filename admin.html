@@ -39,6 +39,12 @@
     .clist-sub { font-size: .76rem; color: var(--ink-soft); }
     .clist-actions { display: flex; gap: 6px; }
     .mini { padding: 5px 11px; font-size: .78rem; border-radius: 10px; }
+    .rfilter { display: flex; gap: 8px; margin-bottom: 14px; }
+    .rbadge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+    .rbadge.pending { background: #FFF1D6; color: #8a5a00; }
+    .rbadge.confirmed { background: #DDF5E3; color: #1c7c3a; }
+    .rbadge.paid { background: #E9E9F5; color: #4a4a7a; }
+    .rbadge.rejected { background: #FBE0E0; color: #a62222; }
   </style>
 </head>
 <body>
@@ -116,6 +122,16 @@
         <h2>Existing campaigns (<span id="count">0</span>)</h2>
         <div id="list"><p class="muted">Loading…</p></div>
       </div>
+    </div>
+
+    <!-- RECEIPTS REVIEW -->
+    <div class="card pad" style="margin-top:22px">
+      <h2>Receipt review (<span id="rcount">0</span>)</h2>
+      <div class="rfilter">
+        <button class="btn mini" data-rf="pending">Pending</button>
+        <button class="btn mini" data-rf="">All</button>
+      </div>
+      <div id="rlist"><p class="muted">Enter the admin key to load receipts.</p></div>
     </div>
   </div>
 
@@ -246,8 +262,55 @@
       }
     });
 
+    // ── Receipt review (Phase 5): verify/reject cashback claims ──
+    let currentRFilter = 'pending';
+    async function loadReceipts() {
+      const list = $('rlist');
+      if (!keyInput.value) { list.innerHTML = '<p class="muted">Enter the admin key to load receipts.</p>'; return; }
+      list.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const q = currentRFilter ? `?status=${currentRFilter}` : '';
+        const res = await fetch(`${API}/receipts/admin${q}`, { headers: { 'X-Admin-Key': keyInput.value } });
+        if (res.status === 401) { list.innerHTML = '<p class="muted">Invalid admin key.</p>'; return; }
+        const data = await res.json();
+        $('rcount').textContent = data.length;
+        if (!data.length) { list.innerHTML = '<p class="muted">No receipts.</p>'; return; }
+        list.innerHTML = '';
+        data.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'clist-item';
+          const thumb = r.imageUrl
+            ? `<a href="${r.imageUrl}" target="_blank" rel="noopener"><img src="${r.imageUrl}" alt="receipt"></a>`
+            : '🧾';
+          const actions = r.status === 'pending'
+            ? `<button class="btn mini" data-verify="${r.id}">Verify</button><button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`
+            : '';
+          row.innerHTML = `
+            <div class="clist-thumb">${thumb}</div>
+            <div class="clist-main">
+              <div class="clist-title">${r.brand || '—'} · £${Number(r.amount).toFixed(2)} <span class="rbadge ${r.status}">${r.status}</span></div>
+              <div class="clist-sub">${r.userName} · ${r.userEmail}</div>
+            </div>
+            <div class="clist-actions">${actions}</div>`;
+          const v = row.querySelector('[data-verify]'); if (v) v.addEventListener('click', () => setReceipt(r.id, 'verify'));
+          const j = row.querySelector('[data-reject]'); if (j) j.addEventListener('click', () => setReceipt(r.id, 'reject'));
+          list.appendChild(row);
+        });
+      } catch (e) {
+        list.innerHTML = '<p class="muted">Could not load receipts.</p>';
+      }
+    }
+    async function setReceipt(id, action) {
+      const res = await fetch(`${API}/receipts/${id}/${action}`, { method: 'POST', headers: { 'X-Admin-Key': keyInput.value } });
+      if (res.ok) loadReceipts();
+      else if (res.status === 401) setMsg('Invalid admin key.', false);
+    }
+    document.querySelectorAll('[data-rf]').forEach(b =>
+      b.addEventListener('click', () => { currentRFilter = b.dataset.rf; loadReceipts(); }));
+
     resetForm();
     loadList();
+    loadReceipts();
   </script>
 </body>
 </html>

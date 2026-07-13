@@ -125,23 +125,23 @@
     <div class="stats-row">
       <div class="card stat-card fade-up d1">
         <div class="stat-label">Total earned</div>
-        <div class="stat-val">£<span class="count" data-target="47.80" data-dec="2">0</span></div>
-        <div class="stat-sub"><span class="stat-up">↑ £12.40</span> this month</div>
+        <div class="stat-val">£<span id="earnedVal">0.00</span></div>
+        <div class="stat-sub">confirmed cashback</div>
       </div>
       <div class="card card-sky stat-card fade-up d2">
         <div class="stat-label">Pending</div>
-        <div class="stat-val">£<span class="count" data-target="8.40" data-dec="2">0</span></div>
-        <div class="stat-sub">3 purchases verifying</div>
+        <div class="stat-val">£<span id="pendingVal">0.00</span></div>
+        <div class="stat-sub">awaiting verification</div>
       </div>
       <div class="card card-pink stat-card fade-up d3">
         <div class="stat-label">Brands used</div>
-        <div class="stat-val"><span class="count" data-target="12" data-dec="0">0</span></div>
-        <div class="stat-sub">This month</div>
+        <div class="stat-val"><span id="brandsVal">0</span></div>
+        <div class="stat-sub">you've earned from</div>
       </div>
       <div class="card card-tang stat-card fade-up d4">
-        <div class="stat-label">Day streak</div>
-        <div class="stat-val"><span class="count" data-target="7" data-dec="0">0</span></div>
-        <div class="stat-sub">Keep it going!</div>
+        <div class="stat-label">Receipts</div>
+        <div class="stat-val"><span id="receiptsVal">0</span></div>
+        <div class="stat-sub">submitted</div>
       </div>
     </div>
 
@@ -153,7 +153,7 @@
           <div class="wallet-balance">£<span id="walletBal">47.80</span></div>
           <div class="wallet-sub">Ready to withdraw to your bank or PayPal</div>
           <div class="wallet-actions">
-            <button class="btn btn-ink" onclick="cirqleToast('Withdrawal requested — arrives in 1–2 days')">Withdraw</button>
+            <button class="btn btn-ink" id="withdrawBtn" onclick="withdraw()">Withdraw</button>
             <a href="browse.html" class="btn">Find deals</a>
             <button class="btn" onclick="cirqleToast('Share link copied!')">Refer a friend</button>
           </div>
@@ -162,31 +162,7 @@
         <!-- Activity -->
         <div class="card fade-up d4">
           <div class="panel-title">Recent activity</div>
-          <div class="activity-item">
-            <span class="coin coin-lime" style="font-size:.95rem">✅</span>
-            <div><div class="activity-name">Nike — Summer Sale cashback confirmed</div><div class="activity-date">Today, 09:14</div></div>
-            <span class="activity-amount amount-green">+£3.50</span>
-          </div>
-          <div class="activity-item">
-            <span class="coin coin-sky" style="font-size:.95rem">🛍️</span>
-            <div><div class="activity-name">ASOS post verified</div><div class="activity-date">Yesterday, 18:42</div></div>
-            <span class="activity-amount amount-green">+£2.10</span>
-          </div>
-          <div class="activity-item">
-            <span class="coin" style="font-size:.95rem">⏳</span>
-            <div><div class="activity-name">Gymshark — purchase pending verification</div><div class="activity-date">12 Jun, 14:20</div></div>
-            <span class="activity-amount amount-pending">Pending</span>
-          </div>
-          <div class="activity-item">
-            <span class="coin coin-lime" style="font-size:.95rem">✅</span>
-            <div><div class="activity-name">Deliveroo — order cashback</div><div class="activity-date">10 Jun, 20:05</div></div>
-            <span class="activity-amount amount-green">+£0.80</span>
-          </div>
-          <div class="activity-item">
-            <span class="coin coin-pink" style="font-size:.95rem">💸</span>
-            <div><div class="activity-name">Withdrawal to PayPal</div><div class="activity-date">8 Jun, 11:00</div></div>
-            <span class="activity-amount amount-muted">−£25.00</span>
-          </div>
+          <div id="activityList"></div>
         </div>
       </div>
 
@@ -195,47 +171,28 @@
         <div class="card fade-up d4">
           <div class="panel-title">Monthly goal</div>
           <div class="goal-header">
-            <span>£47.80 / £100 target</span>
-            <span class="goal-val">48%</span>
+            <span id="goalFraction">£0.00 / £100 target</span>
+            <span class="goal-val" id="goalPct">0%</span>
           </div>
-          <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:47.8%"></div></div>
-          <div class="progress-note">£52.20 to go — you're on track</div>
+          <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+          <div class="progress-note" id="goalNote">Earn cashback to reach your £100 goal.</div>
         </div>
 
-        <!-- Streak -->
+        <!-- Posts tagged -->
         <div class="card streak-card fade-up d5">
-          <span style="font-size:2.2rem">🔥</span>
+          <span style="font-size:2.2rem">📸</span>
           <div>
-            <div class="streak-num">7</div>
-            <div class="streak-label">day earning streak</div>
+            <div class="streak-num" id="postsVal">0</div>
+            <div class="streak-label">posts tagged</div>
           </div>
         </div>
 
         <!-- Active deals -->
         <div class="card fade-up d5">
           <div class="panel-title">Active deals for you</div>
-          <div class="mini-deal">
-            <span class="coin coin-sky" style="font-size:1rem">👟</span>
-            <div><div class="mini-deal-name">Nike</div><div class="mini-deal-cb">13% cashback</div></div>
-            <a href="deal.html?id=1" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
-          </div>
-          <div class="mini-deal">
-            <span class="coin coin-pink" style="font-size:1rem">👗</span>
-            <div><div class="mini-deal-name">ASOS</div><div class="mini-deal-cb">10% cashback</div></div>
-            <a href="deal.html?id=2" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
-          </div>
-          <div class="mini-deal">
-            <span class="coin coin-lime" style="font-size:1rem">🏋️</span>
-            <div><div class="mini-deal-name">Gymshark</div><div class="mini-deal-cb">20% cashback</div></div>
-            <a href="deal.html?id=6" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
-          </div>
-          <div class="mini-deal">
-            <span class="coin" style="font-size:1rem">🍔</span>
-            <div><div class="mini-deal-name">Deliveroo</div><div class="mini-deal-cb">8% cashback</div></div>
-            <a href="deal.html?id=7" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>
-          </div>
+          <div id="activeDealsList"></div>
           <div style="text-align:center; margin-top:16px">
-            <a href="browse.html" style="font-size:.82rem; font-weight:800; color:var(--pink-deep); text-decoration:none">View all 500+ deals →</a>
+            <a href="browse.html" style="font-size:.82rem; font-weight:800; color:var(--pink-deep); text-decoration:none">View all deals →</a>
           </div>
         </div>
 
@@ -287,21 +244,112 @@
       document.getElementById('igInput').value = session.instagramHandle || '';
     }
 
-    // ── Counters ──
-    document.querySelectorAll('.count').forEach(el => {
-      const target = +el.dataset.target;
-      const dec = +el.dataset.dec;
-      let cur = 0;
-      const step = target / 60;
+    // ── Real per-user stats (Phase 5) — everything derives from the server ──
+    function animateCount(el, target, dec) {
+      target = Number(target) || 0;
+      let cur = 0; const step = target / 50 || target;
       const t = setInterval(() => {
         cur = Math.min(cur + step, target);
         el.textContent = dec ? cur.toFixed(dec) : Math.floor(cur);
-        if (cur >= target) clearInterval(t);
+        if (cur >= target) { el.textContent = dec ? target.toFixed(dec) : target; clearInterval(t); }
       }, 16);
-    });
-
-    // ── Progress bar ──
-    setTimeout(() => document.getElementById('progFill').classList.add('anim'), 500);
+    }
+    function statusMeta(s) {
+      return ({
+        confirmed: { icon: '✅', cls: 'coin-lime', label: 'cashback confirmed', amt: 'amount-green', sign: '+' },
+        pending:   { icon: '⏳', cls: '',          label: 'pending verification', amt: 'amount-pending', sign: '' },
+        paid:      { icon: '💸', cls: 'coin-pink',  label: 'paid out',             amt: 'amount-muted', sign: '' },
+        rejected:  { icon: '✖',  cls: '',          label: 'not eligible',         amt: 'amount-muted', sign: '' },
+      })[s] || { icon: '•', cls: '', label: s, amt: 'amount-muted', sign: '' };
+    }
+    function fmtWhen(iso) {
+      const d = new Date(iso); if (isNaN(d)) return '';
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+    function renderActivity(activity) {
+      const el = document.getElementById('activityList');
+      if (!activity || !activity.length) {
+        el.innerHTML = '<div style="font-size:.82rem;font-weight:600;color:var(--ink-soft);padding:6px 0">No activity yet. Upload a receipt from your feed to start earning cashback.</div>';
+        return;
+      }
+      el.innerHTML = activity.map(a => {
+        const m = statusMeta(a.status);
+        const amt = a.status === 'pending' ? 'Pending'
+          : a.status === 'rejected' ? '—'
+          : m.sign + '£' + Number(a.amount || 0).toFixed(2);
+        return '<div class="activity-item">' +
+          '<span class="coin ' + m.cls + '" style="font-size:.95rem">' + m.icon + '</span>' +
+          '<div><div class="activity-name">' + (a.brand || 'Cashback') + ' — ' + m.label + '</div>' +
+          '<div class="activity-date">' + fmtWhen(a.date) + '</div></div>' +
+          '<span class="activity-amount ' + m.amt + '">' + amt + '</span>' +
+        '</div>';
+      }).join('');
+    }
+    async function loadStats() {
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/account/stats`, {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) return;
+        const s = await res.json();
+        animateCount(document.getElementById('earnedVal'), s.totalEarned, 2);
+        animateCount(document.getElementById('pendingVal'), s.pending, 2);
+        animateCount(document.getElementById('brandsVal'), s.brandsUsed, 0);
+        animateCount(document.getElementById('receiptsVal'), s.receiptsCount, 0);
+        document.getElementById('postsVal').textContent = s.postsCount;
+        document.getElementById('walletBal').textContent = Number(s.wallet).toFixed(2);
+        const pct = Math.min(100, Math.round((s.totalEarned / 100) * 100));
+        document.getElementById('goalFraction').textContent = '£' + Number(s.totalEarned).toFixed(2) + ' / £100 target';
+        document.getElementById('goalPct').textContent = pct + '%';
+        const fill = document.getElementById('progFill');
+        fill.style.width = pct + '%';
+        fill.classList.add('anim');
+        document.getElementById('goalNote').textContent = s.totalEarned >= 100
+          ? 'Goal smashed! 🎉' : '£' + (100 - s.totalEarned).toFixed(2) + ' to go';
+        renderActivity(s.activity);
+      } catch (e) { /* leave zeros */ }
+    }
+    async function withdraw() {
+      const btn = document.getElementById('withdrawBtn');
+      const bal = parseFloat(document.getElementById('walletBal').textContent) || 0;
+      if (bal <= 0) { cirqleToast('No confirmed balance to withdraw yet'); return; }
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/account/withdraw`, {
+          method: 'POST', headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) throw new Error('failed');
+        const s = await res.json();
+        document.getElementById('walletBal').textContent = Number(s.wallet).toFixed(2);
+        document.getElementById('earnedVal').textContent = Number(s.totalEarned).toFixed(2);
+        renderActivity(s.activity);
+        cirqleToast('£' + bal.toFixed(2) + ' withdrawn — arrives in 1–2 days');
+      } catch (e) {
+        cirqleToast('Withdrawal failed — try again');
+      } finally { btn.disabled = false; }
+    }
+    // ── Active deals from the live catalog ──
+    async function loadActiveDeals() {
+      const el = document.getElementById('activeDealsList');
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/campaigns`);
+        if (!res.ok) throw new Error();
+        const deals = (await res.json()).slice(0, 4);
+        el.innerHTML = deals.map(c =>
+          '<div class="mini-deal">' +
+            '<span class="coin coin-sky" style="font-size:1rem">' + (c.emoji || '🛍️') + '</span>' +
+            '<div><div class="mini-deal-name">' + c.brand + '</div>' +
+            '<div class="mini-deal-cb">' + c.rate + '% cashback</div></div>' +
+            '<a href="deal.html?id=' + c.id + '" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>' +
+          '</div>'
+        ).join('');
+      } catch (e) {
+        el.innerHTML = '<div style="font-size:.82rem;color:var(--ink-soft)">Couldn’t load deals right now.</div>';
+      }
+    }
+    if (session) { loadStats(); loadActiveDeals(); }
 
     // ── Saved deals ──
     (function renderSaved() {

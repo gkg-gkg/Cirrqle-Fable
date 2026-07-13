@@ -13,6 +13,7 @@ Phase 4 (receipt uploads) reuses this module unchanged.
 import os
 import uuid
 from pathlib import Path
+from typing import Optional
 
 from fastapi import UploadFile
 
@@ -127,3 +128,24 @@ def upload_receipt(file: UploadFile) -> str:
     except OSError as exc:
         raise StorageUploadError(f"Could not write receipt to disk: {exc}") from exc
     return key
+
+
+def receipt_view_url(image_key: str, expires: int = 900) -> Optional[str]:
+    """A short-lived presigned GET URL for a private receipt (admin viewing only).
+
+    Returns None in local mode (local receipts aren't web-served) — the admin view
+    then just shows metadata without the image.
+    """
+    bucket = os.environ.get("S3_RECEIPTS_BUCKET")
+    if not bucket or not image_key:
+        return None
+    region = os.environ.get("AWS_REGION", "eu-west-2")
+    try:
+        import boto3
+        return boto3.client("s3", region_name=region).generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": image_key},
+            ExpiresIn=expires,
+        )
+    except Exception:  # noqa: BLE001 — presign is best-effort
+        return None

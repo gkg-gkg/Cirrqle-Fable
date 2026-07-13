@@ -74,18 +74,24 @@ class Campaign(SQLModel, table=True):
 
 
 class Receipt(SQLModel, table=True):
-    """A purchase receipt a user uploaded for one of their tagged posts (Phase 4).
+    """A cashback claim: a receipt a user uploaded for a deal (Phase 4 + 5).
 
-    Per-user data keyed by `user_id` (same pattern as Mention). `post_id` links
-    it to the Instagram post it proves. `image_key` is an OPAQUE private storage
-    key (S3 object key or local filename) — receipts are private, so we store the
-    key, never a public URL, and never return it to the browser.
+    Per-user data keyed by `user_id` (like Mention). Doubles as the cashback
+    ledger — every £ figure on the dashboard is derived from these rows, so no
+    separate transactions table is needed. Lifecycle:
+      pending (uploaded) -> confirmed (admin-verified) -> paid (withdrawn);  or rejected.
+    `brand`/`amount` are snapshotted from the deal at upload so the claim stays
+    correct even if the campaign is later edited. `image_key` is a private storage
+    key (never a public URL, never returned to the owner's browser).
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, foreign_key="user.id")
-    post_id: str = Field(index=True)      # the Instagram post this receipt is for
-    image_key: str                        # private storage key (not web-served)
-    status: str = "received"
+    post_id: str = Field(index=True)                 # the Instagram post it proves
+    campaign_id: Optional[int] = Field(default=None, foreign_key="campaign.id")
+    brand: str = ""                                  # snapshot of the deal's brand
+    amount: float = 0                                # cashback £ (snapshot of deal.earn)
+    image_key: str                                   # private storage key
+    status: str = "pending"                          # pending -> confirmed -> paid / rejected
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -193,11 +199,46 @@ class CampaignOut(BaseModel):
     images: list[str]
 
 
-# ── Receipts (Phase 4) ──
-# No image URL is returned — receipts are private; the browser only needs to know
-# which posts have a receipt and its status.
+# ── Receipts / cashback (Phase 4 + 5) ──
+# The owner never gets an image URL (receipts are private) — just the claim's
+# brand, amount and status.
 class ReceiptOut(BaseModel):
     id: int
     postId: str
+    campaignId: Optional[int] = None
+    brand: str
+    amount: float
     status: str
     uploadedAt: datetime
+
+
+class AdminReceiptOut(BaseModel):
+    """Admin review view — includes who submitted it + a short-lived image URL."""
+    id: int
+    userEmail: str
+    userName: str
+    postId: str
+    brand: str
+    amount: float
+    status: str
+    uploadedAt: datetime
+    imageUrl: Optional[str] = None   # presigned GET, expires shortly
+
+
+class ActivityItem(BaseModel):
+    brand: str
+    amount: float
+    status: str
+    date: datetime
+
+
+class AccountStats(BaseModel):
+    """Real per-user dashboard numbers, all derived from the user's receipts."""
+    totalEarned: float   # confirmed + paid
+    pending: float       # awaiting verification
+    wallet: float        # confirmed, available to withdraw
+    paidOut: float       # already withdrawn
+    brandsUsed: int
+    postsCount: int
+    receiptsCount: int
+    activity: list[ActivityItem]
