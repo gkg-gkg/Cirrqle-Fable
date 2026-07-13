@@ -1,6 +1,7 @@
 .env
 cirqle.db
 media/
+receipts/
 __pycache__/
 *.pyc
 .venv/

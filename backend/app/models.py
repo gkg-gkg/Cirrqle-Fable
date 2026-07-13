@@ -73,6 +73,22 @@ class Campaign(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class Receipt(SQLModel, table=True):
+    """A purchase receipt a user uploaded for one of their tagged posts (Phase 4).
+
+    Per-user data keyed by `user_id` (same pattern as Mention). `post_id` links
+    it to the Instagram post it proves. `image_key` is an OPAQUE private storage
+    key (S3 object key or local filename) — receipts are private, so we store the
+    key, never a public URL, and never return it to the browser.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    post_id: str = Field(index=True)      # the Instagram post this receipt is for
+    image_key: str                        # private storage key (not web-served)
+    status: str = "received"
+    uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -175,3 +191,13 @@ class CampaignOut(BaseModel):
     bg: str
     tags: list[str]
     images: list[str]
+
+
+# ── Receipts (Phase 4) ──
+# No image URL is returned — receipts are private; the browser only needs to know
+# which posts have a receipt and its status.
+class ReceiptOut(BaseModel):
+    id: int
+    postId: str
+    status: str
+    uploadedAt: datetime

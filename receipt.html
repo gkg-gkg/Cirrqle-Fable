@@ -78,12 +78,13 @@
 
     <div class="card result fade-up" id="resultCard" hidden>
       <img id="preview" alt="Your receipt" />
-      <div class="result-badge">Authenticated</div>
-      <p class="result-note">Your receipt was received and <strong>authenticated</strong>. Cashback will land in your account after the 3‑day hold.</p>
+      <div class="result-badge">Receipt received ✓</div>
+      <p class="result-note">Your receipt was uploaded and saved to your account. Cashback lands once we verify it and the 3‑day hold clears.</p>
       <a href="feed.html" class="btn btn-ink">Back to dashboard</a>
     </div>
   </div>
 
+  <script src="assets/api.js"></script>
   <script src="assets/enhance.js"></script>
   <script>
     // ── Auth guard (matches feed.html) ──
@@ -97,29 +98,37 @@
     // Which post this receipt belongs to (so the dashboard tile can flip to complete).
     const postId = new URLSearchParams(location.search).get('id') || '';
 
-    function markReceipt(id) {
-      if (!id) return;
-      let m;
-      try { m = JSON.parse(localStorage.getItem('cirqle_receipts') || '{}'); }
-      catch (e) { m = {}; }
-      m[id] = { uploaded: true, at: new Date().toISOString() };
-      localStorage.setItem('cirqle_receipts', JSON.stringify(m));
-    }
-
     const input = document.getElementById('receiptInput');
     const dropZone = document.getElementById('dropZone');
 
-    function handleFile(file) {
+    // Upload the receipt image to the server (stored privately on S3), keyed to
+    // this post. The feed reads /receipts to flip the tile to "uploaded".
+    async function handleFile(file) {
       if (!file || !file.type.startsWith('image/')) {
         cirqleToast('Please attach an image of your receipt.');
         return;
       }
-      // Placeholder auth: real verification comes later.
       document.getElementById('preview').src = URL.createObjectURL(file);
-      markReceipt(postId);
-      document.getElementById('uploadCard').hidden = true;
-      document.getElementById('resultCard').hidden = false;
-      cirqleToast('authenticated');
+      dropZone.style.pointerEvents = 'none';
+      cirqleToast('Uploading…');
+      try {
+        const fd = new FormData();
+        fd.append('post_id', postId);
+        fd.append('image', file);
+        const res = await fetch(`${window.CIRQLE_API_BASE}/receipts`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + session.token },
+          body: fd
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) throw new Error('upload failed');
+        document.getElementById('uploadCard').hidden = true;
+        document.getElementById('resultCard').hidden = false;
+        cirqleToast('Receipt uploaded');
+      } catch (e) {
+        dropZone.style.pointerEvents = '';
+        cirqleToast('Upload failed — please try again');
+      }
     }
 
     input.addEventListener('change', () => handleFile(input.files[0]));

@@ -18,6 +18,8 @@ from fastapi import UploadFile
 
 # backend/media — an absolute path so it's the same dir no matter the cwd.
 MEDIA_DIR = Path(__file__).resolve().parent.parent / "media"
+# backend/receipts — private receipt store (Phase 4). Never web-served.
+RECEIPTS_DIR = Path(__file__).resolve().parent.parent / "receipts"
 
 # Where the local files are reachable from a browser (frontend may be on a
 # different origin). Only used in local mode; S3 mode builds an S3 URL instead.
@@ -49,19 +51,22 @@ def _extension(file: UploadFile) -> str:
     return suffix if suffix else ".jpg"
 
 
+def _validate_and_read(file: UploadFile) -> tuple[bytes, str]:
+    """Ensure the upload is a non-empty image; return (bytes, a new object key)."""
+    if not (file.content_type or "").lower().startswith("image/"):
+        raise StorageError(f"'{file.filename}' is not an image.")
+    data = file.file.read()
+    if not data:
+        raise StorageError(f"'{file.filename}' is empty.")
+    return data, f"{uuid.uuid4().hex}{_extension(file)}"
+
+
 def upload_image(file: UploadFile) -> str:
     """Store one uploaded image and return its public URL.
 
     Raises StorageError if the file isn't an image or the write/upload fails.
     """
-    if not (file.content_type or "").lower().startswith("image/"):
-        raise StorageError(f"'{file.filename}' is not an image.")
-
-    data = file.file.read()
-    if not data:
-        raise StorageError(f"'{file.filename}' is empty.")
-
-    key = f"{uuid.uuid4().hex}{_extension(file)}"
+    data, key = _validate_and_read(file)
     bucket = os.environ.get("S3_BUCKET")
 
     if bucket:
@@ -88,3 +93,37 @@ def upload_image(file: UploadFile) -> str:
     except OSError as exc:
         raise StorageUploadError(f"Could not write image to disk: {exc}") from exc
     return f"{LOCAL_BASE_URL}/media/{key}"
+
+
+def upload_receipt(file: UploadFile) -> str:
+    """Store a receipt image PRIVATELY and return its opaque storage key.
+
+    Receipts are personal, so unlike upload_image this produces NO public URL —
+    it returns the object key only. Uses S3_RECEIPTS_BUCKET (a private bucket, no
+    public policy) in prod, else backend/receipts/ locally. Neither is web-served.
+    """
+    data, key = _validate_and_read(file)
+    bucket = os.environ.get("S3_RECEIPTS_BUCKET")
+
+    if bucket:
+        region = os.environ.get("AWS_REGION", "eu-west-2")
+        try:
+            import boto3  # imported lazily so local dev needs no boto3/AWS
+
+            # No ACL and the bucket has no public policy -> the object is private.
+            boto3.client("s3", region_name=region).put_object(
+                Bucket=bucket,
+                Key=key,
+                Body=data,
+                ContentType=file.content_type,
+            )
+        except Exception as exc:  # noqa: BLE001 — surface any AWS failure as one type
+            raise StorageUploadError(f"S3 receipt upload failed: {exc}") from exc
+        return key
+
+    try:
+        RECEIPTS_DIR.mkdir(exist_ok=True)
+        (RECEIPTS_DIR / key).write_bytes(data)
+    except OSError as exc:
+        raise StorageUploadError(f"Could not write receipt to disk: {exc}") from exc
+    return key

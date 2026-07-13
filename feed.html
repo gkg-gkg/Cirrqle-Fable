@@ -207,12 +207,21 @@
     }
     setInterval(tickCountdowns, 60000);
 
-    // ── Receipt completion state (set by receipt.html, keyed by post id) ──
-    function receiptsMap() {
-      try { return JSON.parse(localStorage.getItem('cirqle_receipts') || '{}'); }
-      catch (e) { return {}; }
+    // ── Receipt completion state — loaded per-user from the server (Phase 4). ──
+    let receiptSet = new Set();
+    function hasReceipt(id) { return receiptSet.has(id); }
+    async function loadReceipts() {
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/receipts`, {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (res.ok) {
+          const data = await res.json();
+          receiptSet = new Set((data || []).map(r => r.postId));
+        }
+      } catch (e) { /* ignore — tiles just show as pending */ }
     }
-    function hasReceipt(id) { return !!receiptsMap()[id]; }
 
     // ── Render ──
     function renderPosts(posts) {
@@ -244,7 +253,7 @@
         // Receipt state: flips the tile's status chip + border once verified.
         const done = hasReceipt(p.id);
         const status = done
-          ? '<span class="tile-status done">Receipt verified</span>'
+          ? '<span class="tile-status done">Receipt uploaded</span>'
           : '<span class="tile-status">Receipt pending</span>';
 
         return (
@@ -422,7 +431,7 @@
     }
 
     document.getElementById('refreshBtn').addEventListener('click', refresh);
-    if (session) loadMentions();
+    if (session) loadReceipts().then(loadMentions);
   </script>
   <script src="assets/enhance.js"></script>
 </body>
