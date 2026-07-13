@@ -25,6 +25,22 @@
 
     .feed-wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: clamp(32px,5vw,56px) clamp(20px,4vw,44px) 90px; }
     .feed-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+
+    /* Refresh loader ring */
+    .refresh-area { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .refresh-row { display: inline-flex; align-items: center; gap: 12px; }
+    .refresh-ring { width: 40px; height: 40px; display: none; flex: none; }
+    .refresh-ring.active { display: block; }
+    .refresh-ring .ring-track { fill: none; stroke: rgba(31,27,19,.15); stroke-width: 4; }
+    .refresh-ring .ring-prog {
+      fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round;
+      stroke-dasharray: 119.4; stroke-dashoffset: 119.4;
+      transform: rotate(-90deg); transform-origin: 50% 50%;
+    }
+    .refresh-ring.pulse { animation: ringPulse 1.1s ease-in-out infinite; }
+    @keyframes ringPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.16); opacity: .5; } }
+    .refresh-note { font-size: .74rem; font-weight: 600; color: var(--ink-soft); max-width: 260px; text-align: right; }
+    @media (max-width: 640px) { .refresh-area { align-items: flex-start; } .refresh-note { text-align: left; } }
     .feed-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem,4vw,2.9rem); letter-spacing: -0.03em; line-height: 1.05; }
     .feed-sub { font-size: .95rem; color: var(--ink-soft); font-weight: 500; margin: 6px 0 0; }
     .feed-meta { margin: 16px 0 28px; min-height: 18px; }
@@ -115,7 +131,6 @@
       </div>
       <a href="dashboard.html" class="btn btn-sm">My Account</a>
       <a href="browse.html" class="btn btn-sm">Browse deals</a>
-      <button class="btn btn-sm" onclick="signOut()">Sign out</button>
     </div>
   </nav>
 
@@ -125,7 +140,16 @@
         <div class="feed-title fade-up d1">Your Cirqle posts</div>
         <p class="feed-sub fade-up d2">Instagram posts where you tagged <strong>@cirqle</strong> and the brand.</p>
       </div>
-      <button class="btn btn-ink fade-up d2" id="refreshBtn">↻ Refresh</button>
+      <div class="refresh-area fade-up d2">
+        <div class="refresh-row">
+          <button class="btn btn-ink" id="refreshBtn">↻ Refresh</button>
+          <svg class="refresh-ring" id="refreshRing" viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="ring-track" cx="22" cy="22" r="19" />
+            <circle class="ring-prog" id="ringProg" cx="22" cy="22" r="19" />
+          </svg>
+        </div>
+        <div class="refresh-note">Just posted? It can take up to <strong>15 minutes</strong> for a post to appear here.</div>
+      </div>
     </div>
     <div class="feed-meta"><span class="feed-updated" id="feedUpdated"></span></div>
     <div class="feed-list" id="feedList"></div>
@@ -302,6 +326,7 @@
       const label = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Refreshing…';
+      startRefreshRing();
       try {
         const res = await fetch(`${window.CIRQLE_API_BASE}/feed/refresh`, {
           method: 'POST',
@@ -326,7 +351,34 @@
       } finally {
         btn.disabled = false;
         btn.textContent = label;
+        stopRefreshRing();
       }
+    }
+
+    // ── Refresh loader ring: fills over 12s, then pulses if still going ──
+    let _ringPulseTimer = null;
+    function startRefreshRing() {
+      const ring = document.getElementById('refreshRing');
+      const prog = document.getElementById('ringProg');
+      clearTimeout(_ringPulseTimer);
+      ring.classList.remove('pulse');
+      ring.classList.add('active');
+      // Reset instantly (no transition), force a reflow, then fill over 12s.
+      prog.style.transition = 'none';
+      prog.style.strokeDashoffset = '119.4';
+      void prog.getBoundingClientRect();
+      prog.style.transition = 'stroke-dashoffset 12s linear';
+      prog.style.strokeDashoffset = '0';
+      // If it's still going after 12s, pulse the (now full) ring — "almost there".
+      _ringPulseTimer = setTimeout(() => ring.classList.add('pulse'), 12000);
+    }
+    function stopRefreshRing() {
+      const ring = document.getElementById('refreshRing');
+      const prog = document.getElementById('ringProg');
+      clearTimeout(_ringPulseTimer);
+      ring.classList.remove('active', 'pulse');
+      prog.style.transition = 'none';
+      prog.style.strokeDashoffset = '119.4';
     }
 
     // ── Fallback: ask for the handle inline (accounts created before this feature) ──

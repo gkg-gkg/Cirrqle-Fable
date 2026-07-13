@@ -84,6 +84,17 @@
 
     .right-col > .card { margin-bottom: 20px; }
 
+    /* Account settings (IG handle + sign out) */
+    .account-section { margin-top: 40px; max-width: 540px; }
+    .account-card { padding: 26px; }
+    .ig-current { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 700; font-size: .92rem; }
+    .ig-at { font-family: var(--font-display); font-size: 1.1rem; }
+    .ig-at.ig-muted { color: var(--ink-soft); font-weight: 600; }
+    .ig-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .ig-input { flex: 1 1 220px; padding: 10px 12px; border: var(--bw) solid var(--ink); border-radius: 12px; font: inherit; font-size: .9rem; background: var(--card); color: var(--ink); }
+    .ig-hint { font-size: .76rem; color: var(--ink-soft); font-weight: 600; margin-top: 10px; }
+    .signout-row { margin-top: 22px; padding-top: 20px; border-top: 2px dashed rgba(31,27,19,.15); }
+
     @media (max-width: 900px) {
       .stats-row { grid-template-columns: 1fr 1fr; }
       .main-grid { grid-template-columns: 1fr; }
@@ -102,7 +113,6 @@
       </div>
       <a href="feed.html" class="btn btn-sm btn-ink">Dashboard</a>
       <a href="browse.html" class="btn btn-sm">Browse deals</a>
-      <button class="btn btn-sm" onclick="signOut()">Sign out</button>
     </div>
   </nav>
 
@@ -236,8 +246,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Account settings -->
+    <div class="account-section">
+      <div class="card account-card fade-up">
+        <div class="panel-title">Account</div>
+        <div class="ig-current">
+          <span>📸 Instagram</span>
+          <span class="ig-at ig-muted" id="igCurrent">Not set</span>
+        </div>
+        <div class="ig-row">
+          <input class="ig-input" id="igInput" placeholder="yourhandle" aria-label="Instagram username" autocomplete="off" />
+          <button class="btn btn-ink" id="igSaveBtn">Save handle</button>
+        </div>
+        <div class="ig-hint">This is how we find the posts where you tagged @cirqle and the brand.</div>
+        <div class="signout-row">
+          <button class="btn" onclick="signOut()">Sign out</button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <script src="assets/api.js"></script>
   <script>
     // ── Auth check ──
     const session = JSON.parse(localStorage.getItem('cirqle_session') || sessionStorage.getItem('cirqle_session') || 'null');
@@ -247,8 +277,14 @@
       document.getElementById('navAvatar').textContent = session.firstName[0].toUpperCase();
       const h = new Date().getHours();
       const time = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-      document.getElementById('greetingTime').textContent = (h < 12 ? '' : h < 17 ? '' : '') + time;
       document.getElementById('greetingName').textContent = `${time}, ${session.firstName}`;
+      // Show the current Instagram handle in the Account section.
+      const igCur = document.getElementById('igCurrent');
+      if (session.instagramHandle) {
+        igCur.textContent = '@' + session.instagramHandle;
+        igCur.classList.remove('ig-muted');
+      }
+      document.getElementById('igInput').value = session.instagramHandle || '';
     }
 
     // ── Counters ──
@@ -286,6 +322,38 @@
         '</div>'
       ).join('');
     })();
+
+    // ── Instagram handle: save to the server, then mirror into the session ──
+    async function saveHandle() {
+      const input = document.getElementById('igInput');
+      const handle = input.value.trim().replace(/^@+/, '').toLowerCase();
+      if (!handle) { cirqleToast('Please enter a valid username'); return; }
+      const btn = document.getElementById('igSaveBtn');
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/me`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+          body: JSON.stringify({ instagramHandle: handle })
+        });
+        if (res.status === 401) { signOut(); return; }
+        if (!res.ok) throw new Error('save failed');
+        const user = await res.json();
+        session.instagramHandle = user.instagramHandle;
+        const store = localStorage.getItem('cirqle_session') ? localStorage : sessionStorage;
+        store.setItem('cirqle_session', JSON.stringify(session));
+        const igCur = document.getElementById('igCurrent');
+        igCur.textContent = '@' + user.instagramHandle;
+        igCur.classList.remove('ig-muted');
+        input.value = user.instagramHandle;
+        cirqleToast('Saved @' + user.instagramHandle);
+      } catch (e) {
+        cirqleToast('Could not save your handle — try again');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    document.getElementById('igSaveBtn').addEventListener('click', saveHandle);
 
     // ── Sign out ──
     function signOut() {
