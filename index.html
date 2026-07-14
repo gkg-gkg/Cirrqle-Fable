@@ -459,7 +459,7 @@
       const track = document.getElementById(id);
       if (!track) return;
       const items = list.map(([e, name, pc]) =>
-        `<span class="tick-item"><i class="ico ico-${e}"></i> ${name} <b>· ${pc} back</b></span><span class="tick-dot"></span>`).join('');
+        `<span class="tick-item">${name} <b>· ${pc} back</b></span><span class="tick-dot"></span>`).join('');
       track.innerHTML = items + items; // duplicate for the -50% loop
     }
     fillTicker('tickerTop', brandsTop);
