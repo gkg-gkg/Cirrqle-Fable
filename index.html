@@ -158,7 +158,16 @@
       .features-grid { grid-template-columns: 1fr; }
       .goal-float { right: 6px; }
     }
-    @media (max-width: 520px) { .stats-strip { grid-template-columns: 1fr 1fr; gap: 12px; } }
+    /* Phones: bigger headline, drop the side visual + proof line, keep tiles 2-up */
+    @media (max-width: 600px) {
+      .hero-h { font-size: clamp(3.1rem, 14vw, 4.2rem); margin-top: 6px; }
+      .hero-proof { display: none; }
+      .hero-visual { display: none; }
+      .hero { padding-top: 28px; }
+      .stats-strip { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .steps-grid, .testi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .step-card, .testi-card { padding: 16px; }
+    }
   </style>
 </head>
 <body>
