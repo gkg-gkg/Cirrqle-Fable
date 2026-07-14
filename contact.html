@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>Partner with Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     .form-wrap { max-width: 760px; margin: 0 auto; }
     .form-card { padding: clamp(24px,4vw,40px); }
     .form-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; margin-bottom: 6px; }
     .form-lead { font-size: .9rem; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.6; }
-    .form-section { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--ink-soft); margin: 28px 0 16px; padding-bottom: 8px; border-bottom: var(--bw) solid var(--ink); }
+    .form-section { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--ink-soft); margin: 28px 0 16px; padding-bottom: 8px; border-bottom: var(--bw) solid var(--line); }
     .form-section:first-of-type { margin-top: 4px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -23,7 +25,7 @@
     .check { display: flex; align-items: center; gap: 9px; font-size: .86rem; font-weight: 600; cursor: pointer; }
     .check input { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; }
     .req { color: var(--red); }
-    .success-msg { display: none; margin-top: 18px; padding: 16px 18px; border: var(--bw) solid var(--ink); border-radius: 14px; background: var(--lime); font-size: .9rem; font-weight: 700; }
+    .success-msg { display: none; margin-top: 18px; padding: 16px 18px; border: var(--bw) solid var(--line); border-radius: 14px; background: var(--lime); font-size: .9rem; font-weight: 700; }
     @media(max-width:560px){ .form-row, .form-row-3, .check-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -128,7 +130,7 @@
               <option>£20k+</option>
             </select>
           </div>
-          <div class="field"><label for="rate">Target cashback rate (%)</label><input id="rate" type="number" min="0" max="100" placeholder="10" /></div>
+          <div class="field"><label for="rate">Target cashback rate (%) <span class="req">*</span></label><input id="rate" type="number" min="0" max="100" placeholder="10" /></div>
           <div class="field">
             <label for="timeline">Timeline</label>
             <select id="timeline">
@@ -154,22 +156,73 @@
         <div class="field" style="margin-top:20px"><label for="heard">How did you hear about us?</label><input id="heard" type="text" placeholder="e.g. a friend, LinkedIn, search…" /></div>
         <div class="field"><label for="msg">Anything else we should know?</label><textarea id="msg" placeholder="Tell us about your brand, current channels, and what a great partnership looks like…"></textarea></div>
 
-        <button class="btn btn-lg btn-lime" style="width:100%" onclick="handleSubmit()">Submit partnership application →</button>
+        <button class="btn btn-lg btn-lime" style="width:100%" id="submitBtn" onclick="handleSubmit()">Submit partnership application →</button>
         <div class="success-msg" id="successMsg">Thanks — your partnership application is in! Our brand team will be in touch within one business day.</div>
       </div>
     </div>
   </div>
+  <script src="assets/api.js"></script>
   <script>
-    function handleSubmit() {
-      const required = ['brand', 'website', 'category', 'markets', 'fn', 'ln', 'em'];
-      const missing = required.filter(id => !document.getElementById(id).value.trim());
+    // Submits the application to POST /partners, where it lands in the
+    // admin review queue (approve there publishes it as a live deal).
+    const val = id => document.getElementById(id).value.trim();
+
+    async function handleSubmit() {
+      const required = ['brand', 'website', 'category', 'markets', 'fn', 'ln', 'em', 'rate'];
+      const missing = required.filter(id => !val(id));
       if (missing.length) {
         document.getElementById(missing[0]).focus();
         cirqleToast('Please fill in the required fields marked *');
         return;
       }
-      document.getElementById('successMsg').style.display = 'block';
-      document.getElementById('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const rate = parseFloat(val('rate'));
+      if (!(rate > 0) || rate > 100) {
+        document.getElementById('rate').focus();
+        cirqleToast('Enter a cashback rate between 0 and 100');
+        return;
+      }
+
+      // "Where do you sell?" has no field of its own server-side — keep it
+      // inside the message so the info still reaches the review queue.
+      const channels = val('channels');
+      const message = val('msg') + (channels ? `${val('msg') ? '\n\n' : ''}Sells: ${channels}` : '');
+      const goals = [...document.querySelectorAll('input[name="goal"]:checked')]
+        .map(c => c.closest('label').textContent.trim());
+
+      const payload = {
+        brand: val('brand'), website: val('website'), category: val('category'),
+        cashbackRate: rate, markets: val('markets'),
+        firstName: val('fn'), lastName: val('ln'), email: val('em'),
+        phone: val('phone'), role: val('role'),
+        revenue: val('revenue'), orders: val('orders'), aov: val('aov'),
+        budget: val('budget'), timeline: val('timeline'),
+        goals, heard: val('heard'), message,
+      };
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/partners`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.status === 201) {
+          document.getElementById('successMsg').style.display = 'block';
+          document.getElementById('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          btn.style.display = 'none';
+        } else if (res.status === 422) {
+          document.getElementById('em').focus();
+          cirqleToast('Please double-check your email address');
+          btn.disabled = false;
+        } else {
+          cirqleToast('Something went wrong — please try again');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        cirqleToast('Could not reach the server — please try again');
+        btn.disabled = false;
+      }
     }
   </script>
   <script src="assets/enhance.js"></script>

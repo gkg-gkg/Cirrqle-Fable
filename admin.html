@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>Admin page — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 22px 80px; }
@@ -19,7 +21,7 @@
     .field { margin-bottom: 12px; }
     .field label { display: block; font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
     .field input, .field textarea, .field select {
-      width: 100%; padding: 9px 11px; border: var(--bw) solid var(--ink);
+      width: 100%; padding: 9px 11px; border: var(--bw) solid var(--line);
       border-radius: 12px; font: inherit; font-size: .88rem; background: var(--card); color: var(--ink);
     }
     .field textarea { min-height: 60px; resize: vertical; }
@@ -45,6 +47,17 @@
     .rbadge.confirmed { background: #DDF5E3; color: #1c7c3a; }
     .rbadge.paid { background: #E9E9F5; color: #4a4a7a; }
     .rbadge.rejected { background: #FBE0E0; color: #a62222; }
+    .rbadge.approved { background: #DDF5E3; color: #1c7c3a; }
+    /* partnership application rows expand to show the full submission */
+    .clist-item { flex-wrap: wrap; }
+    .app-detail { flex-basis: 100%; display: none; margin: 4px 0 6px 56px; padding: 12px 14px;
+      background: var(--paper-deep); border-radius: 12px; font-size: .8rem; }
+    .app-detail.open { display: block; }
+    .app-detail dl { display: grid; grid-template-columns: 130px 1fr; gap: 4px 12px; margin: 0; }
+    .app-detail dt { font-weight: 700; color: var(--ink-soft); }
+    .app-detail dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .app-detail a { color: var(--blue); }
+    @media (max-width: 560px) { .app-detail { margin-left: 0; } .app-detail dl { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -132,6 +145,19 @@
         <button class="btn mini" data-rf="">All</button>
       </div>
       <div id="rlist"><p class="muted">Enter the admin key to load receipts.</p></div>
+    </div>
+
+    <!-- PARTNERSHIP APPLICATIONS -->
+    <div class="card pad" style="margin-top:22px">
+      <h2>Partnership applications (<span id="pcount">0</span>)</h2>
+      <p class="muted" style="margin-top:-8px">Submitted by brands via the partner form. Approving one publishes it as a live deal in the catalog above.</p>
+      <div class="rfilter">
+        <button class="btn mini" data-pf="pending">Pending</button>
+        <button class="btn mini" data-pf="approved">Approved</button>
+        <button class="btn mini" data-pf="">All</button>
+      </div>
+      <div id="plist"><p class="muted">Enter the admin key to load applications.</p></div>
+      <div id="pmsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
     </div>
   </div>
 
@@ -308,9 +334,127 @@
     document.querySelectorAll('[data-rf]').forEach(b =>
       b.addEventListener('click', () => { currentRFilter = b.dataset.rf; loadReceipts(); }));
 
+    // ── Partnership applications: review brand submissions; approve → live deal ──
+    // Applications are PUBLIC submissions (untrusted input) — escape everything
+    // before it goes anywhere near innerHTML.
+    const esc = s => String(s ?? '').replace(/[&<>"']/g,
+      c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtDate = iso => iso ? new Date(iso).toLocaleString('en-GB',
+      { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+
+    let currentPFilter = 'pending';
+    function setPMsg(text, ok) {
+      const m = $('pmsg');
+      m.textContent = text;
+      m.className = ok ? 'ok' : 'err';
+    }
+
+    function appDetail(a) {
+      const rows = [
+        ['Website', `<a href="${esc(a.website)}" target="_blank" rel="noopener noreferrer">${esc(a.website)}</a>`],
+        ['Markets', esc(a.markets)],
+        ['Contact', esc(`${a.firstName} ${a.lastName}${a.role ? ' — ' + a.role : ''}`)],
+        ['Email', esc(a.email)],
+        ['Phone', esc(a.phone)],
+        ['Revenue', esc(a.revenue)],
+        ['Orders / month', esc(a.orders)],
+        ['Avg. order value', a.aov ? '£' + esc(a.aov) : ''],
+        ['Budget', esc(a.budget)],
+        ['Timeline', esc(a.timeline)],
+        ['Goals', esc((a.goals || []).join(' · '))],
+        ['Heard via', esc(a.heard)],
+        ['Message', esc(a.message)],
+        ['Submitted', fmtDate(a.createdAt)],
+      ].filter(([, v]) => v);
+      return `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    }
+
+    async function loadApps() {
+      const list = $('plist');
+      if (!keyInput.value) { list.innerHTML = '<p class="muted">Enter the admin key to load applications.</p>'; return; }
+      list.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const q = currentPFilter ? `?status=${currentPFilter}` : '';
+        const res = await fetch(`${API}/partners${q}`, { headers: { 'X-Admin-Key': keyInput.value } });
+        if (res.status === 401) { list.innerHTML = '<p class="muted">Invalid admin key.</p>'; return; }
+        const data = await res.json();
+        $('pcount').textContent = data.length;
+        if (!data.length) { list.innerHTML = '<p class="muted">No applications.</p>'; return; }
+        list.innerHTML = '';
+        data.forEach(a => {
+          const row = document.createElement('div');
+          row.className = 'clist-item';
+          const actions = a.status === 'pending'
+            ? `<button class="btn mini" data-approve="${a.id}">Approve</button><button class="btn mini btn-pink" data-rejapp="${a.id}">Reject</button>`
+            : (a.status === 'approved' && a.campaignId
+                ? `<a class="btn mini" href="deal.html?id=${a.campaignId}" target="_blank" rel="noopener">Deal #${a.campaignId}</a>`
+                : '');
+          row.innerHTML = `
+            <div class="clist-thumb">🤝</div>
+            <div class="clist-main">
+              <div class="clist-title">${esc(a.brand)} — ${esc(a.cashbackRate)}% <span class="rbadge ${esc(a.status)}">${esc(a.status)}</span></div>
+              <div class="clist-sub">${esc(a.category)} · ${esc(a.firstName)} ${esc(a.lastName)} · ${esc(a.email)}</div>
+            </div>
+            <div class="clist-actions">
+              <button class="btn mini" data-detail>Details</button>
+              ${actions}
+              <button class="btn mini btn-pink" data-delapp="${a.id}">Delete</button>
+            </div>
+            <div class="app-detail">${appDetail(a)}</div>`;
+          row.querySelector('[data-detail]').addEventListener('click', () =>
+            row.querySelector('.app-detail').classList.toggle('open'));
+          const ap = row.querySelector('[data-approve]');
+          if (ap) ap.addEventListener('click', () => approveApp(a.id, a.brand));
+          const rj = row.querySelector('[data-rejapp]');
+          if (rj) rj.addEventListener('click', () => setApp(a.id, 'reject'));
+          row.querySelector('[data-delapp]').addEventListener('click', () => delApp(a.id, a.brand));
+          list.appendChild(row);
+        });
+      } catch (e) {
+        list.innerHTML = '<p class="muted">Could not load applications.</p>';
+      }
+    }
+
+    async function approveApp(id, brand) {
+      if (!confirm(`Approve ${brand}? This publishes it as a live deal on the site.`)) return;
+      const res = await fetch(`${API}/partners/${id}/approve`, {
+        method: 'POST', headers: { 'X-Admin-Key': keyInput.value },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setPMsg(`Approved ${brand} — live as deal #${body.campaignId}. Refine images/copy in the campaign editor above.`, true);
+        loadApps();
+        loadList();   // the new deal appears in "Existing campaigns"
+      } else if (res.status === 401) setPMsg('Invalid admin key.', false);
+      else setPMsg(`Approve failed (${res.status}): ${body.detail || 'request failed'}`, false);
+    }
+
+    async function setApp(id, action) {
+      const res = await fetch(`${API}/partners/${id}/${action}`, {
+        method: 'POST', headers: { 'X-Admin-Key': keyInput.value },
+      });
+      if (res.ok) { setPMsg(`Application #${id} ${action}ed.`, true); loadApps(); }
+      else if (res.status === 401) setPMsg('Invalid admin key.', false);
+      else setPMsg(`Action failed (${res.status}).`, false);
+    }
+
+    async function delApp(id, brand) {
+      if (!confirm(`Delete application #${id} (${brand})? Any published deal stays live.`)) return;
+      const res = await fetch(`${API}/partners/${id}`, {
+        method: 'DELETE', headers: { 'X-Admin-Key': keyInput.value },
+      });
+      if (res.status === 204) { setPMsg(`Deleted application #${id}.`, true); loadApps(); }
+      else if (res.status === 401) setPMsg('Invalid admin key.', false);
+      else setPMsg(`Delete failed (${res.status}).`, false);
+    }
+
+    document.querySelectorAll('[data-pf]').forEach(b =>
+      b.addEventListener('click', () => { currentPFilter = b.dataset.pf; loadApps(); }));
+
     resetForm();
     loadList();
     loadReceipts();
+    loadApps();
   </script>
 </body>
 </html>

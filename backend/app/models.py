@@ -73,6 +73,40 @@ class Campaign(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class MerchantApplication(SQLModel, table=True):
+    """A brand's partnership application, submitted from contact.html.
+
+    Public (no user account needed) — merchants aren't Cirqle users. The admin
+    reviews these on admin.html and, on approve, a live `Campaign` is created
+    from the key fields (`campaign_id` links to it). Lifecycle:
+      pending -> approved (deal published)  or  rejected.
+    `goals` holds a JSON-encoded list[str] as TEXT (same trick as Campaign.tags).
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    brand: str = ""
+    website: str = ""
+    category: str = ""
+    cashback_rate: float = 0          # target cashback %, becomes the deal rate
+    markets: str = ""
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    phone: str = ""
+    role: str = ""
+    revenue: str = ""
+    orders: str = ""
+    aov: str = ""                     # avg order value (£), kept as text (may be blank)
+    budget: str = ""
+    timeline: str = ""
+    goals: str = "[]"                 # JSON-encoded list[str]
+    heard: str = ""
+    message: str = ""
+    status: str = "pending"           # pending -> approved / rejected
+    campaign_id: Optional[int] = Field(default=None, foreign_key="campaign.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    reviewed_at: Optional[datetime] = None
+
+
 class Receipt(SQLModel, table=True):
     """A cashback claim: a receipt a user uploaded for a deal (Phase 4 + 5).
 
@@ -242,3 +276,53 @@ class AccountStats(BaseModel):
     postsCount: int
     receiptsCount: int
     activity: list[ActivityItem]
+
+
+# ── Merchant partnership applications ──
+class MerchantApplicationIn(BaseModel):
+    """What contact.html's partnership form sends. The key fields needed to
+    publish a deal on approval are required; the rest is optional context."""
+    brand: str
+    website: str
+    category: str
+    cashbackRate: float
+    firstName: str
+    lastName: str
+    email: EmailStr
+    markets: str = ""
+    phone: str = ""
+    role: str = ""
+    revenue: str = ""
+    orders: str = ""
+    aov: str = ""
+    budget: str = ""
+    timeline: str = ""
+    goals: list[str] = []
+    heard: str = ""
+    message: str = ""
+
+
+class MerchantApplicationOut(BaseModel):
+    """The admin review view — the full application plus its status."""
+    id: int
+    brand: str
+    website: str
+    category: str
+    cashbackRate: float
+    markets: str
+    firstName: str
+    lastName: str
+    email: str
+    phone: str
+    role: str
+    revenue: str
+    orders: str
+    aov: str
+    budget: str
+    timeline: str
+    goals: list[str]
+    heard: str
+    message: str
+    status: str
+    campaignId: Optional[int] = None
+    createdAt: datetime

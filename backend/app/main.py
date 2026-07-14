@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 load_dotenv()  # read backend/.env if present
 
 from .db import init_db  # noqa: E402  (import after load_dotenv so env is set)
-from .routers import account, auth, campaigns, feed, receipts  # noqa: E402
+from .routers import account, auth, campaigns, feed, partners, receipts  # noqa: E402
 from .storage import MEDIA_DIR  # noqa: E402
 
 app = FastAPI(title="Cirqle API")
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(feed.router)
 app.include_router(campaigns.router)
+app.include_router(partners.router)
 app.include_router(receipts.router)
 app.include_router(account.router)
 
