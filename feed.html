@@ -8,7 +8,7 @@
   <title>Dashboard — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     /* Receipt status chip: amber = pending, green = verified */
@@ -366,7 +366,7 @@
       }
     }
 
-    // ── Refresh loader ring: fills over 12s, then pulses if still going ──
+    // ── Refresh loader ring: fills over 20s, then pulses if still going ──
     let _ringPulseTimer = null;
     function startRefreshRing() {
       const ring = document.getElementById('refreshRing');
@@ -374,14 +374,14 @@
       clearTimeout(_ringPulseTimer);
       ring.classList.remove('pulse');
       ring.classList.add('active');
-      // Reset instantly (no transition), force a reflow, then fill over 12s.
+      // Reset instantly (no transition), force a reflow, then fill over 20s.
       prog.style.transition = 'none';
       prog.style.strokeDashoffset = '119.4';
       void prog.getBoundingClientRect();
-      prog.style.transition = 'stroke-dashoffset 12s linear';
+      prog.style.transition = 'stroke-dashoffset 20s linear';
       prog.style.strokeDashoffset = '0';
-      // If it's still going after 12s, pulse the (now full) ring — "almost there".
-      _ringPulseTimer = setTimeout(() => ring.classList.add('pulse'), 12000);
+      // If it's still going after 20s, pulse the (now full) ring — "almost there".
+      _ringPulseTimer = setTimeout(() => ring.classList.add('pulse'), 20000);
     }
     function stopRefreshRing() {
       const ring = document.getElementById('refreshRing');

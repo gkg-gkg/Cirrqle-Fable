@@ -40,10 +40,9 @@
   --tang-deep:  var(--blue-deep);
   --red:        #DC2626;   /* errors */
 
-  /* type — clean grotesque for UI, expressive serif for accents */
+  /* type — single clean grotesque, two roles */
   --font-display: 'Sora', 'Helvetica Neue', Arial, sans-serif;
   --font-body:    'Sora', 'Helvetica Neue', Arial, sans-serif;
-  --font-accent:  'Instrument Serif', Georgia, 'Times New Roman', serif;
 
   /* shape */
   --r-card: 18px;
@@ -109,19 +108,8 @@ body::after {
 }
 
 /* ══════════════════════════════════════
-   SIGNATURE MOTIF — the cirqle ring
+   BACKGROUND ORNAMENTS
    ══════════════════════════════════════ */
-
-/* ring mark before the wordmark — pure CSS, appears site-wide */
-.logo::before, .footer-logo::before {
-  content: '';
-  width: .58em; height: .58em;
-  border: .16em solid currentColor;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: transform .5s var(--snap);
-}
-.logo:hover::before { transform: rotate(180deg) scale(1.12); }
 
 /* concentric orbit rings — faint background ornament (place inside a
    position:relative container; sized & positioned per page) */
@@ -146,16 +134,6 @@ body::after {
   mask-image: radial-gradient(ellipse 70% 75% at 50% 40%, #000 25%, transparent 72%);
   pointer-events: none;
   z-index: 0;
-}
-
-/* editorial accent — expressive serif italic for key words */
-.accent {
-  font-family: var(--font-accent);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.05em;
-  line-height: 1;
-  letter-spacing: 0;
 }
 
 /* ══════════════════════════════════════
@@ -316,35 +294,22 @@ body::after {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* emphasis words — editorial serif italic with a fine underline */
-.squiggle {
-  position: relative; display: inline-block;
-  font-family: var(--font-accent);
-  font-style: italic; font-weight: 400;
-  font-size: 1.05em; line-height: 1;
-  color: var(--blue-deep);
-}
+/* underline accent for hero words — clean, straight */
+.squiggle { position: relative; display: inline-block; color: var(--blue); }
 .squiggle::after {
   content: '';
-  position: absolute; left: 0; right: 0; bottom: -0.05em;
-  height: 2px; border-radius: 2px;
+  position: absolute; left: 0; right: 0; bottom: -0.06em;
+  height: 3px; border-radius: 3px;
   background: var(--blue);
   opacity: .35;
 }
 .squiggle-lime::after { background: var(--blue); }
 
-/* highlighted words — same serif accent, no box (calm & editorial) */
-.hl {
-  padding: 0;
-  font-family: var(--font-accent);
-  font-style: italic; font-weight: 400;
-  font-size: 1.05em; line-height: 1;
-  border-radius: 0;
-  box-decoration-break: clone; -webkit-box-decoration-break: clone;
-  color: var(--blue-deep);
-  background: none;
-}
-.hl-lime, .hl-pink, .hl-sky { background: none; }
+/* soft highlight behind words */
+.hl { padding: 0 .1em; border-radius: 6px; box-decoration-break: clone; -webkit-box-decoration-break: clone; color: var(--blue-deep); }
+.hl-lime { background: var(--blue-tint); }
+.hl-pink { background: var(--blue-tint); }
+.hl-sky  { background: var(--blue-tint); }
 
 /* ══════════════════════════════════════
    CARDS — hairline faces + cursor spotlight
@@ -408,24 +373,16 @@ body::after {
 .section-head { margin-bottom: clamp(36px, 5vw, 60px); }
 .section-head.center { text-align: center; }
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 9px;
+  display: inline-flex; align-items: center; gap: 8px;
   font-weight: 600; font-size: .74rem;
-  text-transform: uppercase; letter-spacing: 1.6px;
-  padding: 7px 16px 7px 13px;
+  text-transform: uppercase; letter-spacing: 1.4px;
+  padding: 6px 14px;
   border: 1px solid var(--line);
   border-radius: var(--r-chip);
   background: var(--card);
   color: var(--blue-deep);
   box-shadow: var(--shadow-sm);
   margin-bottom: 20px;
-}
-/* the ring-dot — every section opens with the cirqle mark */
-.eyebrow::before {
-  content: '';
-  width: 9px; height: 9px;
-  border: 2px solid var(--blue);
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 .h-display {
   font-family: var(--font-display);
