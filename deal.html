@@ -204,6 +204,18 @@
 
     const isUrl = s => /^(https?:)?\/\//.test(s) || String(s).startsWith('/');
 
+    // ── Deal-event tracking (Phase 6): count a view on load + a click on Shop.
+    // keepalive lets the request survive the page navigating away on click.
+    function trackEvent(kind) {
+      try {
+        fetch(`${API}/events`, {
+          method: 'POST', keepalive: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ campaignId: id, kind }),
+        }).catch(() => {});
+      } catch (_) { /* tracking must never break the page */ }
+    }
+
     // ── Image carousel (◀ ▶ arrows, clickable dots, keyboard ← →) ──
     function renderSlide() {
       const heroEmoji = document.getElementById('heroEmoji');
@@ -279,6 +291,7 @@
         return;
       }
       if (!d) return;
+      trackEvent('click');
       if (d.brandUrl) {
         cirqleToast(`Opening ${d.brand} in a new tab — shop as normal`);
         window.open(d.brandUrl, '_blank', 'noopener');
@@ -320,6 +333,7 @@
         const res = await fetch(`${API}/campaigns/${id}`);
         if (!res.ok) throw new Error('Deal not found');
         populate(await res.json());
+        trackEvent('view');
       } catch (err) {
         document.getElementById('heroEmoji').textContent = '🫥';
         document.getElementById('heroTitle').textContent = 'Deal not found';

@@ -159,6 +159,14 @@
       <div id="plist"><p class="muted">Enter the admin key to load applications.</p></div>
       <div id="pmsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
     </div>
+
+    <!-- MERCHANT MESSAGES -->
+    <div class="card pad" style="margin-top:22px">
+      <h2>Merchant messages (<span id="mcount">0</span> unread)</h2>
+      <p class="muted" style="margin-top:-8px">Threads from merchants using the portal. Deal requests are highlighted; replying marks a thread read.</p>
+      <div id="mlist"><p class="muted">Enter the admin key to load messages.</p></div>
+      <div id="mmsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
+    </div>
   </div>
 
   <script src="assets/api.js"></script>
@@ -386,8 +394,9 @@
           row.className = 'clist-item';
           const actions = a.status === 'pending'
             ? `<button class="btn mini" data-approve="${a.id}">Approve</button><button class="btn mini btn-pink" data-rejapp="${a.id}">Reject</button>`
-            : (a.status === 'approved' && a.campaignId
-                ? `<a class="btn mini" href="deal.html?id=${a.campaignId}" target="_blank" rel="noopener">Deal #${a.campaignId}</a>`
+            : (a.status === 'approved'
+                ? (a.campaignId ? `<a class="btn mini" href="deal.html?id=${a.campaignId}" target="_blank" rel="noopener">Deal #${a.campaignId}</a>` : '')
+                  + `<button class="btn mini btn-lime" data-mklogin="${a.id}">Create login</button>`
                 : '');
           row.innerHTML = `
             <div class="clist-thumb">🤝</div>
@@ -407,6 +416,8 @@
           if (ap) ap.addEventListener('click', () => approveApp(a.id, a.brand));
           const rj = row.querySelector('[data-rejapp]');
           if (rj) rj.addEventListener('click', () => setApp(a.id, 'reject'));
+          const ml = row.querySelector('[data-mklogin]');
+          if (ml) ml.addEventListener('click', () => createMerchantLogin(a.id, a.brand));
           row.querySelector('[data-delapp]').addEventListener('click', () => delApp(a.id, a.brand));
           list.appendChild(row);
         });
@@ -427,6 +438,32 @@
         loadList();   // the new deal appears in "Existing campaigns"
       } else if (res.status === 401) setPMsg('Invalid admin key.', false);
       else setPMsg(`Approve failed (${res.status}): ${body.detail || 'request failed'}`, false);
+    }
+
+    // Turn an approved application into a merchant login (Phase 6). The one-time
+    // password is shown once here — copy it and pass it to the merchant.
+    async function createMerchantLogin(id, brand) {
+      if (!confirm(`Create a merchant login for ${brand}? A one-time password will be shown now — copy it, it won't be shown again.`)) return;
+      const res = await fetch(`${API}/merchant`, {
+        method: 'POST',
+        headers: { 'X-Admin-Key': keyInput.value, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: id }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        const { email } = body.merchant;
+        window.alert(`Merchant login created for ${brand}\n\nEmail:    ${email}\nPassword: ${body.password}\n\nCopy these now — the password is not stored and won't be shown again.\nThe merchant signs in at merchant.html.`);
+        setPMsg(`Login created for ${brand} (${email}). Password was shown once — resend by deleting and recreating if lost.`, true);
+        loadThreads();
+      } else if (res.status === 409) {
+        setPMsg(`A merchant login already exists for ${brand}.`, false);
+      } else if (res.status === 400) {
+        setPMsg(body.detail || 'Approve the application before creating a login.', false);
+      } else if (res.status === 401) {
+        setPMsg('Invalid admin key.', false);
+      } else {
+        setPMsg(`Create login failed (${res.status}).`, false);
+      }
     }
 
     async function setApp(id, action) {
@@ -451,10 +488,77 @@
     document.querySelectorAll('[data-pf]').forEach(b =>
       b.addEventListener('click', () => { currentPFilter = b.dataset.pf; loadApps(); }));
 
+    // ── Merchant messages (Phase 6): view threads, reply to merchants ──
+    function setMMsg(text, ok) {
+      const m = $('mmsg');
+      m.textContent = text;
+      m.className = ok ? 'ok' : 'err';
+    }
+
+    async function loadThreads() {
+      const list = $('mlist');
+      if (!keyInput.value) { list.innerHTML = '<p class="muted">Enter the admin key to load messages.</p>'; return; }
+      list.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const res = await fetch(`${API}/merchant/messages/admin`, { headers: { 'X-Admin-Key': keyInput.value } });
+        if (res.status === 401) { list.innerHTML = '<p class="muted">Invalid admin key.</p>'; return; }
+        const data = await res.json();
+        $('mcount').textContent = data.reduce((a, t) => a + t.unread, 0);
+        if (!data.length) { list.innerHTML = '<p class="muted">No merchant logins yet. Create one from an approved application above.</p>'; return; }
+        list.innerHTML = '';
+        data.forEach(t => {
+          const row = document.createElement('div');
+          row.className = 'clist-item';
+          const badge = t.unread ? `<span class="rbadge pending">${t.unread} new</span>` : '';
+          const msgsHtml = t.messages.length
+            ? t.messages.map(m => {
+                const who = m.sender === 'admin'
+                  ? 'Cirqle'
+                  : (m.kind === 'deal_request' ? `${esc(t.businessName)} · deal request` : esc(t.businessName));
+                return `<div style="margin-bottom:6px"><strong>${who}:</strong> ${esc(m.body)} <span style="color:var(--ink-soft);font-size:.72rem">${fmtDate(m.createdAt)}</span></div>`;
+              }).join('')
+            : '<span class="muted">No messages yet.</span>';
+          row.innerHTML = `
+            <div class="clist-thumb">💬</div>
+            <div class="clist-main">
+              <div class="clist-title">${esc(t.businessName || t.email)} ${badge}</div>
+              <div class="clist-sub">${esc(t.email)}</div>
+            </div>
+            <div class="app-detail open" style="margin-left:0">
+              ${msgsHtml}
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <input class="reply-input" placeholder="Reply to this merchant…" style="flex:1;padding:8px 10px;border:var(--bw) solid var(--line);border-radius:10px;font:inherit;font-size:.85rem;background:var(--card);color:var(--ink)" />
+                <button class="btn mini" data-reply="${t.merchantId}">Send</button>
+              </div>
+            </div>`;
+          row.querySelector('[data-reply]').addEventListener('click', () => {
+            adminReply(t.merchantId, row.querySelector('.reply-input').value);
+          });
+          list.appendChild(row);
+        });
+      } catch (e) {
+        list.innerHTML = '<p class="muted">Could not load messages.</p>';
+      }
+    }
+
+    async function adminReply(merchantId, body) {
+      body = (body || '').trim();
+      if (!body) { setMMsg('Write a reply first.', false); return; }
+      const res = await fetch(`${API}/merchant/messages/admin`, {
+        method: 'POST',
+        headers: { 'X-Admin-Key': keyInput.value, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchantId, body }),
+      });
+      if (res.ok) { setMMsg('Reply sent.', true); loadThreads(); }
+      else if (res.status === 401) setMMsg('Invalid admin key.', false);
+      else setMMsg(`Reply failed (${res.status}).`, false);
+    }
+
     resetForm();
     loadList();
     loadReceipts();
     loadApps();
+    loadThreads();
   </script>
 </body>
 </html>

@@ -17,7 +17,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel import Session
 
 from .db import get_session
-from .models import User
+from .models import Merchant, User
 
 SECRET_KEY = os.environ.get("CIRQLE_SECRET_KEY", "dev-insecure-change-me")
 ALGORITHM = "HS256"
@@ -50,13 +50,19 @@ def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     session: Session = Depends(get_session),
 ) -> User:
-    """Decode the bearer token and return the matching user, or raise 401."""
+    """Decode the bearer token and return the matching user, or raise 401.
+
+    Merchant tokens (typ="merchant") are rejected here so a merchant login can't
+    reach user endpoints.
+    """
     invalid = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or expired token.",
     )
     try:
         payload = jwt.decode(creds.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("typ") == "merchant":
+            raise invalid
         user_id = int(payload["sub"])
     except (jwt.PyJWTError, KeyError, ValueError):
         raise invalid
@@ -64,3 +70,37 @@ def get_current_user(
     if user is None:
         raise invalid
     return user
+
+
+def create_merchant_token(merchant_id: int) -> str:
+    payload = {
+        "sub": str(merchant_id),
+        "typ": "merchant",
+        "exp": datetime.now(timezone.utc) + timedelta(days=TOKEN_EXPIRE_DAYS),
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def get_current_merchant(
+    creds: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    session: Session = Depends(get_session),
+) -> Merchant:
+    """Decode a merchant bearer token and return the merchant, or raise 401.
+
+    Only accepts tokens minted with typ="merchant" (a user token won't work).
+    """
+    invalid = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token.",
+    )
+    try:
+        payload = jwt.decode(creds.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("typ") != "merchant":
+            raise invalid
+        merchant_id = int(payload["sub"])
+    except (jwt.PyJWTError, KeyError, ValueError):
+        raise invalid
+    merchant = session.get(Merchant, merchant_id)
+    if merchant is None:
+        raise invalid
+    return merchant

@@ -1,0 +1,278 @@
+"""Merchant portal endpoints (Phase 6).
+
+Merchants aren't Cirqle users. An admin turns an *approved* MerchantApplication
+into a `Merchant` login (POST /merchant, admin-gated) and hands the brand the
+generated password. The merchant then signs in here to see real stats for their
+deals (the `Campaign` rows linked by `merchant_id`) and to message the admin.
+
+Merchant auth uses a JWT with a typ="merchant" claim (see security.py) so a
+merchant token can't reach user endpoints and vice-versa.
+"""
+import secrets
+from datetime import date, datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
+
+from ..db import get_session
+from ..models import (AdminMessageIn, Campaign, DealEvent, DealStat, Merchant,
+                      MerchantApplication, MerchantAuthOut, MerchantCreatedOut,
+                      MerchantCreateIn, MerchantMessage, MerchantMessageIn,
+                      MerchantMessageOut, MerchantOut, MerchantSigninIn,
+                      MerchantStats, MerchantThreadOut, Receipt, TimePoint)
+from ..security import (create_merchant_token, get_current_merchant,
+                        hash_password, verify_password)
+from .campaigns import require_admin
+
+router = APIRouter(prefix="/merchant", tags=["merchant"])
+
+_TIMESERIES_DAYS = 30
+_CASHBACK_GIVEN = ("confirmed", "paid")
+
+
+def _merchant_out(m: Merchant) -> MerchantOut:
+    return MerchantOut(
+        id=m.id, email=m.email, businessName=m.business_name,
+        applicationId=m.application_id, createdAt=m.created_at,
+    )
+
+
+def _message_out(msg: MerchantMessage) -> MerchantMessageOut:
+    return MerchantMessageOut(
+        id=msg.id, sender=msg.sender, kind=msg.kind,
+        body=msg.body, createdAt=msg.created_at,
+    )
+
+
+# ── Merchant auth ──
+@router.post("/signin", response_model=MerchantAuthOut)
+def signin(data: MerchantSigninIn, session: Session = Depends(get_session)):
+    email = data.email.lower()
+    m = session.exec(select(Merchant).where(Merchant.email == email)).first()
+    if m is None or not verify_password(data.password, m.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password.")
+    return MerchantAuthOut(token=create_merchant_token(m.id), merchant=_merchant_out(m))
+
+
+@router.get("/me", response_model=MerchantOut)
+def me(merchant: Merchant = Depends(get_current_merchant)):
+    return _merchant_out(merchant)
+
+
+# ── Merchant dashboard stats ──
+def _compute_stats(merchant: Merchant, session: Session) -> MerchantStats:
+    campaigns = session.exec(
+        select(Campaign).where(Campaign.merchant_id == merchant.id)
+    ).all()
+    campaign_ids = [c.id for c in campaigns]
+
+    if not campaign_ids:
+        return MerchantStats(
+            dealsCount=0, views=0, clicks=0, claims=0, cashbackGiven=0.0,
+            pendingCashback=0.0, conversion=0.0,
+            timeseries=_empty_timeseries(), deals=[],
+        )
+
+    events = session.exec(
+        select(DealEvent).where(DealEvent.campaign_id.in_(campaign_ids))
+    ).all()
+    receipts = session.exec(
+        select(Receipt).where(Receipt.campaign_id.in_(campaign_ids))
+    ).all()
+
+    views = sum(1 for e in events if e.kind == "view")
+    clicks = sum(1 for e in events if e.kind == "click")
+    claims = len(receipts)
+    cashback_given = round(
+        sum(r.amount for r in receipts if r.status in _CASHBACK_GIVEN), 2)
+    pending_cashback = round(
+        sum(r.amount for r in receipts if r.status == "pending"), 2)
+    conversion = round(claims / views * 100, 1) if views else 0.0
+
+    # ── Per-deal breakdown ──
+    deals = []
+    for c in campaigns:
+        c_events = [e for e in events if e.campaign_id == c.id]
+        c_receipts = [r for r in receipts if r.campaign_id == c.id]
+        deals.append(DealStat(
+            campaignId=c.id, brand=c.brand, title=c.card_title or c.title or c.brand,
+            views=sum(1 for e in c_events if e.kind == "view"),
+            clicks=sum(1 for e in c_events if e.kind == "click"),
+            claims=len(c_receipts),
+            cashback=round(sum(r.amount for r in c_receipts
+                               if r.status in _CASHBACK_GIVEN), 2),
+        ))
+
+    return MerchantStats(
+        dealsCount=len(campaigns), views=views, clicks=clicks, claims=claims,
+        cashbackGiven=cashback_given, pendingCashback=pending_cashback,
+        conversion=conversion,
+        timeseries=_build_timeseries(events, receipts), deals=deals,
+    )
+
+
+def _empty_timeseries() -> list[TimePoint]:
+    today = date.today()
+    return [
+        TimePoint(date=str(today - timedelta(days=n)), views=0, clicks=0, claims=0)
+        for n in range(_TIMESERIES_DAYS - 1, -1, -1)
+    ]
+
+
+def _build_timeseries(events, receipts) -> list[TimePoint]:
+    """Last 30 days of views/clicks/claims, one point per day (zero-filled)."""
+    today = date.today()
+    start = today - timedelta(days=_TIMESERIES_DAYS - 1)
+    buckets = {str(start + timedelta(days=n)): {"views": 0, "clicks": 0, "claims": 0}
+               for n in range(_TIMESERIES_DAYS)}
+
+    for e in events:
+        key = str(e.created_at.date())
+        if key in buckets and e.kind in ("view", "click"):
+            buckets[key][e.kind + "s"] += 1
+    for r in receipts:
+        key = str(r.uploaded_at.date())
+        if key in buckets:
+            buckets[key]["claims"] += 1
+
+    return [TimePoint(date=d, **buckets[d]) for d in sorted(buckets)]
+
+
+@router.get("/stats", response_model=MerchantStats)
+def stats(merchant: Merchant = Depends(get_current_merchant),
+          session: Session = Depends(get_session)):
+    return _compute_stats(merchant, session)
+
+
+# ── Merchant <-> admin messages ──
+@router.get("/messages", response_model=list[MerchantMessageOut])
+def list_messages(merchant: Merchant = Depends(get_current_merchant),
+                  session: Session = Depends(get_session)):
+    """This merchant's thread. Marks admin replies as read."""
+    msgs = session.exec(
+        select(MerchantMessage)
+        .where(MerchantMessage.merchant_id == merchant.id)
+        .order_by(MerchantMessage.created_at)
+    ).all()
+    for msg in msgs:
+        if msg.sender == "admin" and not msg.read_by_merchant:
+            msg.read_by_merchant = True
+            session.add(msg)
+    session.commit()
+    return [_message_out(m) for m in msgs]
+
+
+@router.post("/messages", response_model=MerchantMessageOut, status_code=201)
+def send_message(data: MerchantMessageIn,
+                 merchant: Merchant = Depends(get_current_merchant),
+                 session: Session = Depends(get_session)):
+    """Merchant sends a message or a `deal_request` to the admin."""
+    body = data.body.strip()
+    if not body:
+        raise HTTPException(status_code=422, detail="Message can't be empty.")
+    kind = data.kind if data.kind in ("message", "deal_request") else "message"
+    msg = MerchantMessage(
+        merchant_id=merchant.id, sender="merchant", kind=kind, body=body,
+        read_by_admin=False, read_by_merchant=True,
+    )
+    session.add(msg)
+    session.commit()
+    session.refresh(msg)
+    return _message_out(msg)
+
+
+# ── Admin: create merchant logins + manage message threads ──
+@router.post("", response_model=MerchantCreatedOut, status_code=201,
+             dependencies=[Depends(require_admin)])
+def create_merchant(data: MerchantCreateIn, session: Session = Depends(get_session)):
+    """Admin: turn an approved application into a merchant login.
+
+    Generates a one-time password (shown once, only the hash is stored) and
+    links the application's published deal to the new merchant so stats attribute.
+    """
+    app = session.get(MerchantApplication, data.applicationId)
+    if app is None:
+        raise HTTPException(status_code=404, detail="Application not found.")
+    if app.status != "approved":
+        raise HTTPException(status_code=400,
+                            detail="Approve the application before creating a login.")
+
+    email = (app.email or "").lower().strip()
+    if not email:
+        raise HTTPException(status_code=400, detail="Application has no email.")
+    if session.exec(select(Merchant).where(Merchant.email == email)).first():
+        raise HTTPException(status_code=409,
+                            detail="A merchant login already exists for this email.")
+
+    password = secrets.token_urlsafe(9)
+    merchant = Merchant(
+        application_id=app.id, email=email,
+        password_hash=hash_password(password), business_name=app.brand,
+    )
+    session.add(merchant)
+    session.commit()
+    session.refresh(merchant)
+
+    # Attribute the application's published deal to this merchant (for stats).
+    if app.campaign_id is not None:
+        camp = session.get(Campaign, app.campaign_id)
+        if camp is not None:
+            camp.merchant_id = merchant.id
+            session.add(camp)
+            session.commit()
+
+    return MerchantCreatedOut(merchant=_merchant_out(merchant), password=password)
+
+
+@router.get("/messages/admin", response_model=list[MerchantThreadOut],
+            dependencies=[Depends(require_admin)])
+def admin_list_threads(session: Session = Depends(get_session)):
+    """Admin: every merchant's thread, most-unread first."""
+    merchants = session.exec(select(Merchant)).all()
+    threads = []
+    for m in merchants:
+        msgs = session.exec(
+            select(MerchantMessage)
+            .where(MerchantMessage.merchant_id == m.id)
+            .order_by(MerchantMessage.created_at)
+        ).all()
+        unread = sum(1 for msg in msgs
+                     if msg.sender == "merchant" and not msg.read_by_admin)
+        threads.append(MerchantThreadOut(
+            merchantId=m.id, businessName=m.business_name, email=m.email,
+            unread=unread, messages=[_message_out(msg) for msg in msgs],
+        ))
+    threads.sort(key=lambda t: t.unread, reverse=True)
+    return threads
+
+
+@router.post("/messages/admin", response_model=MerchantMessageOut, status_code=201,
+             dependencies=[Depends(require_admin)])
+def admin_reply(data: AdminMessageIn, session: Session = Depends(get_session)):
+    """Admin: reply to a merchant. Marks that merchant's inbound as read."""
+    merchant = session.get(Merchant, data.merchantId)
+    if merchant is None:
+        raise HTTPException(status_code=404, detail="Merchant not found.")
+    body = data.body.strip()
+    if not body:
+        raise HTTPException(status_code=422, detail="Message can't be empty.")
+
+    inbound = session.exec(
+        select(MerchantMessage).where(
+            MerchantMessage.merchant_id == merchant.id,
+            MerchantMessage.sender == "merchant",
+            MerchantMessage.read_by_admin == False,  # noqa: E712
+        )
+    ).all()
+    for msg in inbound:
+        msg.read_by_admin = True
+        session.add(msg)
+
+    reply = MerchantMessage(
+        merchant_id=merchant.id, sender="admin", kind="message", body=body,
+        read_by_admin=True, read_by_merchant=False,
+    )
+    session.add(reply)
+    session.commit()
+    session.refresh(reply)
+    return _message_out(reply)

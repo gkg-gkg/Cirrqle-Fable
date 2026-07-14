@@ -70,6 +70,7 @@ class Campaign(SQLModel, table=True):
     bg: str = "var(--paper-deep)"
     tags: str = "[]"           # JSON-encoded list[str]
     images: str = "[]"         # JSON-encoded list[str] of image URLs
+    merchant_id: Optional[int] = Field(default=None, foreign_key="merchant.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -127,6 +128,50 @@ class Receipt(SQLModel, table=True):
     image_key: str                                   # private storage key
     status: str = "pending"                          # pending -> confirmed -> paid / rejected
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Merchant(SQLModel, table=True):
+    """A brand's login to the merchant portal (Phase 6).
+
+    Merchants aren't `User`s — an admin creates this from an *approved*
+    `MerchantApplication` and gives the brand the generated password. Their
+    deals are the `Campaign` rows whose `merchant_id` points here, so the
+    portal can show real per-merchant stats.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    application_id: Optional[int] = Field(default=None, foreign_key="merchantapplication.id")
+    email: str = Field(index=True, unique=True)
+    password_hash: str
+    business_name: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DealEvent(SQLModel, table=True):
+    """One tracked interaction with a deal — a page view or an outbound click.
+
+    Append-only log (Phase 6). Fired from deal.html via a beacon; aggregated
+    into the merchant dashboard. Public/anonymous — no user_id.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    campaign_id: int = Field(index=True, foreign_key="campaign.id")
+    kind: str = Field(index=True)                     # "view" | "click"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class MerchantMessage(SQLModel, table=True):
+    """A message in a merchant<->admin thread (Phase 6).
+
+    Merchants message the admin (general note or a `deal_request` to get more
+    deals); the admin replies. One flat thread per merchant.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    merchant_id: int = Field(index=True, foreign_key="merchant.id")
+    sender: str = "merchant"                          # "merchant" | "admin"
+    kind: str = "message"                             # "message" | "deal_request"
+    body: str = ""
+    read_by_admin: bool = False
+    read_by_merchant: bool = True                     # merchant has seen their own message
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 # ── What the browser sends ──
@@ -335,3 +380,97 @@ class MerchantApplicationOut(BaseModel):
     status: str
     campaignId: Optional[int] = None
     createdAt: datetime
+
+
+# ── Merchant portal (Phase 6) ──
+class MerchantSigninIn(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class MerchantOut(BaseModel):
+    id: int
+    email: EmailStr
+    businessName: str
+    applicationId: Optional[int] = None
+    createdAt: datetime
+
+
+class MerchantAuthOut(BaseModel):
+    token: str
+    merchant: MerchantOut
+
+
+class MerchantCreateIn(BaseModel):
+    """Admin: turn an approved application into a merchant login."""
+    applicationId: int
+
+
+class MerchantCreatedOut(BaseModel):
+    """Returned once to the admin so they can pass on the credentials.
+    The plaintext password is shown here and never stored or shown again."""
+    merchant: MerchantOut
+    password: str
+
+
+class DealStat(BaseModel):
+    campaignId: int
+    brand: str
+    title: str
+    views: int
+    clicks: int
+    claims: int
+    cashback: float
+
+
+class TimePoint(BaseModel):
+    date: str          # YYYY-MM-DD
+    views: int
+    clicks: int
+    claims: int
+
+
+class MerchantStats(BaseModel):
+    """Real per-merchant dashboard numbers, aggregated across the merchant's deals."""
+    dealsCount: int
+    views: int
+    clicks: int
+    claims: int
+    cashbackGiven: float     # confirmed + paid
+    pendingCashback: float   # awaiting verification
+    conversion: float        # claims / views, as a percentage
+    timeseries: list[TimePoint]
+    deals: list[DealStat]
+
+
+class MerchantMessageIn(BaseModel):
+    body: str
+    kind: str = "message"    # "message" | "deal_request"
+
+
+class MerchantMessageOut(BaseModel):
+    id: int
+    sender: str
+    kind: str
+    body: str
+    createdAt: datetime
+
+
+class MerchantThreadOut(BaseModel):
+    """Admin view of one merchant's message thread."""
+    merchantId: int
+    businessName: str
+    email: str
+    unread: int              # messages from the merchant the admin hasn't read
+    messages: list[MerchantMessageOut]
+
+
+class AdminMessageIn(BaseModel):
+    merchantId: int
+    body: str
+
+
+# ── Deal-event tracking (Phase 6) ──
+class EventIn(BaseModel):
+    campaignId: int
+    kind: str                # "view" | "click"
