@@ -84,16 +84,13 @@
 
     .right-col > .card { margin-bottom: 20px; }
 
-    /* Account settings (IG handle + sign out) */
-    .account-section { margin-top: 40px; max-width: 540px; }
-    .account-card { padding: 26px; }
-    .ig-current { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 700; font-size: .92rem; }
-    .ig-at { font-family: var(--font-display); font-size: 1.1rem; }
-    .ig-at.ig-muted { color: var(--ink-soft); font-weight: 600; }
-    .ig-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .ig-input { flex: 1 1 220px; padding: 10px 12px; border: var(--bw) solid var(--line); border-radius: 12px; font: inherit; font-size: .9rem; background: var(--card); color: var(--ink); }
-    .ig-hint { font-size: .76rem; color: var(--ink-soft); font-weight: 600; margin-top: 10px; }
-    .signout-row { margin-top: 22px; padding-top: 20px; border-top: 2px dashed rgba(31,27,19,.15); }
+    /* Account details CTA (links to the full account page) */
+    .account-section { margin-top: 40px; }
+    .account-cta { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 22px 26px; }
+    .account-cta-title { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; }
+    .account-cta-sub { font-size: .84rem; color: var(--ink-soft); margin-top: 3px; max-width: 420px; }
+    .nav-user-link { text-decoration: none; border-radius: var(--r-chip); transition: opacity .15s; }
+    .nav-user-link:hover { opacity: .68; }
 
     @media (max-width: 900px) {
       .stats-row { grid-template-columns: 1fr 1fr; }
@@ -107,10 +104,10 @@
   <nav class="nav">
     <a href="index.html" class="logo">cirqle</a>
     <div class="nav-cta">
-      <div class="nav-user">
+      <a href="account.html" class="nav-user nav-user-link" title="Account details">
         <span class="nav-avatar" id="navAvatar">?</span>
         <span class="nav-name" id="navName">Loading…</span>
-      </div>
+      </a>
       <a href="feed.html" class="btn btn-sm btn-ink">Dashboard</a>
       <a href="browse.html" class="btn btn-sm">Browse deals</a>
     </div>
@@ -204,22 +201,14 @@
       </div>
     </div>
 
-    <!-- Account settings -->
+    <!-- Account details -->
     <div class="account-section">
-      <div class="card account-card fade-up">
-        <div class="panel-title">Account</div>
-        <div class="ig-current">
-          <span>📸 Instagram</span>
-          <span class="ig-at ig-muted" id="igCurrent">Not set</span>
+      <div class="card account-cta fade-up">
+        <div>
+          <div class="account-cta-title">Account details</div>
+          <div class="account-cta-sub">Edit your profile, email and Instagram handle, change your password, or sign out.</div>
         </div>
-        <div class="ig-row">
-          <input class="ig-input" id="igInput" placeholder="yourhandle" aria-label="Instagram username" autocomplete="off" />
-          <button class="btn btn-ink" id="igSaveBtn">Save handle</button>
-        </div>
-        <div class="ig-hint">This is how we find the posts where you tagged @cirqle and the brand.</div>
-        <div class="signout-row">
-          <button class="btn" onclick="signOut()">Sign out</button>
-        </div>
+        <a href="account.html" class="btn btn-ink">Account details →</a>
       </div>
     </div>
   </div>
@@ -235,13 +224,6 @@
       const h = new Date().getHours();
       const time = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
       document.getElementById('greetingName').textContent = `${time}, ${session.firstName}`;
-      // Show the current Instagram handle in the Account section.
-      const igCur = document.getElementById('igCurrent');
-      if (session.instagramHandle) {
-        igCur.textContent = '@' + session.instagramHandle;
-        igCur.classList.remove('ig-muted');
-      }
-      document.getElementById('igInput').value = session.instagramHandle || '';
     }
 
     // ── Real per-user stats (Phase 5) — everything derives from the server ──
@@ -356,39 +338,7 @@
       ).join('');
     })();
 
-    // ── Instagram handle: save to the server, then mirror into the session ──
-    async function saveHandle() {
-      const input = document.getElementById('igInput');
-      const handle = input.value.trim().replace(/^@+/, '').toLowerCase();
-      if (!handle) { cirqleToast('Please enter a valid username'); return; }
-      const btn = document.getElementById('igSaveBtn');
-      btn.disabled = true;
-      try {
-        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/me`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
-          body: JSON.stringify({ instagramHandle: handle })
-        });
-        if (res.status === 401) { signOut(); return; }
-        if (!res.ok) throw new Error('save failed');
-        const user = await res.json();
-        session.instagramHandle = user.instagramHandle;
-        const store = localStorage.getItem('cirqle_session') ? localStorage : sessionStorage;
-        store.setItem('cirqle_session', JSON.stringify(session));
-        const igCur = document.getElementById('igCurrent');
-        igCur.textContent = '@' + user.instagramHandle;
-        igCur.classList.remove('ig-muted');
-        input.value = user.instagramHandle;
-        cirqleToast('Saved @' + user.instagramHandle);
-      } catch (e) {
-        cirqleToast('Could not save your handle — try again');
-      } finally {
-        btn.disabled = false;
-      }
-    }
-    document.getElementById('igSaveBtn').addEventListener('click', saveHandle);
-
-    // ── Sign out ──
+    // ── Sign out (also used by the 401 handler in loadStats) ──
     function signOut() {
       localStorage.removeItem('cirqle_session');
       sessionStorage.removeItem('cirqle_session');

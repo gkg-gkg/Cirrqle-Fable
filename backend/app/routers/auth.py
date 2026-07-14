@@ -1,9 +1,10 @@
 """Auth endpoints: create an account, sign in, and fetch the current user."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlmodel import Session, select
 
 from ..db import get_session
-from ..models import AuthOut, ProfileUpdateIn, SigninIn, SignupIn, User, UserOut
+from ..models import (AuthOut, PasswordChangeIn, ProfileUpdateIn, SigninIn,
+                      SignupIn, User, UserOut)
 from ..security import create_token, get_current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,6 +21,7 @@ def _user_out(user: User) -> UserOut:
         lastName=user.last_name,
         email=user.email,
         instagramHandle=user.instagram_handle,
+        createdAt=user.created_at,
     )
 
 
@@ -64,7 +66,31 @@ def update_me(
     user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Let a logged-in user update their own profile (currently: Instagram handle)."""
+    """Let a logged-in user update their own profile: name, email, IG handle.
+
+    PATCH semantics — only the fields present in the body are changed. Email
+    must stay unique (it's the login identity), so we reject a clash with any
+    other account.
+    """
+    if data.firstName is not None:
+        first = data.firstName.strip()
+        if not first:
+            raise HTTPException(status_code=422, detail="First name can't be empty.")
+        user.first_name = first
+
+    if data.lastName is not None:
+        last = data.lastName.strip()
+        if not last:
+            raise HTTPException(status_code=422, detail="Last name can't be empty.")
+        user.last_name = last
+
+    if data.email is not None:
+        email = data.email.lower()
+        clash = session.exec(select(User).where(User.email == email)).first()
+        if clash is not None and clash.id != user.id:
+            raise HTTPException(status_code=409, detail="An account with this email already exists.")
+        user.email = email
+
     if data.instagramHandle is not None:
         handle = _normalize_handle(data.instagramHandle)
         if not handle:
@@ -75,3 +101,20 @@ def update_me(
     session.commit()
     session.refresh(user)
     return _user_out(user)
+
+
+@router.post("/me/password", status_code=204)
+def change_password(
+    data: PasswordChangeIn,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    """Change the signed-in user's password (verifies the current one first)."""
+    if not verify_password(data.currentPassword, user.password_hash):
+        raise HTTPException(status_code=401, detail="Current password is incorrect.")
+    if len(data.newPassword) < 8:
+        raise HTTPException(status_code=422, detail="New password must be at least 8 characters.")
+    user.password_hash = hash_password(data.newPassword)
+    session.add(user)
+    session.commit()
+    return Response(status_code=204)

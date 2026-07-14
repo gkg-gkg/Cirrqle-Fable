@@ -145,8 +145,16 @@ class SigninIn(BaseModel):
 
 class ProfileUpdateIn(BaseModel):
     # Only fields the user is allowed to change. Optional -> PATCH semantics
-    # (send just what you want to update).
+    # (send just what you want to update; omitted fields are left untouched).
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+    email: Optional[EmailStr] = None
     instagramHandle: Optional[str] = None
+
+
+class PasswordChangeIn(BaseModel):
+    currentPassword: str
+    newPassword: str
 
 
 # ── What the API returns (never includes the password hash) ──
@@ -155,6 +163,7 @@ class UserOut(BaseModel):
     lastName: str
     email: EmailStr
     instagramHandle: str
+    createdAt: Optional[datetime] = None
 
 
 class AuthOut(BaseModel):
