@@ -7,7 +7,7 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ── Rainbow scroll progress bar ──
+  // ── Scroll progress bar ──
   var bar = document.getElementById('scrollProgress');
   if (!bar) {
     bar = document.createElement('div');
@@ -21,6 +21,23 @@
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
+  // ── Nav: hairline + shadow once the page scrolls ──
+  var nav = document.querySelector('.nav');
+  if (nav) {
+    var onNavScroll = function () {
+      nav.classList.toggle('scrolled', window.scrollY > 8);
+    };
+    window.addEventListener('scroll', onNavScroll, { passive: true });
+    onNavScroll();
+  }
+
+  // ── Nav: mark the current page's link ──
+  var here = location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-links a').forEach(function (a) {
+    var target = (a.getAttribute('href') || '').split(/[?#]/)[0];
+    if (target === here) a.setAttribute('aria-current', 'page');
+  });
 
   // ── Auth-aware nav ──
   // Elements tagged data-auth="out" show when signed OUT (sign in / sign up).
@@ -55,6 +72,26 @@
     }
   }
 
+  // ── Back to top — floating ring, appears after two screens ──
+  var topBtn = document.getElementById('backTop');
+  if (!topBtn) {
+    topBtn = document.createElement('button');
+    topBtn.className = 'back-top';
+    topBtn.id = 'backTop';
+    topBtn.type = 'button';
+    topBtn.setAttribute('aria-label', 'Back to top');
+    topBtn.innerHTML = '&#8593;';
+    document.body.appendChild(topBtn);
+    topBtn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+  var onTopScroll = function () {
+    topBtn.classList.toggle('show', window.scrollY > window.innerHeight * 1.5);
+  };
+  window.addEventListener('scroll', onTopScroll, { passive: true });
+  onTopScroll();
+
   // ── Global toast helper ──
   window.cirqleToast = function (msg) {
     var t = document.getElementById('toast');
@@ -71,15 +108,28 @@
     t._timer = setTimeout(function () { t.classList.remove('show'); }, 3000);
   };
 
-  // ── Pointer-driven fun (skip on touch / reduced motion) ──
+  // ── Pointer-driven polish (skip on touch / reduced motion) ──
   var finePointer = window.matchMedia('(pointer: fine)').matches;
   if (!finePointer || reduceMotion) return;
 
-  // Sticker wobble on hover
+  // Card spotlight: feed cursor position to CSS (--mx / --my) so the
+  // wash + lit border ring in cirqle.css track the pointer. Delegated
+  // so cards injected later (deals grids, feeds) work automatically.
+  document.addEventListener('pointermove', function (e) {
+    var el = e.target && e.target.closest
+      ? e.target.closest('.card-hover, .spot')
+      : null;
+    if (!el) return;
+    var r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  }, { passive: true });
+
+  // Sticker lift on hover
   document.querySelectorAll('.sticker').forEach(function (s) {
     s.addEventListener('mouseenter', function () {
       s.style.transition = 'transform .3s cubic-bezier(.34,1.56,.64,1)';
-      s.style.transform = 'rotate(0deg) scale(1.08)';
+      s.style.transform = 'scale(1.06)';
     });
     s.addEventListener('mouseleave', function () { s.style.transform = ''; });
   });

@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>Cirqle — Shop. Post. Earn Cashback.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     /* ── Page-specific: HERO ── */
@@ -18,6 +20,8 @@
       gap: clamp(32px, 5vw, 72px);
       align-items: center;
     }
+    .hero > div:not(.dots) { position: relative; z-index: 1; }
+    .hero .dots { position: absolute; inset: 0; z-index: 0; }
     .hero-h {
       font-family: var(--font-display);
       font-weight: 700;
@@ -32,7 +36,7 @@
     .proof-faces { display: flex; }
     .proof-face {
       width: 38px; height: 38px; border-radius: 50%;
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem; margin-right: -10px;
     }
@@ -127,14 +131,27 @@
 
     /* ── Big CTA ── */
     .cta-slab { padding: clamp(48px, 6vw, 80px) clamp(24px, 5vw, 64px); text-align: center; overflow: hidden; }
+    .cta-slab > :not(.cta-orbit) { position: relative; z-index: 1; }
     .cta-slab .h-display { color: #fff; }
-    .cta-slab .hl-lime { color: #fff; background: rgba(255,255,255,.14); }
+    .cta-slab .hl-lime { color: #CFE3F1; }
     .cta-sub { color: rgba(255,255,255,.66); font-size: 1.02rem; margin: 18px auto 34px; max-width: 460px; }
+    /* concentric cirqle rings glowing softly behind the CTA copy */
+    .cta-orbit {
+      position: absolute; top: 50%; left: 50%;
+      width: 640px; height: 640px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle at center, rgba(255,255,255,.07) 0 1px, transparent 1px 52px);
+      -webkit-mask-image: radial-gradient(circle at center, #000 25%, transparent 70%);
+      mask-image: radial-gradient(circle at center, #000 25%, transparent 70%);
+      pointer-events: none;
+    }
 
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; text-align: center; padding-top: 40px; }
       .hero-sub, .hero-proof, .hero-actions { margin-left: auto; margin-right: auto; justify-content: center; }
       .hero-visual { margin-top: 22px; }
+      .hero-visual .floaty { display: none; }
       .deco-coin2 { left: 0; } .deco-ring { right: 0; }
       .stats-strip { grid-template-columns: repeat(2, 1fr); }
       .steps-grid, .testi-grid { grid-template-columns: 1fr; }
@@ -161,8 +178,10 @@
 
   <!-- ══ HERO ══ -->
   <header class="hero">
+    <div class="dots" aria-hidden="true"></div>
     <div>
-      <h1 class="hero-h fade-up d1">Get <span class="hl hl-lime">paid</span> to shop.<br>For real.</h1>
+      <span class="eyebrow fade-up d1">Cashback, reinvented</span>
+      <h1 class="hero-h fade-up d1" style="margin-top:6px">Get <span class="hl hl-lime">paid</span> to shop.<br>For real.</h1>
       <p class="hero-sub fade-up d2">Buy from brands you already love, post it on your socials, and watch <span class="squiggle">actual money</span> land in your wallet. No points. No vouchers. Cash.</p>
       <div class="hero-actions fade-up d3">
         <a href="browse.html" class="btn btn-lg btn-lime">Browse Deals</a>
@@ -180,6 +199,7 @@
     </div>
 
     <div class="hero-visual fade-up d3">
+      <div class="orbit" aria-hidden="true" style="top:50%; left:50%; transform:translate(-50%,-50%)"></div>
       <!-- Wallet phone -->
       <div class="wallet-phone">
         <div class="wp-top">
@@ -207,6 +227,9 @@
           <span class="wp-item-cash">+£0.80</span>
         </div>
       </div>
+      <div class="floaty" style="position:absolute; top:20px; right:clamp(-6px,1vw,10px); z-index:3">
+        <span class="sticker sticker-lime">✓ Post verified in 8s</span>
+      </div>
 
     </div>
   </header>
@@ -217,7 +240,7 @@
       <div class="card stat-card reveal"><span class="stat-num"><span class="count" data-target="50" data-suffix="K+">0</span></span><span class="stat-label">Active members</span></div>
       <div class="card card-lime stat-card reveal reveal-delay-1"><span class="stat-num">£<span class="count" data-target="2" data-suffix="M+">0</span></span><span class="stat-label">Cashback paid out</span></div>
       <div class="card card-sky stat-card reveal reveal-delay-2"><span class="stat-num"><span class="count" data-target="500" data-suffix="+">0</span></span><span class="stat-label">Partner brands</span></div>
-      <div class="card card-pink stat-card reveal reveal-delay-3"><span class="stat-num"><span class="count" data-target="4" data-suffix=".9★">0</span></span><span class="stat-label">App store rating</span></div>
+      <div class="card card-pink stat-card reveal reveal-delay-3"><span class="stat-num"><span class="count" data-target="4.9" data-suffix="★">0</span></span><span class="stat-label">App store rating</span></div>
     </div>
   </section>
 
@@ -230,6 +253,7 @@
   <section class="section" id="how">
     <div class="section-inner">
       <div class="section-head center">
+        <span class="eyebrow reveal">How it works</span>
         <h2 class="h-display reveal reveal-delay-1">Three steps to<br><span class="hl hl-pink">free money.</span></h2>
         <p class="h-sub reveal reveal-delay-2">No gimmicks. No complicated points systems. Just real cashback in your pocket.</p>
       </div>
@@ -260,6 +284,7 @@
   <section class="section" id="features" style="padding-top:0">
     <div class="section-inner features-grid">
       <div>
+        <span class="eyebrow reveal">Why Cirqle</span>
         <h2 class="h-display reveal reveal-delay-1" style="font-size:clamp(2rem,4.4vw,3.2rem)">Built for people<br>who <span class="squiggle squiggle-lime">actually shop.</span></h2>
         <p class="h-sub reveal reveal-delay-2">Every feature designed to make earning effortless. You shouldn't have to work hard to get money back.</p>
         <div style="margin-top:34px; display:flex; flex-direction:column; gap:8px">
@@ -317,6 +342,7 @@
   <section class="section" id="reviews">
     <div class="section-inner">
       <div class="section-head center">
+        <span class="eyebrow reveal">Member reviews</span>
         <h2 class="h-display reveal reveal-delay-1">Shoppers <span class="hl hl-sky">love</span> Cirqle.</h2>
       </div>
       <div class="testi-grid">
@@ -364,6 +390,7 @@
   <section class="section" id="cta" style="padding-top:0">
     <div class="section-inner">
       <div class="card card-ink cta-slab reveal">
+        <div class="cta-orbit" aria-hidden="true"></div>
         <h2 class="h-display">Ready to get <span class="hl hl-lime">paid</span><br>to shop?</h2>
         <p class="cta-sub">Join 50,000+ members already earning cashback. Signing up takes 60 seconds.</p>
         <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap">
@@ -451,10 +478,11 @@
         const target = +el.dataset.target;
         const suffix = el.dataset.suffix || '';
         const step = target / (1600 / 16);
+        const fmt = v => Number.isInteger(target) ? Math.floor(v).toLocaleString() : v.toFixed(1);
         let cur = 0;
         const timer = setInterval(() => {
           cur = Math.min(cur + step, target);
-          el.textContent = (target < 10 ? cur.toFixed(1) : Math.floor(cur).toLocaleString()) + suffix;
+          el.textContent = fmt(cur) + suffix;
           if (cur >= target) clearInterval(timer);
         }, 16);
         counterObs.unobserve(el);

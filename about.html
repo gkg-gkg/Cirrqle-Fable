@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>About — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 64px; }
     .stat-c { text-align: center; padding: 26px 16px; }
-    .stat-c:nth-child(1){transform:rotate(-1deg)} .stat-c:nth-child(2){transform:rotate(.8deg)} .stat-c:nth-child(3){transform:rotate(-.6deg)}
     .stat-v { font-family: var(--font-display); font-weight: 800; font-size: 2.2rem; letter-spacing: -0.03em; }
     .stat-l { font-size: .82rem; font-weight: 700; color: var(--ink-soft); margin-top: 6px; }
     .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
@@ -21,11 +22,24 @@
     .value-text { font-size: .84rem; color: var(--ink-soft); line-height: 1.6; }
     .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 22px; }
     .team-card { text-align: center; padding: 24px 16px; }
-    .team-card:nth-child(1){transform:rotate(-.9deg)} .team-card:nth-child(2){transform:rotate(.7deg)} .team-card:nth-child(3){transform:rotate(-.5deg)}
-    .team-av { width: 62px; height: 62px; border-radius: 50%; border: var(--bw) solid var(--ink); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px; }
+    .team-av { width: 62px; height: 62px; border-radius: 50%; border: var(--bw) solid var(--line); box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px; }
     .team-name { font-family: var(--font-display); font-weight: 800; font-size: .95rem; }
     .team-role { font-size: .76rem; font-weight: 600; color: var(--ink-soft); margin-top: 2px; }
-    .cta-box { text-align: center; padding: 44px 30px; margin-top: 60px; }
+    .cta-box { text-align: center; padding: 44px 30px; margin-top: 60px; overflow: hidden; }
+    .cta-box > :not(.cta-orbit) { position: relative; z-index: 1; }
+    .cta-orbit {
+      position: absolute; top: 50%; left: 50%;
+      width: 480px; height: 480px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle at center, rgba(255,255,255,.07) 0 1px, transparent 1px 46px);
+      -webkit-mask-image: radial-gradient(circle at center, #000 25%, transparent 70%);
+      mask-image: radial-gradient(circle at center, #000 25%, transparent 70%);
+      pointer-events: none;
+    }
+    /* content h2s open with the ring mark */
+    .prose h2 { display: flex; align-items: center; gap: 11px; }
+    .prose h2::before { content: ''; width: 11px; height: 11px; border: 2.5px solid var(--blue); border-radius: 50%; flex-shrink: 0; }
     @media(max-width:700px){ .stats-row, .values-grid, .team-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -40,8 +54,10 @@
   </nav>
 
   <div class="page">
-    <div class="page-hero">
-      <h1 class="h-display fade-up d1" style="margin-top:20px">Shop. Post. <span class="hl hl-lime">Earn.</span><br>That's the whole idea.</h1>
+    <div class="dots" aria-hidden="true" style="top:-10px; left:-40px; right:-40px; height:360px"></div>
+    <div class="page-hero" style="position:relative">
+      <span class="eyebrow fade-up d1" style="margin-top:20px">Our mission</span>
+      <h1 class="h-display fade-up d1" style="margin-top:6px">Shop. Post. <span class="hl hl-lime">Earn.</span><br>That's the whole idea.</h1>
       <p class="h-sub fade-up d2" style="margin:16px auto 0">We built Cirqle to give shoppers real value back — not loyalty points, not vouchers, but actual money. Shop at your favourite brands, share it on social, and watch cashback land in your wallet.</p>
     </div>
 
@@ -79,9 +95,10 @@
     </div>
 
     <div class="card card-ink cta-box reveal">
-      <h2 style="color:var(--paper); font-size:clamp(1.6rem,3.4vw,2.2rem)">Ready to start <span class="hl hl-lime" style="color:var(--ink)">earning?</span></h2>
-      <p style="color:rgba(255,246,233,.7); margin:12px 0 26px">Join thousands of UK shoppers getting real cashback every day.</p>
-      <a href="signup.html" class="btn btn-lg btn-lime" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Create a free account →</a>
+      <div class="cta-orbit" aria-hidden="true"></div>
+      <h2 style="color:var(--paper); font-size:clamp(1.6rem,3.4vw,2.2rem)">Ready to start <span class="hl hl-lime" style="color:#CFE3F1">earning?</span></h2>
+      <p style="color:rgba(255,255,255,.66); margin:12px 0 26px">Join thousands of UK shoppers getting real cashback every day.</p>
+      <a href="signup.html" class="btn btn-lg btn-lime">Create a free account →</a>
     </div>
   </div>
   <script src="assets/enhance.js"></script>

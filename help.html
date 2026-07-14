@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>Help Centre — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     .search-box { position: relative; max-width: 480px; margin: 26px auto 0; }
     .search-box input {
       width: 100%;
       background: var(--card);
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-chip);
       padding: 15px 24px 15px 50px;
       font-size: .95rem; font-weight: 600;
@@ -22,12 +24,12 @@
       box-shadow: var(--shadow-sm);
       transition: transform .15s var(--snap), box-shadow .15s var(--snap);
     }
-    .search-box input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .search-box input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(60,125,166,.15); }
     .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); }
     .categories { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
     .cat-btn {
       padding: 8px 18px;
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-chip);
       background: var(--card);
       font-size: .84rem; font-weight: 700;
@@ -35,8 +37,8 @@
       cursor: pointer;
       transition: all .15s var(--snap);
     }
-    .cat-btn:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
-    .cat-btn.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); transform: rotate(-1.5deg); }
+    .cat-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: #D8DEE7; }
+    .cat-btn.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
     .faq-section { margin-bottom: 44px; }
     .faq-section h2 { font-size: 1.3rem; margin-bottom: 16px; }
     .contact-strip { text-align: center; padding: 40px 30px; }
@@ -123,7 +125,7 @@
     <div class="card card-ink contact-strip reveal">
       <h3>Still need help?</h3>
       <p>Our support team replies within 24 hours.</p>
-      <a href="contact.html" class="btn btn-lg btn-lime" style="box-shadow:4px 4px 0 rgba(255,246,233,.35)">Contact support →</a>
+      <a href="contact.html" class="btn btn-lg btn-lime">Contact support →</a>
     </div>
   </div>
   <script>

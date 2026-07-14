@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>All Deals — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     /* ── Page header ── */
@@ -14,7 +16,7 @@
     .search-wrap { position: relative; flex-shrink: 0; }
     .search-input {
       background: var(--card);
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-chip);
       padding: 13px 22px 13px 46px;
       font-size: .92rem; font-weight: 600;
@@ -23,9 +25,9 @@
       width: 300px;
       outline: none;
       box-shadow: var(--shadow-sm);
-      transition: transform .15s var(--snap), box-shadow .15s var(--snap);
+      transition: border-color .15s var(--snap), box-shadow .15s var(--snap);
     }
-    .search-input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(60,125,166,.15); }
     .search-input::placeholder { color: #93A0AD; }
     .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
@@ -43,7 +45,7 @@
     .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
     .filter-tab {
       padding: 8px 18px;
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-chip);
       background: var(--card);
       color: var(--ink);
@@ -52,13 +54,13 @@
       font-family: var(--font-body);
       transition: all .15s var(--snap);
     }
-    .filter-tab:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
-    .filter-tab.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); transform: rotate(-1.5deg); }
+    .filter-tab:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: #D8DEE7; }
+    .filter-tab.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
     .sort-wrap { display: flex; align-items: center; gap: 10px; }
     .sort-label { font-size: .8rem; font-weight: 700; color: var(--ink-soft); }
     .sort-select {
       background: var(--card);
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: 12px;
       padding: 9px 14px;
       font-size: .84rem; font-weight: 600;
@@ -77,36 +79,35 @@
     /* ── Deal card ── */
     .deal-card {
       background: var(--card);
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-card);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
       cursor: pointer;
-      opacity: 0; transform: translateY(24px);
-      animation: cardIn .5s var(--snap) forwards;
-      transition: transform .22s var(--bounce), box-shadow .22s var(--bounce);
+      animation: cardIn .5s var(--snap) backwards;
+      transition: transform .22s var(--bounce), box-shadow .22s var(--bounce), border-color .22s;
     }
-    .deal-card:hover { transform: translate(-3px,-3px) rotate(-.5deg); box-shadow: var(--shadow-lg); }
+    .deal-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: #DCE2EA; }
     .deal-card.hidden { display: none; }
-    @keyframes cardIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(24px); } }
     .deal-card:nth-child(1){animation-delay:.04s}.deal-card:nth-child(2){animation-delay:.08s}.deal-card:nth-child(3){animation-delay:.12s}
     .deal-card:nth-child(4){animation-delay:.16s}.deal-card:nth-child(5){animation-delay:.2s}.deal-card:nth-child(6){animation-delay:.24s}
     .deal-card:nth-child(7){animation-delay:.28s}.deal-card:nth-child(8){animation-delay:.32s}.deal-card:nth-child(9){animation-delay:.36s}
 
-    .card-image { position: relative; height: 186px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 4.2rem; overflow: hidden; }
+    .card-image { position: relative; height: 186px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 4.2rem; overflow: hidden; }
     .card-image .bg-emoji { transition: transform .3s var(--bounce); }
-    .deal-card:hover .bg-emoji { transform: scale(1.18) rotate(-6deg); }
+    .deal-card:hover .bg-emoji { transform: scale(1.1); }
     .cb-sticker { position: absolute; top: 12px; right: 12px; }
     .brand-tag {
       position: absolute; bottom: 10px; left: 12px;
       display: inline-flex; align-items: center; gap: 7px;
       background: var(--card);
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       border-radius: var(--r-chip);
       padding: 4px 12px 4px 5px;
       font-size: .74rem; font-weight: 800;
     }
-    .brand-dot { width: 22px; height: 22px; border-radius: 50%; border: var(--bw) solid var(--ink); background: var(--lime); display: inline-flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; }
+    .brand-dot { width: 22px; height: 22px; border-radius: 50%; border: var(--bw) solid var(--line); background: var(--lime); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; }
 
     .card-body { padding: 16px 18px 14px; }
     .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
@@ -116,7 +117,7 @@
     .card-meta .chip { font-size: .68rem; padding: 3px 10px; }
 
     .card-footer {
-      border-top: var(--bw) solid var(--ink);
+      border-top: var(--bw) solid var(--line);
       background: var(--paper);
       padding: 14px 18px;
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -133,9 +134,8 @@
       display: inline-flex; align-items: center; gap: 5px;
       font-size: .66rem; font-weight: 800;
       padding: 5px 11px;
-      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      border: var(--bw) solid var(--line); border-radius: var(--r-chip);
       background: var(--teal-tint); box-shadow: var(--shadow-sm);
-      transform: rotate(-3deg);
     }
     .dist-chip { background: var(--teal-tint) !important; }
 
@@ -144,14 +144,14 @@
     .postcode-bar .pc-icon { font-size: 1.1rem; }
     .postcode-input {
       flex: 0 0 150px; background: var(--card);
-      border: var(--bw) solid var(--ink); border-radius: var(--r-chip);
+      border: var(--bw) solid var(--line); border-radius: var(--r-chip);
       padding: 11px 18px; font-size: .9rem; font-weight: 600;
       font-family: var(--font-body); color: var(--ink);
       outline: none; box-shadow: var(--shadow-sm);
       transition: transform .15s var(--snap), box-shadow .15s var(--snap);
     }
     .postcode-input::placeholder { color: #93A0AD; }
-    .postcode-input:focus { transform: translate(-2px,-2px); box-shadow: var(--shadow); }
+    .postcode-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(60,125,166,.15); }
     .pc-note { font-size: .8rem; font-weight: 700; color: var(--blue-deep); }
 
     .empty-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; display: none; }
@@ -304,7 +304,7 @@
              onerror="this.remove()">`
         : `<span class="bg-emoji">${esc(c.emoji)}</span>`;
       const el = document.createElement('div');
-      el.className = 'deal-card';
+      el.className = 'deal-card spot';
       el.dataset.category = catKey(c.category);
       el.dataset.cashback = earnNum(c.earn);
       el.dataset.clicks = c.claims;

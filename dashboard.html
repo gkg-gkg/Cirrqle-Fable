@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>My Account — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
     .nav-user { display: flex; align-items: center; gap: 10px; }
     .nav-avatar {
       width: 38px; height: 38px; border-radius: 50%;
-      border: var(--bw) solid var(--ink);
+      border: var(--bw) solid var(--line);
       background: var(--pink);
       display: flex; align-items: center; justify-content: center;
       font-family: var(--font-display); font-weight: 800; font-size: .95rem;
@@ -28,9 +30,7 @@
 
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
     .stat-card { padding: 20px 22px; }
-    .stat-card:nth-child(odd) { transform: rotate(-.6deg); }
-    .stat-card:nth-child(even) { transform: rotate(.6deg); }
-    .stat-label { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); margin-bottom: 8px; }
+            .stat-label { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); margin-bottom: 8px; }
     .stat-val { font-family: var(--font-display); font-weight: 800; font-size: 1.8rem; letter-spacing: -0.03em; line-height: 1; }
     .stat-sub { font-size: .72rem; font-weight: 600; color: var(--ink-soft); margin-top: 7px; }
     .stat-up { color: var(--green); font-weight: 800; }
@@ -38,7 +38,7 @@
     .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
 
     /* Wallet */
-    .wallet-card { background: var(--lime); padding: 30px; margin-bottom: 24px; transform: rotate(-.4deg); }
+    .wallet-card { background: var(--lime); padding: 30px; margin-bottom: 24px; }
     .wallet-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 6px; }
     .wallet-balance { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 5vw, 3.4rem); letter-spacing: -0.04em; line-height: 1; }
     .wallet-sub { font-size: .85rem; font-weight: 600; color: rgba(31,27,19,.7); margin: 8px 0 24px; }
@@ -59,11 +59,11 @@
     /* Goal */
     .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: .84rem; font-weight: 700; }
     .goal-val { color: var(--green); font-weight: 800; }
-    .progress-bar { height: 16px; border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--paper); overflow: hidden; margin: 8px 0; }
+    .progress-bar { height: 16px; border: var(--bw) solid var(--line); border-radius: 999px; background: var(--paper); overflow: hidden; margin: 8px 0; }
     .progress-fill {
       height: 100%; border-radius: 999px;
       background: repeating-linear-gradient(-45deg, var(--lime) 0 10px, var(--lime-soft) 10px 20px);
-      border-right: var(--bw) solid var(--ink);
+      border-right: var(--bw) solid var(--line);
       transform: scaleX(0); transform-origin: left;
       transition: transform 1.4s var(--snap);
     }
@@ -91,7 +91,7 @@
     .ig-at { font-family: var(--font-display); font-size: 1.1rem; }
     .ig-at.ig-muted { color: var(--ink-soft); font-weight: 600; }
     .ig-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .ig-input { flex: 1 1 220px; padding: 10px 12px; border: var(--bw) solid var(--ink); border-radius: 12px; font: inherit; font-size: .9rem; background: var(--card); color: var(--ink); }
+    .ig-input { flex: 1 1 220px; padding: 10px 12px; border: var(--bw) solid var(--line); border-radius: 12px; font: inherit; font-size: .9rem; background: var(--card); color: var(--ink); }
     .ig-hint { font-size: .76rem; color: var(--ink-soft); font-weight: 600; margin-top: 10px; }
     .signout-row { margin-top: 22px; padding-top: 20px; border-top: 2px dashed rgba(31,27,19,.15); }
 

@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23437D9E' stroke-width='12'/%3E%3C/svg%3E" />
   <title>Blog — Cirqle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css" />
   <style>
-    .featured { display: grid; grid-template-columns: 200px 1fr; gap: 26px; align-items: center; padding: 28px; margin-bottom: 44px; transform: rotate(-.4deg); }
-    .feat-img { height: 160px; border: var(--bw) solid var(--ink); border-radius: 18px; background: var(--lime); display: flex; align-items: center; justify-content: center; font-size: 3.4rem; box-shadow: var(--shadow-sm); }
+    .featured { display: grid; grid-template-columns: 200px 1fr; gap: 26px; align-items: center; padding: 28px; margin-bottom: 44px; }
+    .feat-img { height: 160px; border: var(--bw) solid var(--line); border-radius: 18px; background: var(--lime); display: flex; align-items: center; justify-content: center; font-size: 3.4rem; box-shadow: var(--shadow-sm); }
     .feat-title { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.15; margin: 10px 0 8px; }
     .feat-desc { font-size: .9rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: 10px; }
     .feat-meta { font-size: .76rem; font-weight: 700; color: var(--ink-soft); }
@@ -19,8 +21,7 @@
 
     .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .blog-card { text-decoration: none; color: var(--ink); overflow: hidden; padding: 0; display: block; }
-    .blog-card:nth-child(3n+1){transform:rotate(-.6deg)} .blog-card:nth-child(3n+2){transform:rotate(.5deg)} .blog-card:nth-child(3n){transform:rotate(-.3deg)}
-    .bc-img { height: 120px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
+        .bc-img { height: 120px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 2.6rem; }
     .bc-body { padding: 18px; }
     .bc-title { font-family: var(--font-display); font-weight: 800; font-size: 1rem; line-height: 1.3; margin: 8px 0 6px; }
     .bc-desc { font-size: .8rem; color: var(--ink-soft); line-height: 1.55; margin-bottom: 10px; }
