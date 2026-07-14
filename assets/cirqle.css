@@ -41,8 +41,8 @@
   --red:        #DC2626;   /* errors */
 
   /* type — single clean grotesque, two roles */
-  --font-display: 'Sora', 'Helvetica Neue', Arial, sans-serif;
-  --font-body:    'Sora', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   /* shape */
   --r-card: 18px;
