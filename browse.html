@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=3" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=4" />
   <style>
     /* ── Page header ── */
     .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; position: relative; z-index: 1; }
@@ -192,7 +192,7 @@
       <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
     </div>
     <div class="search-wrap fade-up d2">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
       <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
     </div>
   </div>
@@ -249,7 +249,7 @@
 
       <!-- Empty state -->
       <div class="empty-state" id="emptyState">
-        <div class="empty-icon">🫥</div>
+        <div class="empty-icon"><i class="ico ico-ghost ico-soft"></i></div>
         <div class="empty-title">No deals found</div>
         <div class="empty-sub">Try a different search term or category.</div>
       </div>
@@ -302,7 +302,7 @@
         ? `<img src="${esc(c.images[0])}" alt="${esc(c.brand)}" loading="lazy"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
              onerror="this.remove()">`
-        : `<span class="bg-emoji">${esc(c.emoji)}</span>`;
+        : `<span class="bg-emoji">${cirqleIcon(cirqleCatIcon(c.category))}</span>`;
       const el = document.createElement('div');
       el.className = 'deal-card spot';
       el.dataset.category = catKey(c.category);
@@ -322,7 +322,7 @@
         <div class="card-body">
           <div class="card-head">
             <div class="card-title">${esc(c.cardTitle || c.title)}</div>
-            <div class="card-rating">⭐ ${m.rating.toFixed(1)}</div>
+            <div class="card-rating"><i class="ico ico-star"></i> ${m.rating.toFixed(1)}</div>
           </div>
           <div class="card-desc">${esc(c.cardDesc)}</div>
           <div class="card-meta"><span class="chip">${esc(c.location)}</span><span class="chip">${esc(shortExpiry(c.expiry))}</span></div>

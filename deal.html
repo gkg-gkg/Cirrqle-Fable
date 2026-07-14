@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=3" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=4" />
   <style>
     .deal-page { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: clamp(28px,4vw,44px) clamp(20px,4vw,44px) 90px; }
 
@@ -111,7 +111,7 @@
         <div class="card hero-card fade-up d1">
           <div class="hero-img" id="heroImg" style="background:var(--sky)">
             <img id="heroImage" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none" onerror="this.style.display='none'" />
-            <span id="heroEmoji" aria-hidden="true">👟</span>
+            <span id="heroEmoji" aria-hidden="true"><i class="ico ico-bag"></i></span>
             <button class="hero-arrow hero-arrow-prev" id="heroPrev" type="button" aria-label="Previous image">◀</button>
             <button class="hero-arrow hero-arrow-next" id="heroNext" type="button" aria-label="Next image">▶</button>
             <span class="hero-badge sticker sticker-lime" id="heroBadge">13% cashback</span>
@@ -226,7 +226,8 @@
         heroImage.style.display = '';
         heroEmoji.style.display = 'none';
       } else {
-        heroEmoji.textContent = val;
+        // Fallback (no uploaded image): a category icon, not an emoji.
+        heroEmoji.innerHTML = cirqleIcon((d && d._catIcon) || 'bag');
         heroEmoji.style.display = '';
         heroImage.style.display = 'none';
       }
@@ -268,8 +269,9 @@
       document.getElementById('infoTags').innerHTML =
         `<span class="chip">${c.location || ''}</span>` + (c.tags || []).map(t => `<span class="chip">${t}</span>`).join('');
 
-      // Build the carousel from real images, or a single emoji slide.
-      slides = (c.images && c.images.length) ? c.images : [c.emoji];
+      // Build the carousel from real images, or a single category-icon slide.
+      c._catIcon = cirqleCatIcon(c.category);
+      slides = (c.images && c.images.length) ? c.images : ['__icon__'];
       slide = 0;
       const heroDots = document.getElementById('heroDots');
       heroDots.innerHTML = slides
@@ -335,7 +337,7 @@
         populate(await res.json());
         trackEvent('view');
       } catch (err) {
-        document.getElementById('heroEmoji').textContent = '🫥';
+        document.getElementById('heroEmoji').innerHTML = '<i class="ico ico-ghost ico-soft"></i>';
         document.getElementById('heroTitle').textContent = 'Deal not found';
         document.getElementById('heroDesc').textContent = 'This deal may have ended. Browse other deals instead.';
       }

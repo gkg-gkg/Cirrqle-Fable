@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=3" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=4" />
   <style>
     .nav-user { display: flex; align-items: center; gap: 10px; }
     .nav-avatar {
@@ -177,7 +177,7 @@
 
         <!-- Posts tagged -->
         <div class="card streak-card fade-up d5">
-          <span style="font-size:2.2rem">📸</span>
+          <span style="font-size:2.2rem"><i class="ico ico-camera"></i></span>
           <div>
             <div class="streak-num" id="postsVal">0</div>
             <div class="streak-label">posts tagged</div>
@@ -238,10 +238,10 @@
     }
     function statusMeta(s) {
       return ({
-        confirmed: { icon: '✅', cls: 'coin-lime', label: 'cashback confirmed', amt: 'amount-green', sign: '+' },
-        pending:   { icon: '⏳', cls: '',          label: 'pending verification', amt: 'amount-pending', sign: '' },
-        paid:      { icon: '💸', cls: 'coin-pink',  label: 'paid out',             amt: 'amount-muted', sign: '' },
-        rejected:  { icon: '✖',  cls: '',          label: 'not eligible',         amt: 'amount-muted', sign: '' },
+        confirmed: { icon: cirqleIcon('check'), cls: 'coin-lime', label: 'cashback confirmed', amt: 'amount-green', sign: '+' },
+        pending:   { icon: cirqleIcon('clock'), cls: '',          label: 'pending verification', amt: 'amount-pending', sign: '' },
+        paid:      { icon: cirqleIcon('cash'),  cls: 'coin-pink',  label: 'paid out',             amt: 'amount-muted', sign: '' },
+        rejected:  { icon: cirqleIcon('x'),     cls: '',          label: 'not eligible',         amt: 'amount-muted', sign: '' },
       })[s] || { icon: '•', cls: '', label: s, amt: 'amount-muted', sign: '' };
     }
     function fmtWhen(iso) {
@@ -288,14 +288,14 @@
         fill.style.width = pct + '%';
         fill.classList.add('anim');
         document.getElementById('goalNote').textContent = s.totalEarned >= 100
-          ? 'Goal smashed! 🎉' : '£' + (100 - s.totalEarned).toFixed(2) + ' to go';
+          ? 'Goal smashed! ' + cirqleIcon('sparkles') : '£' + (100 - s.totalEarned).toFixed(2) + ' to go';
         renderActivity(s.activity);
       } catch (e) { /* leave zeros */ }
     }
     function withdraw() {
       // Withdrawals aren't live yet. Intentionally do NOT call /account/withdraw,
       // so the user's balance is never touched — just show a "coming soon" message.
-      cirqleToast('Withdrawals are coming soon — your balance stays put for now 💸');
+      cirqleToast('Withdrawals are coming soon — your balance stays put for now');
     }
     // ── Active deals from the live catalog ──
     async function loadActiveDeals() {
@@ -306,7 +306,7 @@
         const deals = (await res.json()).slice(0, 4);
         el.innerHTML = deals.map(c =>
           '<div class="mini-deal">' +
-            '<span class="coin coin-sky" style="font-size:1rem">' + (c.emoji || '🛍️') + '</span>' +
+            '<span class="coin coin-sky" style="font-size:1rem">' + cirqleIcon(cirqleCatIcon(c.category)) + '</span>' +
             '<div><div class="mini-deal-name">' + c.brand + '</div>' +
             '<div class="mini-deal-cb">' + c.rate + '% cashback</div></div>' +
             '<a href="deal.html?id=' + c.id + '" class="btn btn-sm btn-lime mini-deal-btn">Shop →</a>' +
@@ -330,7 +330,7 @@
       }
       list.innerHTML = saved.map(s =>
         '<div class="mini-deal">' +
-          '<span class="coin coin-lime" style="font-size:1rem">' + (s.emoji || '🔖') + '</span>' +
+          '<span class="coin coin-lime" style="font-size:1rem">' + cirqleIcon('bookmark') + '</span>' +
           '<div><div class="mini-deal-name">' + s.brand + '</div>' +
           '<div class="mini-deal-cb">' + s.rate + '% cashback</div></div>' +
           '<a href="deal.html?id=' + s.id + '" class="btn btn-sm mini-deal-btn">View →</a>' +

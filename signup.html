@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=3" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=4" />
   <style>
     main {
       position: relative; z-index: 1;
@@ -79,10 +79,10 @@
       <h1 class="auth-h">Start earning <span class="hl hl-pink">real cash</span> today.</h1>
       <p class="auth-sub">Join 50,000+ members who earn money back on their everyday shopping. No gimmicks, no fees.</p>
       <div class="perks-list">
-        <div class="perk"><span class="coin coin-lime" style="font-size:.95rem">💸</span><span><strong>Real money</strong> — withdrawn to your bank anytime</span></div>
-        <div class="perk"><span class="coin coin-sky" style="font-size:.95rem">⚡</span><span><strong>Instant verification</strong> — cashback confirmed in seconds</span></div>
-        <div class="perk"><span class="coin coin-pink" style="font-size:.95rem">🛍️</span><span><strong>500+ brands</strong> — Nike, ASOS, Deliveroo and more</span></div>
-        <div class="perk"><span class="coin" style="font-size:.95rem">🔒</span><span><strong>Secure &amp; free</strong> — no credit card required</span></div>
+        <div class="perk"><span class="coin coin-lime" style="font-size:.95rem"><i class="ico ico-cash"></i></span><span><strong>Real money</strong> — withdrawn to your bank anytime</span></div>
+        <div class="perk"><span class="coin coin-sky" style="font-size:.95rem"><i class="ico ico-bolt"></i></span><span><strong>Instant verification</strong> — cashback confirmed in seconds</span></div>
+        <div class="perk"><span class="coin coin-pink" style="font-size:.95rem"><i class="ico ico-bag"></i></span><span><strong>500+ brands</strong> — Nike, ASOS, Deliveroo and more</span></div>
+        <div class="perk"><span class="coin" style="font-size:.95rem"><i class="ico ico-lock"></i></span><span><strong>Secure &amp; free</strong> — no credit card required</span></div>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
           <div class="field">
             <label for="firstName">First name</label>
             <div class="field-wrap">
-              <span class="field-icon">👤</span>
+              <span class="field-icon"><i class="ico ico-user ico-soft"></i></span>
               <input type="text" id="firstName" placeholder="Alex" autocomplete="given-name" />
             </div>
             <div class="field-error" id="firstNameErr">Please enter your first name.</div>
@@ -104,7 +104,7 @@
           <div class="field">
             <label for="lastName">Last name</label>
             <div class="field-wrap">
-              <span class="field-icon">👤</span>
+              <span class="field-icon"><i class="ico ico-user ico-soft"></i></span>
               <input type="text" id="lastName" placeholder="Smith" autocomplete="family-name" />
             </div>
             <div class="field-error" id="lastNameErr">Please enter your last name.</div>
@@ -114,7 +114,7 @@
         <div class="field">
           <label for="email">Email address</label>
           <div class="field-wrap">
-            <span class="field-icon">✉️</span>
+            <span class="field-icon"><i class="ico ico-mail ico-soft"></i></span>
             <input type="email" id="email" placeholder="alex@example.com" autocomplete="email" />
           </div>
           <div class="field-error" id="emailErr">Please enter a valid email address.</div>
@@ -123,7 +123,7 @@
         <div class="field">
           <label for="instagram">Instagram username</label>
           <div class="field-wrap">
-            <span class="field-icon">📸</span>
+            <span class="field-icon"><i class="ico ico-camera ico-soft"></i></span>
             <input type="text" id="instagram" placeholder="yourhandle" autocomplete="off" />
           </div>
           <div class="field-error" id="instagramErr">Please enter your Instagram username.</div>
@@ -132,9 +132,9 @@
         <div class="field">
           <label for="password">Password</label>
           <div class="field-wrap">
-            <span class="field-icon">🔒</span>
+            <span class="field-icon"><i class="ico ico-lock ico-soft"></i></span>
             <input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password" />
-            <button type="button" class="pass-toggle" id="passToggle" aria-label="Show password">👁</button>
+            <button type="button" class="pass-toggle" id="passToggle" aria-label="Show password"><i class="ico ico-eye ico-soft"></i></button>
           </div>
           <div class="strength-bar" id="strengthBar" aria-hidden="true">
             <div class="strength-seg" id="seg1"></div>
@@ -149,9 +149,9 @@
         <div class="field">
           <label for="confirmPassword">Confirm password</label>
           <div class="field-wrap">
-            <span class="field-icon">🔒</span>
+            <span class="field-icon"><i class="ico ico-lock ico-soft"></i></span>
             <input type="password" id="confirmPassword" placeholder="Repeat your password" autocomplete="new-password" />
-            <button type="button" class="pass-toggle" id="confirmToggle" aria-label="Show password">👁</button>
+            <button type="button" class="pass-toggle" id="confirmToggle" aria-label="Show password"><i class="ico ico-eye ico-soft"></i></button>
           </div>
           <div class="field-error" id="confirmErr">Passwords do not match.</div>
         </div>
@@ -197,7 +197,7 @@
       const inp = document.getElementById(inputId);
       const isText = inp.type === 'text';
       inp.type = isText ? 'password' : 'text';
-      btn.textContent = isText ? '👁' : '🙈';
+      btn.innerHTML = isText ? '<i class="ico ico-eye ico-soft"></i>' : '<i class="ico ico-eyeoff ico-soft"></i>';
     }
     document.getElementById('passToggle').addEventListener('click', () => togglePass('password', document.getElementById('passToggle')));
     document.getElementById('confirmToggle').addEventListener('click', () => togglePass('confirmPassword', document.getElementById('confirmToggle')));

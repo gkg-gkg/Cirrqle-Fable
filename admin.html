@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=3" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=4" />
   <style>
     .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 40px 22px 80px; }
     .admin-wrap h1 { font-family: var(--font-display); font-weight: 800; font-size: 2rem; letter-spacing: -0.02em; }
@@ -80,7 +80,7 @@
           <input type="hidden" id="editId" />
           <div class="two">
             <div class="field"><label>Brand *</label><input id="f_brand" required /></div>
-            <div class="field"><label>Emoji (fallback thumbnail)</label><input id="f_emoji" placeholder="👟" /></div>
+            <div class="field"><label>Emoji (legacy — public pages use category icons)</label><input id="f_emoji" placeholder="(optional)" /></div>
           </div>
           <div class="field"><label>Detail title *</label><input id="f_title" required placeholder="Nike Summer Sale — up to 13% back" /></div>
           <div class="two">
@@ -221,9 +221,10 @@
       data.forEach(c => {
         const row = document.createElement('div');
         row.className = 'clist-item';
+        const catCls = 'ico ico-' + cirqleCatIcon(c.category);
         const thumb = (c.images && c.images.length)
-          ? `<img src="${c.images[0]}" alt="" onerror="this.replaceWith(document.createTextNode('${c.emoji || '📦'}'))">`
-          : (c.emoji || '📦');
+          ? `<img src="${c.images[0]}" alt="" onerror="this.outerHTML='<i class=&quot;${catCls}&quot;></i>'">`
+          : `<i class="${catCls}"></i>`;
         row.innerHTML = `
           <div class="clist-thumb">${thumb}</div>
           <div class="clist-main">
@@ -315,7 +316,7 @@
           row.className = 'clist-item';
           const thumb = r.imageUrl
             ? `<a href="${r.imageUrl}" target="_blank" rel="noopener"><img src="${r.imageUrl}" alt="receipt"></a>`
-            : '🧾';
+            : '<i class="ico ico-receipt ico-soft"></i>';
           const actions = r.status === 'pending'
             ? `<button class="btn mini" data-verify="${r.id}">Verify</button><button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`
             : '';
@@ -399,7 +400,7 @@
                   + `<button class="btn mini btn-lime" data-mklogin="${a.id}">Create login</button>`
                 : '');
           row.innerHTML = `
-            <div class="clist-thumb">🤝</div>
+            <div class="clist-thumb"><i class="ico ico-users"></i></div>
             <div class="clist-main">
               <div class="clist-title">${esc(a.brand)} — ${esc(a.cashbackRate)}% <span class="rbadge ${esc(a.status)}">${esc(a.status)}</span></div>
               <div class="clist-sub">${esc(a.category)} · ${esc(a.firstName)} ${esc(a.lastName)} · ${esc(a.email)}</div>
@@ -519,7 +520,7 @@
               }).join('')
             : '<span class="muted">No messages yet.</span>';
           row.innerHTML = `
-            <div class="clist-thumb">💬</div>
+            <div class="clist-thumb"><i class="ico ico-chat"></i></div>
             <div class="clist-main">
               <div class="clist-title">${esc(t.businessName || t.email)} ${badge}</div>
               <div class="clist-sub">${esc(t.email)}</div>

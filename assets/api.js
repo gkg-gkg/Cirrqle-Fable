@@ -7,3 +7,20 @@ window.CIRQLE_API_BASE =
   (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://localhost:8000'
     : 'https://cirqle.duckdns.org';
+
+/* ── Icon helpers (sleek monoline glyphs, replacing emojis) ──
+   Return an <i> using the CSS icon system in cirqle.css. */
+window.cirqleIcon = function (name, cls) {
+  return '<i class="ico ico-' + name + (cls ? ' ' + cls : '') + '"></i>';
+};
+/* Map a deal category to its icon name (deals no longer store an emoji). */
+window.cirqleCatIcon = function (category) {
+  const map = {
+    fashion: 'shirt', beauty: 'sparkles', food: 'cup', drink: 'cup',
+    electronic: 'laptop', tech: 'laptop', travel: 'plane', home: 'home',
+    living: 'home', fitness: 'dumbbell', gym: 'dumbbell', entertain: 'play',
+  };
+  const c = (category || '').toLowerCase();
+  for (const k in map) { if (c.includes(k)) return map[k]; }
+  return 'bag';
+};
