@@ -22,6 +22,38 @@
     }
     .hero > div:not(.dots) { position: relative; z-index: 1; }
     .hero .dots { position: absolute; inset: 0; z-index: 0; }
+    /* soft drifting glow fields behind the hero — movement without colour */
+    .hero-blob {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle, var(--blue-glow), transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .blob-a { width: 460px; height: 460px; top: -100px; right: 4%; animation: blobDrift 22s ease-in-out infinite alternate; }
+    .blob-b { width: 380px; height: 380px; bottom: -140px; left: -80px; animation: blobDrift 27s ease-in-out -9s infinite alternate-reverse; }
+    @keyframes blobDrift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(44px, 30px) scale(1.14); }
+    }
+    /* the "paid" highlight draws itself in like a marker stroke */
+    .hero-h .hl {
+      background: linear-gradient(var(--blue-tint), var(--blue-tint)) no-repeat 0 0 / 0% 100%;
+      animation: hlSweep .8s var(--snap) .5s forwards;
+    }
+    @keyframes hlSweep { to { background-size: 100% 100%; } }
+    /* primary CTA breathes a soft glow */
+    .hero-actions .btn-lime { animation: ctaPulse 3.4s ease-in-out 1.4s infinite; }
+    @keyframes ctaPulse {
+      0%, 100% { box-shadow: var(--shadow-blue), inset 0 1px 0 rgba(255,255,255,.18); }
+      50% { box-shadow: 0 8px 26px rgba(53,99,127,.34), 0 0 0 7px rgba(67,125,158,.09), inset 0 1px 0 rgba(255,255,255,.18); }
+    }
+    /* wallet: pointer tilt (JS feeds the transform) + periodic cashback ping */
+    .wallet-phone { transition: transform .35s var(--snap); will-change: transform; }
+    .wp-item.ping { animation: itemPing 1.5s var(--snap); }
+    @keyframes itemPing {
+      0% { box-shadow: 0 0 0 0 rgba(67,125,158,.32); }
+      65% { box-shadow: 0 0 0 9px rgba(67,125,158,0); }
+      100% { box-shadow: 0 0 0 0 rgba(67,125,158,0); }
+    }
     .hero-h {
       font-family: var(--font-display);
       font-weight: 700;
@@ -129,8 +161,23 @@
     .testi-role { font-size: .76rem; color: var(--ink-soft); font-weight: 400; }
 
     /* ── Big CTA ── */
-    .cta-slab { padding: clamp(48px, 6vw, 80px) clamp(24px, 5vw, 64px); text-align: center; overflow: hidden; }
-    .cta-slab > :not(.cta-orbit) { position: relative; z-index: 1; }
+    .cta-slab { padding: clamp(48px, 6vw, 80px) clamp(24px, 5vw, 64px); text-align: center; overflow: hidden; position: relative; }
+    .cta-slab > :not(.cta-orbit):not(.cta-ring) { position: relative; z-index: 1; }
+    /* slow counter-rotating dashed rings behind the dark CTA */
+    .cta-ring {
+      position: absolute; width: 560px; height: 560px;
+      top: 50%; left: 50%; margin: -280px 0 0 -280px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255,255,255,.13);
+      animation: spin 70s linear infinite;
+      pointer-events: none;
+    }
+    .cta-ring::before {
+      content: ''; position: absolute; inset: 70px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255,255,255,.09);
+      animation: spin 50s linear infinite reverse;
+    }
     .cta-slab .h-display { color: #fff; }
     .cta-slab .hl-lime { color: #fff; background: rgba(255,255,255,.14); }
     .cta-sub { color: rgba(255,255,255,.66); font-size: 1.02rem; margin: 18px auto 34px; max-width: 460px; }
@@ -185,6 +232,8 @@
   <!-- ══ HERO ══ -->
   <header class="hero">
     <div class="dots" aria-hidden="true"></div>
+    <span class="hero-blob blob-a" aria-hidden="true"></span>
+    <span class="hero-blob blob-b" aria-hidden="true"></span>
     <div>
       <h1 class="hero-h fade-up d1">Get <span class="hl hl-lime">paid</span> to shop.<br>For real.</h1>
       <p class="hero-sub fade-up d2">Buy from brands you already love, post it on your socials, and watch <span class="squiggle">actual money</span> land in your wallet. No points. No vouchers. Cash.</p>
@@ -389,6 +438,7 @@
   <section class="section" id="cta" style="padding-top:0">
     <div class="section-inner">
       <div class="card card-ink cta-slab reveal">
+        <span class="cta-ring" aria-hidden="true"></span>
         <div class="cta-orbit" aria-hidden="true"></div>
         <h2 class="h-display">Ready to get <span class="hl hl-lime">paid</span><br>to shop?</h2>
         <p class="cta-sub">Join 50,000+ members already earning cashback. Signing up takes 60 seconds.</p>
@@ -499,6 +549,38 @@
         else balEl.textContent = Math.floor(val);
       }, 30);
     }
+
+    // ── Hero life: wallet tilt on pointer + periodic "cashback arriving" ping ──
+    (function () {
+      const rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const phone = document.querySelector('.wallet-phone');
+      if (!phone || rm) return;
+
+      // 3D tilt follows the cursor over the visual (desktop pointers only)
+      const vis = document.querySelector('.hero-visual');
+      if (vis && window.matchMedia('(pointer: fine)').matches) {
+        vis.style.perspective = '900px';
+        vis.addEventListener('pointermove', e => {
+          const r = vis.getBoundingClientRect();
+          const dx = (e.clientX - r.left) / r.width - .5;
+          const dy = (e.clientY - r.top) / r.height - .5;
+          phone.style.transform = `rotateY(${(dx * 7).toFixed(2)}deg) rotateX(${(-dy * 7).toFixed(2)}deg)`;
+        });
+        vis.addEventListener('pointerleave', () => { phone.style.transform = ''; });
+      }
+
+      // every few seconds one wallet row pulses, like cashback just landed
+      const items = phone.querySelectorAll('.wp-item');
+      if (items.length) {
+        let i = 0;
+        setInterval(() => {
+          const el = items[i++ % items.length];
+          el.classList.remove('ping');
+          void el.offsetWidth;           // restart the animation
+          el.classList.add('ping');
+        }, 5200);
+      }
+    })();
 
     // ── Smooth anchor scroll ──
     document.querySelectorAll('a[href^="#"]').forEach(a => {

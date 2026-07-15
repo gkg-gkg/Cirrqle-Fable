@@ -24,7 +24,47 @@
     .b-stat { text-align: center; padding: 24px 12px; }
         .b-stat-v { font-family: var(--font-display); font-weight: 800; font-size: 2rem; letter-spacing: -0.03em; }
     .b-stat-l { font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-top: 4px; }
-    .cta-box { text-align: center; padding: 44px 30px; margin-top: 60px; }
+    .cta-box { text-align: center; padding: 44px 30px; margin-top: 60px; position: relative; overflow: hidden; }
+    .cta-box > :not(.cta-ring) { position: relative; z-index: 1; }
+    .cta-ring {
+      position: absolute; width: 520px; height: 520px;
+      top: 50%; left: 50%; margin: -260px 0 0 -260px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255,255,255,.13);
+      animation: spin 70s linear infinite;
+      pointer-events: none;
+    }
+    .cta-ring::before {
+      content: ''; position: absolute; inset: 64px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255,255,255,.09);
+      animation: spin 50s linear infinite reverse;
+    }
+
+    /* ── subtle life: glow drift, marker-sweep highlight, CTA pulse ── */
+    .page-hero { position: relative; }
+    .hero-blob {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle, var(--blue-glow), transparent 70%);
+      pointer-events: none; z-index: -1;
+    }
+    .blob-a { width: 440px; height: 440px; top: -120px; right: -40px; animation: blobDrift 22s ease-in-out infinite alternate; }
+    .blob-b { width: 360px; height: 360px; bottom: -160px; left: -100px; animation: blobDrift 27s ease-in-out -9s infinite alternate-reverse; }
+    @keyframes blobDrift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(44px, 30px) scale(1.14); }
+    }
+    .page-hero .hl {
+      background: linear-gradient(var(--blue-tint), var(--blue-tint)) no-repeat 0 0 / 0% 100%;
+      animation: hlSweep .8s var(--snap) .5s forwards;
+    }
+    @keyframes hlSweep { to { background-size: 100% 100%; } }
+    .page-hero .btn-lime { animation: ctaPulse 3.4s ease-in-out 1.4s infinite; }
+    @keyframes ctaPulse {
+      0%, 100% { box-shadow: var(--shadow-blue), inset 0 1px 0 rgba(255,255,255,.18); }
+      50% { box-shadow: 0 8px 26px rgba(53,99,127,.34), 0 0 0 7px rgba(67,125,158,.09), inset 0 1px 0 rgba(255,255,255,.18); }
+    }
+
     @media(max-width:760px){ .why-grid { grid-template-columns: 1fr 1fr; } .steps-list { grid-template-columns: 1fr; } .stats-section { grid-template-columns: 1fr 1fr; } }
     @media(max-width:500px){ .why-grid { grid-template-columns: 1fr; } }
   </style>
@@ -40,6 +80,8 @@
 
   <div class="page">
     <div class="page-hero">
+      <span class="hero-blob blob-a" aria-hidden="true"></span>
+      <span class="hero-blob blob-b" aria-hidden="true"></span>
       <h1 class="h-display fade-up d1" style="margin-top:20px">Turn your customers into your <span class="hl hl-lime">best marketing</span></h1>
       <p class="h-sub fade-up d2" style="margin:16px auto 0">Cirqle connects brands with real shoppers who share their purchases authentically. You get organic UGC and new customers. They get paid. Everyone wins.</p>
       <div class="fade-up d3" style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
@@ -49,12 +91,12 @@
     </div>
 
     <div class="why-grid">
-      <div class="card why-card fade-up d1"><span class="why-icon"><i class="ico ico-megaphone"></i></span><div class="why-title">Authentic content at scale</div><div class="why-text">Thousands of genuine shoppers posting about your brand — not paid actors. Real content that converts.</div></div>
-      <div class="card card-lime why-card fade-up d2"><span class="why-icon"><i class="ico ico-cash"></i></span><div class="why-title">Performance-only pricing</div><div class="why-text">You only pay cashback when a verified purchase happens. Zero wasted spend on impressions or clicks.</div></div>
-      <div class="card card-sky why-card fade-up d3"><span class="why-icon"><i class="ico ico-chart"></i></span><div class="why-title">Full attribution</div><div class="why-text">See exactly which posts drove which purchases. Real-time dashboard with conversion data and ROI.</div></div>
-      <div class="card card-pink why-card fade-up d4"><span class="why-icon"><i class="ico ico-target"></i></span><div class="why-title">Targeted reach</div><div class="why-text">Choose your audience by category, location, or spend level. Only pay for the shoppers who matter most.</div></div>
-      <div class="card card-tang why-card fade-up d5"><span class="why-icon"><i class="ico ico-bolt"></i></span><div class="why-title">Live in 48 hours</div><div class="why-text">Set up your cashback campaign and go live in under two days. No tech work on your side required.</div></div>
-      <div class="card why-card fade-up d6"><span class="why-icon"><i class="ico ico-users"></i></span><div class="why-title">Dedicated account manager</div><div class="why-text">Every brand partner gets a dedicated account manager. We set you up, then optimise continuously.</div></div>
+      <div class="card card-hover why-card fade-up d1"><span class="why-icon"><i class="ico ico-megaphone"></i></span><div class="why-title">Authentic content at scale</div><div class="why-text">Thousands of genuine shoppers posting about your brand — not paid actors. Real content that converts.</div></div>
+      <div class="card card-lime card-hover why-card fade-up d2"><span class="why-icon"><i class="ico ico-cash"></i></span><div class="why-title">Performance-only pricing</div><div class="why-text">You only pay cashback when a verified purchase happens. Zero wasted spend on impressions or clicks.</div></div>
+      <div class="card card-sky card-hover why-card fade-up d3"><span class="why-icon"><i class="ico ico-chart"></i></span><div class="why-title">Full attribution</div><div class="why-text">See exactly which posts drove which purchases. Real-time dashboard with conversion data and ROI.</div></div>
+      <div class="card card-pink card-hover why-card fade-up d4"><span class="why-icon"><i class="ico ico-target"></i></span><div class="why-title">Targeted reach</div><div class="why-text">Choose your audience by category, location, or spend level. Only pay for the shoppers who matter most.</div></div>
+      <div class="card card-tang card-hover why-card fade-up d5"><span class="why-icon"><i class="ico ico-bolt"></i></span><div class="why-title">Live in 48 hours</div><div class="why-text">Set up your cashback campaign and go live in under two days. No tech work on your side required.</div></div>
+      <div class="card card-hover why-card fade-up d6"><span class="why-icon"><i class="ico ico-users"></i></span><div class="why-title">Dedicated account manager</div><div class="why-text">Every brand partner gets a dedicated account manager. We set you up, then optimise continuously.</div></div>
     </div>
 
     <div class="prose reveal"><h2>How it works for brands</h2></div>
@@ -73,11 +115,39 @@
     </div>
 
     <div class="card card-ink cta-box reveal">
+      <span class="cta-ring" aria-hidden="true"></span>
       <h2 style="color:var(--paper); font-size:clamp(1.6rem,3.4vw,2.2rem)">Ready to grow with <span class="hl hl-lime" style="color:var(--ink)">Cirqle?</span></h2>
       <p style="color:rgba(255,255,255,.66); margin:12px 0 26px">Tell us about your brand and we'll set up a 20-minute call to explore what's possible.</p>
       <a href="contact.html" class="btn btn-lg btn-lime">Talk to our team →</a>
     </div>
   </div>
+  <script>
+    // Count the stat figures up when they scroll into view ("50k+" -> 0..50k+).
+    (function () {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const els = document.querySelectorAll('.b-stat-v');
+      if (!els.length || !('IntersectionObserver' in window)) return;
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(en => {
+          if (!en.isIntersecting) return;
+          obs.unobserve(en.target);
+          const raw = en.target.textContent.trim();
+          const m = raw.match(/^([\d.]+)(.*)$/);
+          if (!m) return;
+          const target = parseFloat(m[1]), suffix = m[2];
+          const dec = m[1].includes('.') ? 1 : 0;
+          const step = target / (1100 / 16);
+          let cur = 0;
+          const t = setInterval(() => {
+            cur = Math.min(cur + step, target);
+            en.target.textContent = cur.toFixed(dec) + suffix;
+            if (cur >= target) { en.target.textContent = raw; clearInterval(t); }
+          }, 16);
+        });
+      }, { threshold: 0.6 });
+      els.forEach(el => obs.observe(el));
+    })();
+  </script>
   <script src="assets/enhance.js"></script>
 </body>
 </html>
