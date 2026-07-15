@@ -145,17 +145,6 @@
           <span id="submitText">Sign in →</span>
         </button>
 
-        <div class="divider">
-          <div class="divider-line"></div>
-          <span class="divider-text">or continue with</span>
-          <div class="divider-line"></div>
-        </div>
-
-        <div class="social-btns">
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Apple</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Google</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Facebook</a>
-        </div>
       </form>
 
       <div class="signup-link">
@@ -301,11 +290,6 @@
       document.getElementById('forgotSuccess').classList.add('visible');
     });
 
-    // ── Social auth toast ──
-    function showSocialToast(e) {
-      e.preventDefault();
-      cirqleToast('Social sign-in coming soon — use email for now');
-    }
   </script>
   <script src="assets/enhance.js"></script>
 </body>

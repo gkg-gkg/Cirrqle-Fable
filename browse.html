@@ -230,17 +230,7 @@
               <option value="cashback">Highest cashback</option>
               <option value="newest">Newest first</option>
               <option value="discount">Biggest discount</option>
-              <option value="nearest">Nearest to me</option>
-              <option value="rating">Top rated</option>
             </select>
-          </div>
-          <div>
-            <div class="side-group-title">Near me</div>
-            <div class="postcode-row">
-              <input class="postcode-input" id="postcodeInput" type="text" maxlength="8" autocomplete="postal-code"
-                     enterkeyhint="search" placeholder="Postcode ⏎" aria-label="Your postcode — press Enter to search" />
-              <span class="pc-note" id="pcNote"></span>
-            </div>
           </div>
         </div>
       </aside>
@@ -275,8 +265,6 @@
     const countNum = document.getElementById('countNum');
     const tabs = document.querySelectorAll('.side-cat');
     const sortSelect = document.getElementById('sortSelect');
-    const postcodeInput = document.getElementById('postcodeInput');
-    const pcNote = document.getElementById('pcNote');
 
     let cards = [];            // rendered .deal-card elements
     let activeFilter = 'all';
@@ -293,18 +281,8 @@
       if (/members/i.test(e)) return 'New members';
       return 'Ends ' + String(e).replace(/\s*\d{4}$/, '');   // drop the year
     }
-    // Placeholder rating/distance/ending until Phase 5 makes metrics real.
-    // Derived from id so they're stable and work for admin-added campaigns too.
-    function metaFor(c) {
-      return {
-        rating: +(4.1 + ((c.id * 7) % 9) / 10).toFixed(1),     // 4.1–4.9
-        distance: +(((c.id * 37) % 130) / 10).toFixed(1),      // 0–13 mi
-        ending: !/ongoing|members/i.test(c.expiry) && /\d/.test(c.expiry),
-      };
-    }
 
     function renderCard(c) {
-      const m = metaFor(c);
       const thumb = c.images && c.images.length
         ? `<img src="${esc(c.images[0])}" alt="${esc(c.brand)}" loading="lazy"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
@@ -316,8 +294,6 @@
       el.dataset.cashback = earnNum(c.earn);
       el.dataset.clicks = c.claims;
       el.dataset.discount = c.rate;
-      el.dataset.rating = m.rating;
-      el.dataset.distance = m.distance;
       el.dataset.id = c.id;
       el.dataset.brand = (c.brand || '').toLowerCase();
       // Chips: online/in-store · end date (omitted for ongoing deals) · claims.
@@ -327,12 +303,10 @@
       el.innerHTML = `
         <div class="card-image">
           ${thumb}
-          ${m.ending ? '<span class="ending-badge">Ends soon</span>' : ''}
         </div>
         <div class="card-body">
           <div class="card-head">
             <div class="card-title">${esc(c.cardTitle || c.title)}</div>
-            <div class="card-rating"><i class="ico ico-star"></i> ${m.rating.toFixed(1)}</div>
           </div>
           <div class="card-desc">${esc(c.cardDesc)}</div>
           <div class="card-meta">
@@ -386,20 +360,11 @@
         if (value === 'cashback') return +b.dataset.cashback - +a.dataset.cashback;
         if (value === 'discount') return +b.dataset.discount - +a.dataset.discount;
         if (value === 'popular')  return +b.dataset.clicks - +a.dataset.clicks;
-        if (value === 'rating')   return +b.dataset.rating - +a.dataset.rating;
-        if (value === 'nearest')  return +a.dataset.distance - +b.dataset.distance;
         if (value === 'newest')   return +b.dataset.id - +a.dataset.id;
         return 0;
       }).forEach(c => grid.insertBefore(c, emptyState));
     }
 
-    function showNearby() {
-      const pc = postcodeInput.value.trim().toUpperCase();
-      if (!pc) { pcNote.textContent = 'Enter a postcode first'; return; }
-      pcNote.textContent = `Showing deals near ${pc}`;
-      sortSelect.value = 'nearest';
-      sortCards('nearest');
-    }
 
     // Wire the (always-present) controls up front.
     tabs.forEach(tab => tab.addEventListener('click', () => {
@@ -414,7 +379,6 @@
     });
     sortSelect.addEventListener('change', e => sortCards(e.target.value));
     // Postcode: Enter (or the mobile keyboard's Search key) runs the search.
-    postcodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); showNearby(); } });
 
     // Load the catalog, render, then apply the default sort.
     (async function load() {

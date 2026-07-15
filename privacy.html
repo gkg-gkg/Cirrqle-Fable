@@ -19,6 +19,9 @@
     .toc-num { display: inline-block; width: 26px; font-weight: 800; color: var(--pink-deep); }
     .legal-footer { margin-top: 48px; padding: 20px 24px; border: var(--bw) solid var(--line); border-radius: 16px; background: var(--paper-deep); font-size: .84rem; color: var(--ink-soft); line-height: 1.7; }
     .legal-footer a { color: var(--pink-deep); font-weight: 700; }
+    .prose table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: .9rem; }
+    .prose th, .prose td { text-align: left; padding: 9px 12px; border: 1px solid var(--line); vertical-align: top; }
+    .prose th { background: var(--paper-deep); font-weight: 700; }
   </style>
 </head>
 <body>
@@ -35,98 +38,128 @@
   <div class="page">
     <div class="page-hero">
       <h1 class="h-display fade-up d1" style="margin-top:20px">Privacy <span class="hl hl-lime">Policy</span></h1>
-      <p class="updated fade-up d2">Last updated: 14 June 2026</p>
+      <p class="updated fade-up d2">Last updated: 15 July 2026</p>
     </div>
 
     <div class="toc fade-up d2">
       <div class="toc-title">Contents</div>
-      <a href="#what-we-collect"><span class="toc-num">1.</span>What we collect</a>
-      <a href="#how-we-use"><span class="toc-num">2.</span>How we use your data</a>
-      <a href="#sharing"><span class="toc-num">3.</span>Sharing with third parties</a>
-      <a href="#cookies"><span class="toc-num">4.</span>Cookies</a>
-      <a href="#rights"><span class="toc-num">5.</span>Your rights</a>
-      <a href="#retention"><span class="toc-num">6.</span>Data retention</a>
-      <a href="#security"><span class="toc-num">7.</span>Security</a>
-      <a href="#contact-us"><span class="toc-num">8.</span>Contact us</a>
+      <a href="#who-we-are"><span class="toc-num">1.</span>Who we are</a>
+      <a href="#what-we-collect"><span class="toc-num">2.</span>What data we collect</a>
+      <a href="#how-we-use"><span class="toc-num">3.</span>How &amp; why we use it</a>
+      <a href="#instagram"><span class="toc-num">4.</span>Instagram data</a>
+      <a href="#sharing"><span class="toc-num">5.</span>Who we share it with</a>
+      <a href="#transfers"><span class="toc-num">6.</span>International transfers</a>
+      <a href="#retention"><span class="toc-num">7.</span>How long we keep it</a>
+      <a href="#rights"><span class="toc-num">8.</span>Your rights</a>
+      <a href="#security"><span class="toc-num">9.</span>Security</a>
+      <a href="#cookies"><span class="toc-num">10.</span>Cookies &amp; storage</a>
+      <a href="#changes"><span class="toc-num">11.</span>Changes &amp; contact</a>
     </div>
 
     <div class="prose">
-      <p>Cirqle Ltd ("Cirqle", "we", "us") is committed to protecting your privacy. This policy explains how we collect, use, and protect your personal data when you use cirqle.co.uk or our services.</p>
+      <p>This policy explains how <strong>Cirqle Ltd</strong> ("Cirqle", "we", "us") collects, uses, and protects your personal data when you use cirqle.co.uk and our services. We are the "data controller" for this data under the UK GDPR and the Data Protection Act 2018.</p>
+
+      <section id="who-we-are">
+        <h2>1. Who we are</h2>
+        <p>Cirqle Ltd is a company registered in England and Wales <em>[company number — to be added]</em>, registered office <em>[registered address — to be added]</em>. We are registered with the Information Commissioner's Office (ICO) under registration <em>[ICO registration number — to be added]</em>.</p>
+        <p>For any privacy question or to exercise your rights, contact <a href="mailto:privacy@cirqle.co.uk">privacy@cirqle.co.uk</a>.</p>
+      </section>
 
       <section id="what-we-collect">
-        <h2>1. What we collect</h2>
-        <p>We collect the following types of information:</p>
+        <h2>2. What data we collect</h2>
         <ul>
-          <li><strong>Account data:</strong> name, email address, and password (hashed).</li>
-          <li><strong>Transaction data:</strong> purchases tracked through our links, cashback amounts, withdrawal history.</li>
-          <li><strong>Social post data:</strong> post URLs or screenshots you submit for cashback verification.</li>
-          <li><strong>Device &amp; usage data:</strong> IP address, browser type, pages visited, time spent — via cookies and analytics tools.</li>
-          <li><strong>Payment data:</strong> bank account or PayPal details for withdrawals. We do not store full card numbers.</li>
+          <li><strong>Account data:</strong> your first and last name, email address, password (stored only as a secure bcrypt hash — never in plain text), your Instagram handle, and the date you signed up.</li>
+          <li><strong>Cashback claims:</strong> photos of receipts you upload (stored privately), the deal you claimed against, the Instagram post linked to the claim, and the cashback amount and its status (pending, confirmed, paid, or rejected).</li>
+          <li><strong>Instagram post data:</strong> where you provide an Instagram handle and refresh your feed, we collect public posts that tag our brand account — see section 4.</li>
+          <li><strong>Technical data:</strong> our website is hosted on GitHub Pages and our API on Amazon Web Services (AWS). As part of normal operation and security, those providers process standard request data such as your IP address, the time of the request, and your browser type. We do not run our own advertising or analytics tracking.</li>
+          <li><strong>Brand / partnership data:</strong> if you apply to partner with us as a brand, we collect the business and contact details you submit in that form.</li>
         </ul>
+        <p>We do <strong>not</strong> collect payment card numbers, and we do not buy personal data or track you across other websites.</p>
       </section>
 
       <section id="how-we-use">
-        <h2>2. How we use your data</h2>
-        <p>We use your data to:</p>
-        <ul>
-          <li>Create and manage your Cirqle account.</li>
-          <li>Track purchases and calculate cashback owed to you.</li>
-          <li>Verify social posts and process cashback payments.</li>
-          <li>Send you transactional emails (cashback confirmed, withdrawal processed, etc.).</li>
-          <li>Improve our platform through anonymised analytics.</li>
-          <li>Comply with legal obligations, including fraud prevention and financial regulations.</li>
-        </ul>
-        <p>We will only send you marketing emails if you have opted in. You can unsubscribe at any time.</p>
+        <h2>3. How &amp; why we use it</h2>
+        <p>Under UK GDPR we must have a "lawful basis" for each use of your data:</p>
+        <table>
+          <tr><th>What we do</th><th>Lawful basis</th></tr>
+          <tr><td>Create and run your account and provide the cashback service</td><td>Performance of our contract with you</td></tr>
+          <tr><td>Verify claims and prevent fraud, abuse, and duplicate accounts</td><td>Our legitimate interests</td></tr>
+          <tr><td>Keep the service secure, working, and debugged</td><td>Our legitimate interests</td></tr>
+          <tr><td>Send service emails (claim received/confirmed/paid, sign-in codes, password resets)</td><td>Performance of our contract</td></tr>
+          <tr><td>Send marketing emails, if you opt in</td><td>Your consent (you can withdraw it any time)</td></tr>
+          <tr><td>Keep financial and tax records</td><td>Compliance with a legal obligation</td></tr>
+        </table>
+        <p>We only send marketing if you have opted in, and every marketing email has an unsubscribe link.</p>
+      </section>
+
+      <section id="instagram">
+        <h2>4. Instagram data</h2>
+        <p>Cirqle's cashback model asks you to post about a purchase on Instagram and tag our account. To check that a qualifying post exists, we retrieve <strong>public</strong> Instagram posts that tag our brand account and match them to the Instagram handle on your account. For those posts we may process the post's URL, caption, timestamp, the posting account's username and display name, and public like/comment counts.</p>
+        <p>We use this only to verify your cashback claim. You control which handle is on your account, and you can remove or change it at any time. This retrieval is performed for us by a third-party provider (see section 5). We are reviewing this mechanism and may change how post verification works in future; we will update this policy if we do.</p>
       </section>
 
       <section id="sharing">
-        <h2>3. Sharing with third parties</h2>
-        <p>We share data with:</p>
+        <h2>5. Who we share it with</h2>
+        <p>We do <strong>not</strong> sell your personal data. We share it only with service providers ("processors") who act on our instructions, and where the law requires:</p>
         <ul>
-          <li><strong>Brand partners:</strong> purchase data (not your identity) to confirm cashback eligibility.</li>
-          <li><strong>Payment processors:</strong> to process withdrawals securely.</li>
-          <li><strong>Analytics providers:</strong> anonymised usage data only.</li>
+          <li><strong>Amazon Web Services (AWS)</strong> — hosting, database, private receipt storage, and email delivery. Your data is stored in AWS's UK (London) region.</li>
+          <li><strong>Apify</strong> — retrieves the public Instagram post data described in section 4.</li>
+          <li><strong>GitHub (GitHub Pages)</strong> — serves our website.</li>
+          <li><strong>Google Fonts</strong> — serves the fonts our pages use; this may involve your browser's IP address being seen by Google.</li>
+          <li><strong>Brand partners:</strong> if and when we settle cashback with a partner brand, we may share the minimum information needed to confirm a qualifying purchase — never more than necessary.</li>
+          <li><strong>A payment provider</strong> — when cashback withdrawals go live, to pay out your balance (not active yet).</li>
+          <li><strong>Authorities or advisers</strong> — where we are legally required to disclose, or to protect our rights.</li>
         </ul>
-        <p>We never sell your personal data. We do not share your data with advertisers for targeting purposes.</p>
       </section>
 
-      <section id="cookies">
-        <h2>4. Cookies</h2>
-        <p>We use cookies to keep you signed in, track purchases, and understand how people use our site. See our <a href="cookies.html">Cookie Policy</a> for details, or manage your preferences in your browser settings.</p>
-      </section>
-
-      <section id="rights">
-        <h2>5. Your rights</h2>
-        <p>Under UK GDPR, you have the right to:</p>
-        <ul>
-          <li>Access the personal data we hold about you.</li>
-          <li>Request correction of inaccurate data.</li>
-          <li>Request deletion of your data ("right to be forgotten").</li>
-          <li>Object to or restrict certain uses of your data.</li>
-          <li>Request a portable copy of your data.</li>
-          <li>Lodge a complaint with the ICO (ico.org.uk).</li>
-        </ul>
-        <p>To exercise any right, email <a href="mailto:privacy@cirqle.co.uk">privacy@cirqle.co.uk</a>. We will respond within 30 days.</p>
+      <section id="transfers">
+        <h2>6. International transfers</h2>
+        <p>Your account and cashback data is stored in the UK (AWS London region). Some of our providers (for example Apify, Google, and GitHub) may process limited data outside the UK. Where they do, we rely on appropriate safeguards — such as UK "adequacy" decisions or the International Data Transfer Agreement — to keep your data protected to UK standards.</p>
       </section>
 
       <section id="retention">
-        <h2>6. Data retention</h2>
-        <p>We keep your account data for as long as your account is active, plus 7 years for legal and financial compliance. Transaction records are kept for 7 years in line with HMRC requirements. You can request deletion of your account at any time.</p>
+        <h2>7. How long we keep it</h2>
+        <ul>
+          <li><strong>Account data</strong> — while your account is open, and for a short period after closure to handle any final queries.</li>
+          <li><strong>Cashback and financial records</strong> — up to 6 years, to meet UK tax and accounting requirements.</li>
+          <li><strong>Sign-in codes and password-reset links</strong> — minutes only (they expire quickly by design).</li>
+          <li><strong>Cached Instagram posts</strong> — until you refresh them or close your account.</li>
+        </ul>
+        <p>You can ask us to delete your account and associated data at any time (subject to records we must keep by law).</p>
+      </section>
+
+      <section id="rights">
+        <h2>8. Your rights</h2>
+        <p>Under UK GDPR you have the right to:</p>
+        <ul>
+          <li>Access the personal data we hold about you.</li>
+          <li>Have inaccurate data corrected.</li>
+          <li>Have your data erased ("right to be forgotten").</li>
+          <li>Restrict or object to certain uses of your data.</li>
+          <li>Receive a portable copy of the data you gave us.</li>
+          <li>Withdraw consent (for anything based on consent) at any time.</li>
+        </ul>
+        <p>To exercise any of these, email <a href="mailto:privacy@cirqle.co.uk">privacy@cirqle.co.uk</a>. We aim to respond within one month. If you're unhappy with how we handle your data, you can complain to the ICO at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>.</p>
       </section>
 
       <section id="security">
-        <h2>7. Security</h2>
-        <p>We use industry-standard security measures including TLS encryption, password hashing, and regular security audits. Despite these measures, no system is 100% secure — please use a strong, unique password for your Cirqle account.</p>
+        <h2>9. Security</h2>
+        <p>We protect your data with measures including: passwords stored only as bcrypt hashes; receipt images held in private storage and viewable only through short-lived, signed links; encrypted connections (HTTPS/TLS); and hosting on AWS's UK infrastructure. No system is ever completely secure, so please use a strong, unique password for your Cirqle account and keep it private.</p>
       </section>
 
-      <section id="contact-us">
-        <h2>8. Contact us</h2>
-        <p>Cirqle Ltd, London, UK.<br>Privacy enquiries: <a href="mailto:privacy@cirqle.co.uk">privacy@cirqle.co.uk</a><br>General: <a href="contact.html">Contact page</a></p>
+      <section id="cookies">
+        <h2>10. Cookies &amp; storage</h2>
+        <p>We do not use advertising or tracking cookies. To keep you signed in and remember a few preferences, we use your browser's local storage. Full details are in our <a href="cookies.html">Cookie Policy</a>.</p>
+      </section>
+
+      <section id="changes">
+        <h2>11. Changes &amp; contact</h2>
+        <p>We may update this policy from time to time. If we make a material change, we'll post a notice on the site and, where appropriate, email you. Questions or requests: <a href="mailto:privacy@cirqle.co.uk">privacy@cirqle.co.uk</a>, or via our <a href="contact.html">contact page</a>.</p>
       </section>
     </div>
 
     <div class="legal-footer reveal">
-      This policy is governed by the laws of England and Wales. We reserve the right to update this policy — you will be notified of material changes by email or via a notice on our website. See also: <a href="terms.html">Terms of Service</a> · <a href="cookies.html">Cookie Policy</a>
+      This policy is governed by the laws of England and Wales. See also: <a href="terms.html">Terms of Service</a> · <a href="cookies.html">Cookie Policy</a>
     </div>
   </div>
   <script src="assets/enhance.js"></script>

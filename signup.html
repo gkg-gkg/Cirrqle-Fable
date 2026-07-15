@@ -166,17 +166,6 @@
           <span id="submitText">Create free account →</span>
         </button>
 
-        <div class="divider">
-          <div class="divider-line"></div>
-          <span class="divider-text">or sign up with</span>
-          <div class="divider-line"></div>
-        </div>
-
-        <div class="social-btns">
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Apple</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Google</a>
-          <a href="#" class="btn btn-sm" onclick="showSocialToast(event)">Facebook</a>
-        </div>
       </form>
 
       <div class="signin-link">
@@ -302,11 +291,6 @@
       setTimeout(() => { window.location.href = 'dashboard.html'; }, 1600);
     });
 
-    // ── Social auth toast ──
-    function showSocialToast(e) {
-      e.preventDefault();
-      cirqleToast('Social sign-in coming soon — use email for now');
-    }
   </script>
   <script src="assets/enhance.js"></script>
 </body>
