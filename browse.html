@@ -13,9 +13,7 @@
   <style>
     /* ── Page header ── */
     .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 24px; position: relative; z-index: 1; }
-    /* search + compact limited-time banner share one row */
-    .head-row { display: flex; gap: 18px; align-items: stretch; margin-top: 22px; }
-    .search-wrap { position: relative; flex: 0 0 300px; }
+    .search-wrap { position: relative; margin-top: 22px; width: 300px; }
     .search-input {
       background: var(--card);
       border: var(--bw) solid var(--line);
@@ -32,16 +30,6 @@
     .search-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(60,125,166,.15); }
     .search-input::placeholder { color: #93A0AD; }
     .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-
-    /* ── Featured banner: compact, sits beside the search bar ── */
-    .banner-inner {
-      flex: 1; min-width: 0;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      padding: 8px 10px 8px 18px;
-    }
-    .banner-title { font-family: var(--font-display); font-weight: 700; font-size: .92rem; letter-spacing: -0.01em; }
-    .banner-title .sticker { margin-right: 8px; font-size: .68rem; padding: 3px 10px; }
-    .banner-sub { font-size: .76rem; color: var(--ink-soft); font-weight: 500; margin-top: 2px; }
 
     /* ── Layout: filter sidebar + deals grid ── */
     .deals-section { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 100px; position: relative; z-index: 1; }
@@ -167,12 +155,8 @@
       .side-group-title { margin-bottom: 6px; }
     }
     @media (max-width: 620px) {
-      /* header: search + banner stack */
-      .head-row { flex-direction: column; gap: 12px; }
-      .search-wrap { flex: none; }
+      .search-wrap { width: 100%; }
       .search-input { width: 100%; }
-      .banner-inner { padding: 10px 12px 10px 14px; }
-      .banner-sub { display: none; }
       /* sort + postcode stay side by side (each half-width) */
       .side-row { gap: 12px; }
 
@@ -187,10 +171,10 @@
       .card-desc { display: none; }
       .card-meta { gap: 4px; }
       .card-meta .chip { font-size: .6rem; padding: 2px 7px; }
-      .card-footer { padding: 8px 11px; flex-wrap: wrap; }
+      .card-footer { padding: 6px 11px; flex-wrap: wrap; }
       .earn-label { font-size: .54rem; }
       .earn-val { font-size: 1rem; }
-      .shop-btn { font-size: .7rem; padding: 6px 12px; }
+      .card-footer .shop-btn { font-size: .7rem; padding: 4px 12px; min-height: 30px; }
     }
   </style>
 </head>
@@ -214,18 +198,9 @@
   <div class="browse-head">
     <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
     <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
-    <div class="head-row fade-up d2">
-      <div class="search-wrap">
-        <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
-        <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
-      </div>
-      <div class="card banner-inner">
-        <div style="min-width:0">
-          <div class="banner-title"><span class="sticker sticker-pink">Limited time</span>Double cashback weekend — up to 20% back</div>
-          <div class="banner-sub">50+ selected brands, ends Sunday midnight.</div>
-        </div>
-        <a href="signup.html" class="btn btn-sm btn-ink" style="flex-shrink:0">Shop now →</a>
-      </div>
+    <div class="search-wrap fade-up d2">
+      <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
     </div>
   </div>
 
@@ -263,8 +238,7 @@
             <div class="side-group-title">Near me</div>
             <div class="postcode-row">
               <input class="postcode-input" id="postcodeInput" type="text" maxlength="8" autocomplete="postal-code"
-                     placeholder="Postcode" aria-label="Your postcode" />
-              <button class="btn btn-sm btn-lime" id="postcodeBtn" type="button">See deals near me</button>
+                     enterkeyhint="search" placeholder="Postcode ⏎" aria-label="Your postcode — press Enter to search" />
               <span class="pc-note" id="pcNote"></span>
             </div>
           </div>
@@ -362,7 +336,7 @@
           </div>
           <div class="card-desc">${esc(c.cardDesc)}</div>
           <div class="card-meta">
-            <span class="chip">${place}</span>
+            <span class="chip chip-place">${place}</span>
             ${expiryChip}
             <span class="chip">${Number(c.claims || 0).toLocaleString()} claims</span>
           </div>
@@ -391,7 +365,21 @@
       });
       countNum.textContent = visible;
       emptyState.classList.toggle('visible', visible === 0);
+      fitChips();
     }
+
+    // Chips must sit on ONE line: if a tile's chips wrap, drop its
+    // online/in-store chip so the end date + claims fit side by side.
+    function fitChips() {
+      document.querySelectorAll('.deal-card:not(.hidden) .card-meta').forEach(meta => {
+        const place = meta.querySelector('.chip-place');
+        if (!place) return;
+        const chips = meta.querySelectorAll('.chip');
+        if (chips[chips.length - 1].offsetTop > chips[0].offsetTop) place.remove();
+      });
+    }
+    window.addEventListener('load', fitChips);
+    window.addEventListener('resize', fitChips);
 
     function sortCards(value) {
       [...cards].sort((a, b) => {
@@ -425,8 +413,8 @@
       applyFilters();
     });
     sortSelect.addEventListener('change', e => sortCards(e.target.value));
-    document.getElementById('postcodeBtn').addEventListener('click', showNearby);
-    postcodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') showNearby(); });
+    // Postcode: Enter (or the mobile keyboard's Search key) runs the search.
+    postcodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); showNearby(); } });
 
     // Load the catalog, render, then apply the default sort.
     (async function load() {
