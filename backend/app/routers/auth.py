@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 from ..db import get_session
 from ..models import (AuthOut, PasswordChangeIn, ProfileUpdateIn, SigninIn,
                       SignupIn, User, UserOut)
+from ..ratelimit import rate_limit
 from ..security import create_token, get_current_user, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -25,7 +26,8 @@ def _user_out(user: User) -> UserOut:
     )
 
 
-@router.post("/signup", response_model=AuthOut, status_code=201)
+@router.post("/signup", response_model=AuthOut, status_code=201,
+             dependencies=[rate_limit("signup", limit=5, window=3600)])
 def signup(data: SignupIn, session: Session = Depends(get_session)):
     email = data.email.lower()
     if session.exec(select(User).where(User.email == email)).first():
@@ -46,7 +48,8 @@ def signup(data: SignupIn, session: Session = Depends(get_session)):
     return AuthOut(token=create_token(user.id), user=_user_out(user))
 
 
-@router.post("/signin", response_model=AuthOut)
+@router.post("/signin", response_model=AuthOut,
+             dependencies=[rate_limit("signin", limit=10, window=300)])
 def signin(data: SigninIn, session: Session = Depends(get_session)):
     email = data.email.lower()
     user = session.exec(select(User).where(User.email == email)).first()

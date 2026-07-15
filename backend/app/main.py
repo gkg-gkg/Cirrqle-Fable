@@ -19,12 +19,23 @@ from .storage import MEDIA_DIR  # noqa: E402
 
 app = FastAPI(title="Cirqle API")
 
-# We authenticate with a bearer token (no cookies), so allowing any origin is
-# safe for local dev. Restrict this via CIRQLE_CORS_ORIGINS in production.
-origins = [o.strip() for o in os.environ.get("CIRQLE_CORS_ORIGINS", "*").split(",")]
+# Which website origins may call this API. Set CIRQLE_CORS_ORIGINS (comma-
+# separated) to override; otherwise default to our known production frontends.
+# Any localhost port is always allowed via the regex below (for local dev), so
+# we no longer fall back to a wide-open "*".
+_env_origins = os.environ.get("CIRQLE_CORS_ORIGINS")
+if _env_origins:
+    origins = [o.strip() for o in _env_origins.split(",") if o.strip()]
+else:
+    origins = [
+        "https://gkg-gkg.github.io",
+        "https://cirqle.co.uk",
+        "https://www.cirqle.co.uk",
+    ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_methods=["*"],
     allow_headers=["*"],
 )
