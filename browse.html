@@ -9,11 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=5" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=6" />
   <style>
     /* ── Page header ── */
-    .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 28px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; position: relative; z-index: 1; }
-    .search-wrap { position: relative; flex-shrink: 0; }
+    .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 28px; position: relative; z-index: 1; }
+    .search-wrap { position: relative; margin-top: 22px; max-width: 420px; }
     .search-input {
       background: var(--card);
       border: var(--bw) solid var(--line);
@@ -40,30 +40,34 @@
     .banner-title { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; margin: 2px 0 3px; }
     .banner-sub { font-size: .85rem; color: var(--ink-soft); font-weight: 500; }
 
-    /* ── Filters ── */
-    .filters-bar { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
-    .filter-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
-    .filter-tab {
-      padding: 8px 18px;
-      border: var(--bw) solid var(--line);
-      border-radius: var(--r-chip);
-      background: var(--card);
-      color: var(--ink);
-      font-size: .84rem; font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font-body);
-      transition: all .15s var(--snap);
+    /* ── Layout: filter sidebar + deals grid ── */
+    .deals-section { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 100px; position: relative; z-index: 1; }
+    .deals-layout { display: grid; grid-template-columns: 224px 1fr; gap: 30px; align-items: start; }
+    .filter-col { position: sticky; top: 86px; display: flex; flex-direction: column; gap: 24px; }
+    .side-group-title {
+      font-size: .66rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.2px; color: var(--ink-soft); margin-bottom: 10px;
     }
-    .filter-tab:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: #D8DEE7; }
-    .filter-tab.active { background: var(--ink); color: var(--paper); box-shadow: var(--shadow-sm); }
-    .sort-wrap { display: flex; align-items: center; gap: 10px; }
-    .sort-label { font-size: .8rem; font-weight: 700; color: var(--ink-soft); }
+    .side-cats { display: flex; flex-direction: column; gap: 2px; }
+    .side-cat {
+      display: block; width: 100%; text-align: left;
+      padding: 9px 12px; border: none; border-radius: 10px;
+      background: none; color: var(--ink-soft);
+      font-family: var(--font-body); font-size: .88rem; font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .side-cat:hover { background: var(--paper-deep); color: var(--ink); }
+    .side-cat.active { background: var(--blue-pale); color: var(--blue-deep); font-weight: 700; }
+    /* desktop: the sort/postcode wrapper dissolves so both groups stack in the column */
+    .side-row { display: contents; }
     .sort-select {
+      width: 100%;
       background: var(--card);
       border: var(--bw) solid var(--line);
       border-radius: 12px;
-      padding: 9px 14px;
-      font-size: .84rem; font-weight: 600;
+      padding: 10px 12px;
+      font-size: .86rem; font-weight: 600;
       font-family: var(--font-body);
       color: var(--ink);
       outline: none; cursor: pointer;
@@ -71,10 +75,9 @@
     }
 
     /* ── Grid ── */
-    .deals-section { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 100px; position: relative; z-index: 1; }
-    .results-count { font-size: .85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 22px; }
+    .results-count { font-size: .85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 18px; }
     .results-count span { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 1rem; }
-    .deals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .deals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
     /* ── Deal card ── */
     .deal-card {
@@ -94,40 +97,29 @@
     .deal-card:nth-child(4){animation-delay:.16s}.deal-card:nth-child(5){animation-delay:.2s}.deal-card:nth-child(6){animation-delay:.24s}
     .deal-card:nth-child(7){animation-delay:.28s}.deal-card:nth-child(8){animation-delay:.32s}.deal-card:nth-child(9){animation-delay:.36s}
 
-    .card-image { position: relative; height: 186px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 4.2rem; overflow: hidden; }
+    .card-image { position: relative; height: 148px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 3.6rem; overflow: hidden; }
     .card-image .bg-emoji { transition: transform .3s var(--bounce); }
     .deal-card:hover .bg-emoji { transform: scale(1.1); }
     .cb-sticker { position: absolute; top: 12px; right: 12px; }
-    .brand-tag {
-      position: absolute; bottom: 10px; left: 12px;
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--card);
-      border: var(--bw) solid var(--line);
-      border-radius: var(--r-chip);
-      padding: 4px 12px 4px 5px;
-      font-size: .74rem; font-weight: 800;
-    }
-    .brand-dot { width: 22px; height: 22px; border-radius: 50%; border: var(--bw) solid var(--line); background: var(--lime); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; }
 
-    .card-body { padding: 16px 18px 14px; }
-    .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-    .card-title { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; letter-spacing: -0.01em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-desc { font-size: .8rem; color: var(--ink-soft); line-height: 1.55; margin-bottom: 12px; min-height: calc(.8rem * 1.55 * 2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .card-body { padding: 14px 16px 12px; }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .card-title { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 800; font-size: 1rem; letter-spacing: -0.01em; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-desc { font-size: .8rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta { display: flex; gap: 6px; flex-wrap: wrap; }
     .card-meta .chip { font-size: .68rem; padding: 3px 10px; }
 
     .card-footer {
       border-top: var(--bw) solid var(--line);
       background: var(--paper);
-      padding: 14px 18px;
+      padding: 11px 16px;
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
     .earn-label { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); }
-    .earn-val { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--green); line-height: 1.1; }
-    .card-clicks { font-size: .7rem; font-weight: 700; color: var(--ink-soft); }
-    .shop-btn { font-size: .8rem; padding: 9px 18px; }
+    .earn-val { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--green); line-height: 1.1; }
+    .shop-btn { font-size: .8rem; padding: 8px 16px; }
 
-    /* ── Rating · ending-soon · distance ── */
+    /* ── Rating · ending-soon ── */
     .card-rating { display: inline-flex; align-items: center; gap: 4px; font-size: .82rem; font-weight: 800; color: var(--ink); flex-shrink: 0; white-space: nowrap; }
     .ending-badge {
       position: absolute; top: 12px; left: 12px;
@@ -137,22 +129,20 @@
       border: var(--bw) solid var(--line); border-radius: var(--r-chip);
       background: var(--teal-tint); box-shadow: var(--shadow-sm);
     }
-    .dist-chip { background: var(--teal-tint) !important; }
 
-    /* ── Postcode bar ── */
-    .postcode-bar { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 30px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: relative; z-index: 1; }
-    .postcode-bar .pc-icon { font-size: 1.1rem; }
+    /* ── Postcode (in the sidebar) ── */
+    .postcode-row { display: flex; flex-direction: column; gap: 8px; }
     .postcode-input {
-      flex: 0 0 150px; background: var(--card);
-      border: var(--bw) solid var(--line); border-radius: var(--r-chip);
-      padding: 11px 18px; font-size: .9rem; font-weight: 600;
+      width: 100%; background: var(--card);
+      border: var(--bw) solid var(--line); border-radius: 12px;
+      padding: 10px 12px; font-size: .88rem; font-weight: 600;
       font-family: var(--font-body); color: var(--ink);
       outline: none; box-shadow: var(--shadow-sm);
-      transition: transform .15s var(--snap), box-shadow .15s var(--snap);
+      transition: border-color .15s var(--snap), box-shadow .15s var(--snap);
     }
     .postcode-input::placeholder { color: #93A0AD; }
     .postcode-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(60,125,166,.15); }
-    .pc-note { font-size: .8rem; font-weight: 700; color: var(--blue-deep); }
+    .pc-note { font-size: .76rem; font-weight: 700; color: var(--blue-deep); min-height: 1em; }
 
     .empty-state { grid-column: 1 / -1; text-align: center; padding: 70px 20px; display: none; }
     .empty-state.visible { display: block; }
@@ -160,19 +150,26 @@
     .empty-title { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; margin-bottom: 6px; }
     .empty-sub { font-size: .9rem; color: var(--ink-soft); }
 
-    @media (max-width: 960px) { .deals-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1060px) { .deals-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 900px) {
+      /* sidebar collapses above the grid: categories become a swipeable row,
+         sort + postcode sit side by side */
+      .deals-layout { grid-template-columns: 1fr; gap: 20px; }
+      .filter-col { position: static; gap: 16px; }
+      .side-cats { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 6px; padding-bottom: 4px; }
+      .side-cats::-webkit-scrollbar { display: none; }
+      .side-cat { flex-shrink: 0; width: auto; border: var(--bw) solid var(--line); border-radius: var(--r-chip); background: var(--card); padding: 8px 16px; }
+      .side-cat.active { border-color: transparent; }
+      .side-row { display: flex; gap: 16px; }
+      .side-row > * { flex: 1; min-width: 0; }
+      .side-group-title { margin-bottom: 6px; }
+    }
     @media (max-width: 620px) {
       .deals-grid { grid-template-columns: 1fr; }
-      .browse-head { flex-direction: column; align-items: stretch; }
-      .search-input, .search-wrap { width: 100%; }
+      .search-input { width: 100%; }
+      .search-wrap { max-width: none; }
       .banner-inner { flex-direction: column; align-items: flex-start; }
-      /* category tabs: one swipeable row instead of a tall wrapped block */
-      .filters-bar { flex-direction: column; align-items: stretch; }
-      .filter-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
-      .filter-tabs::-webkit-scrollbar { display: none; }
-      .filter-tab { flex-shrink: 0; }
-      .sort-wrap { justify-content: space-between; }
-      .sort-select { flex: 1; min-width: 0; }
+      .side-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -194,10 +191,8 @@
 
   <!-- PAGE HEADER -->
   <div class="browse-head">
-    <div>
-      <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
-      <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
-    </div>
+    <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
+    <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
     <div class="search-wrap fade-up d2">
       <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
       <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
@@ -216,49 +211,62 @@
     </div>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filters-bar">
-    <div class="filter-tabs" role="tablist" aria-label="Deal categories">
-      <button class="filter-tab active" data-filter="all">All</button>
-      <button class="filter-tab" data-filter="fashion">Fashion &amp; Beauty</button>
-      <button class="filter-tab" data-filter="food">Food &amp; Drink</button>
-      <button class="filter-tab" data-filter="electronics">Electronics</button>
-      <button class="filter-tab" data-filter="travel">Travel</button>
-      <button class="filter-tab" data-filter="home">Home &amp; Living</button>
-      <button class="filter-tab" data-filter="fitness">Fitness</button>
-    </div>
-    <div class="sort-wrap">
-      <span class="sort-label">Sort by</span>
-      <select class="sort-select" id="sortSelect" aria-label="Sort deals">
-        <option value="popular">Most popular</option>
-        <option value="cashback">Highest cashback</option>
-        <option value="newest">Newest first</option>
-        <option value="discount">Biggest discount</option>
-        <option value="nearest">Nearest to me</option>
-        <option value="rating">Top rated</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- POSTCODE -->
-  <div class="postcode-bar fade-up">
-    <input class="postcode-input" id="postcodeInput" type="text" maxlength="8" autocomplete="postal-code"
-           placeholder="Postcode" aria-label="Your postcode" />
-    <button class="btn btn-sm btn-lime" id="postcodeBtn" type="button">See deals near me</button>
-    <span class="pc-note" id="pcNote"></span>
-  </div>
-
-  <!-- DEALS GRID -->
+  <!-- SIDEBAR + DEALS GRID -->
   <div class="deals-section">
-    <p class="results-count"><span id="countNum">12</span> deals available</p>
+    <div class="deals-layout">
 
-    <div class="deals-grid" id="dealsGrid">
+      <!-- Filter sidebar -->
+      <aside class="filter-col fade-up">
+        <div>
+          <div class="side-group-title">Categories</div>
+          <div class="side-cats" role="tablist" aria-label="Deal categories">
+            <button class="side-cat active" data-filter="all">All deals</button>
+            <button class="side-cat" data-filter="fashion">Fashion &amp; Beauty</button>
+            <button class="side-cat" data-filter="food">Food &amp; Drink</button>
+            <button class="side-cat" data-filter="electronics">Electronics</button>
+            <button class="side-cat" data-filter="travel">Travel</button>
+            <button class="side-cat" data-filter="home">Home &amp; Living</button>
+            <button class="side-cat" data-filter="fitness">Fitness</button>
+          </div>
+        </div>
+        <div class="side-row">
+          <div>
+            <div class="side-group-title">Sort by</div>
+            <select class="sort-select" id="sortSelect" aria-label="Sort deals">
+              <option value="popular">Most popular</option>
+              <option value="cashback">Highest cashback</option>
+              <option value="newest">Newest first</option>
+              <option value="discount">Biggest discount</option>
+              <option value="nearest">Nearest to me</option>
+              <option value="rating">Top rated</option>
+            </select>
+          </div>
+          <div>
+            <div class="side-group-title">Near me</div>
+            <div class="postcode-row">
+              <input class="postcode-input" id="postcodeInput" type="text" maxlength="8" autocomplete="postal-code"
+                     placeholder="Postcode" aria-label="Your postcode" />
+              <button class="btn btn-sm btn-lime" id="postcodeBtn" type="button">See deals near me</button>
+              <span class="pc-note" id="pcNote"></span>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-      <!-- Empty state -->
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon"><i class="ico ico-ghost ico-soft"></i></div>
-        <div class="empty-title">No deals found</div>
-        <div class="empty-sub">Try a different search term or category.</div>
+      <!-- Deals -->
+      <div>
+        <p class="results-count"><span id="countNum">12</span> deals available</p>
+
+        <div class="deals-grid" id="dealsGrid">
+
+          <!-- Empty state -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon"><i class="ico ico-ghost ico-soft"></i></div>
+            <div class="empty-title">No deals found</div>
+            <div class="empty-sub">Try a different search term or category.</div>
+          </div>
+
+        </div>
       </div>
 
     </div>
@@ -273,7 +281,7 @@
     const grid = document.getElementById('dealsGrid');
     const emptyState = document.getElementById('emptyState');
     const countNum = document.getElementById('countNum');
-    const tabs = document.querySelectorAll('.filter-tab');
+    const tabs = document.querySelectorAll('.side-cat');
     const sortSelect = document.getElementById('sortSelect');
     const postcodeInput = document.getElementById('postcodeInput');
     const pcNote = document.getElementById('pcNote');
@@ -319,11 +327,13 @@
       el.dataset.rating = m.rating;
       el.dataset.distance = m.distance;
       el.dataset.id = c.id;
+      el.dataset.brand = (c.brand || '').toLowerCase();
+      // Exactly three chips: online/in-store · end date · claims.
+      const place = /online/i.test(c.location || '') ? 'Online' : 'In-store';
       el.innerHTML = `
         <div class="card-image">
           ${thumb}
           <span class="cb-sticker sticker sticker-lime">${esc(c.rate)}% cashback</span>
-          <span class="brand-tag"><span class="brand-dot">${esc((c.brand || '?').charAt(0))}</span><span class="card-brand-name">${esc(c.brand)}</span></span>
           ${m.ending ? '<span class="ending-badge">Ends soon</span>' : ''}
         </div>
         <div class="card-body">
@@ -332,11 +342,15 @@
             <div class="card-rating"><i class="ico ico-star"></i> ${m.rating.toFixed(1)}</div>
           </div>
           <div class="card-desc">${esc(c.cardDesc)}</div>
-          <div class="card-meta"><span class="chip">${esc(c.location)}</span><span class="chip">${esc(shortExpiry(c.expiry))}</span></div>
+          <div class="card-meta">
+            <span class="chip">${place}</span>
+            <span class="chip">${esc(shortExpiry(c.expiry))}</span>
+            <span class="chip">${Number(c.claims || 0).toLocaleString()} claims</span>
+          </div>
         </div>
         <div class="card-footer">
           <div><div class="earn-label">You could earn</div><div class="earn-val">${esc(c.earn)}</div></div>
-          <div style="text-align:right"><div class="card-clicks">${Number(c.claims || 0).toLocaleString()} claims</div><a href="deal.html?id=${c.id}" class="btn btn-lime shop-btn" style="margin-top:6px">Shop →</a></div>
+          <a href="deal.html?id=${c.id}" class="btn btn-lime shop-btn">Shop →</a>
         </div>`;
       el.addEventListener('click', e => {
         if (e.target.closest('a')) return;   // let the Shop button handle its own click
@@ -350,7 +364,7 @@
       cards.forEach(card => {
         const cat = card.dataset.category;
         const title = card.querySelector('.card-title').textContent.toLowerCase();
-        const brand = card.querySelector('.card-brand-name').textContent.toLowerCase();
+        const brand = card.dataset.brand || '';
         const matchesCat = activeFilter === 'all' || cat === activeFilter;
         const matchesSearch = !searchTerm || title.includes(searchTerm) || brand.includes(searchTerm);
         if (matchesCat && matchesSearch) { card.classList.remove('hidden'); visible++; }
@@ -375,16 +389,6 @@
     function showNearby() {
       const pc = postcodeInput.value.trim().toUpperCase();
       if (!pc) { pcNote.textContent = 'Enter a postcode first'; return; }
-      cards.forEach(card => {
-        const meta = card.querySelector('.card-meta');
-        let chip = meta.querySelector('.dist-chip');
-        if (!chip) {
-          chip = document.createElement('span');
-          chip.className = 'chip dist-chip';
-          meta.appendChild(chip);
-        }
-        chip.textContent = `${(+card.dataset.distance).toFixed(1)} mi away`;
-      });
       pcNote.textContent = `Showing deals near ${pc}`;
       sortSelect.value = 'nearest';
       sortCards('nearest');

@@ -408,10 +408,13 @@ body::after {
 .card-hover:hover::after, .spot:hover::after,
 .card-hover:hover::before, .spot:hover::before { opacity: 1; }
 
-.card-lime { background: var(--blue-pale); border-color: #DDEAF3; }
-.card-pink { background: var(--paper-deep); }
-.card-sky  { background: var(--paper-deep); }
-.card-tang { background: var(--paper-deep); }
+/* Tile colour variants normalised to white — the mixed pale-blue/grey tiles
+   read as random. Colour now comes only from deliberate accents (.card-ink,
+   solid feature panels), not from alternating card faces. */
+.card-lime { background: var(--card); border-color: var(--line); }
+.card-pink { background: var(--card); }
+.card-sky  { background: var(--card); }
+.card-tang { background: var(--card); }
 .card-ink  { background: var(--ink); color: #fff; border-color: transparent; }
 /* stronger spotlight reads better on the dark slab */
 .card-ink.card-hover::after { background: radial-gradient(380px circle at var(--mx,50%) var(--my,50%), rgba(125,178,210,.16), transparent 68%); }

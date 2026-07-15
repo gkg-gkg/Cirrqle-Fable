@@ -9,15 +9,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=5" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=6" />
   <style>
     /* categorical series colors — validated colorblind-safe (dataviz skill) */
     :root { --s-views:#2a78d6; --s-clicks:#1baf7a; --s-claims:#eda100; }
 
     .wrap { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: clamp(28px,5vw,52px) clamp(20px,4vw,44px) 90px; }
 
-    /* ── Login ── */
-    .login-wrap { max-width: 440px; margin: min(8vh,80px) auto 0; }
+    /* ── Login: intro panel left, form card right (stacks on small screens) ── */
+    .login-wrap {
+      max-width: 1020px; margin: min(7vh,70px) auto 0;
+      display: grid; grid-template-columns: 1.05fr 420px;
+      gap: clamp(36px, 6vw, 80px); align-items: center;
+    }
     .login-card { padding: clamp(28px,4vw,38px); }
     .login-badge {
       width: 52px; height: 52px; border-radius: 50%;
@@ -26,9 +30,11 @@
       font-size: 1.35rem; margin-bottom: 18px;
       border: var(--bw) solid #DDEAF3;
     }
-    .login-eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--blue-deep); margin-bottom: 8px; }
-    .login-title { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; letter-spacing: -0.03em; margin-bottom: 6px; }
-    .login-sub { font-size: .88rem; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.6; }
+    .login-eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--blue-deep); margin-bottom: 10px; }
+    .login-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 3.6vw, 2.9rem); letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 14px; }
+    .login-sub { font-size: .95rem; color: var(--ink-soft); line-height: 1.7; max-width: 440px; }
+    .form-title { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .form-sub { font-size: .84rem; color: var(--ink-soft); margin-bottom: 22px; line-height: 1.6; }
     .login-err { font-size: .82rem; font-weight: 700; color: var(--red); margin-top: 4px; min-height: 1.1em; }
     .pass-toggle {
       position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
@@ -40,9 +46,16 @@
     .login-note { font-size: .78rem; color: var(--ink-soft); margin-top: 18px; line-height: 1.65; }
     .login-note a { color: var(--blue-deep); font-weight: 700; text-decoration: none; }
     .login-note a:hover { text-decoration: underline; }
-    /* what the portal offers — quiet chips under the card */
-    .login-points { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
-    .login-points .chip { background: var(--card); }
+    /* what the portal offers — full feature rows in the intro panel */
+    .login-points { display: flex; flex-direction: column; gap: 18px; margin-top: 32px; }
+    .login-point { display: flex; gap: 14px; align-items: flex-start; }
+    .login-point .coin { font-size: 1.05rem; }
+    .point-title { font-size: .95rem; font-weight: 700; }
+    .point-desc { font-size: .84rem; color: var(--ink-soft); line-height: 1.55; margin-top: 2px; }
+    @media (max-width: 920px) {
+      .login-wrap { grid-template-columns: 1fr; gap: 28px; max-width: 460px; }
+      .login-points { gap: 14px; margin-top: 24px; }
+    }
 
     /* ── Dashboard ── */
     .greeting-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem,4vw,2.5rem); letter-spacing: -0.03em; }
@@ -124,11 +137,29 @@
 
   <!-- ── Login view ── -->
   <div class="wrap login-wrap" id="loginView">
-    <div class="card login-card fade-up">
+    <div class="login-intro fade-up">
       <div class="login-badge"><i class="ico ico-briefcase"></i></div>
       <div class="login-eyebrow">Merchant portal</div>
-      <div class="login-title">Sign in to your deals</div>
-      <div class="login-sub">Use the email from your partnership application and the password the Cirqle team gave you.</div>
+      <h1 class="login-title">Your deals,<br>performing live.</h1>
+      <p class="login-sub">Sign in to see real views, clicks and claims across your Cirqle deals — and talk directly to our team.</p>
+      <div class="login-points">
+        <div class="login-point">
+          <span class="coin coin-sky"><i class="ico ico-chart"></i></span>
+          <div><div class="point-title">Live deal analytics</div><div class="point-desc">Views, clicks and cashback claims for every deal, day by day.</div></div>
+        </div>
+        <div class="login-point">
+          <span class="coin coin-lime"><i class="ico ico-cash"></i></span>
+          <div><div class="point-title">Cashback tracking</div><div class="point-desc">Exactly what you've given back — confirmed and pending.</div></div>
+        </div>
+        <div class="login-point">
+          <span class="coin"><i class="ico ico-chat"></i></span>
+          <div><div class="point-title">Direct line to our team</div><div class="point-desc">Message us or request more deals straight from your dashboard.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card login-card fade-up d2">
+      <div class="form-title">Sign in to your deals</div>
+      <div class="form-sub">Use the email from your partnership application and the password the Cirqle team gave you.</div>
       <form id="loginForm" autocomplete="on">
         <div class="field">
           <label for="mEmail">Email</label>
@@ -149,11 +180,6 @@
         <button type="submit" class="btn btn-lg btn-lime" id="loginBtn" style="width:100%">Sign in →</button>
       </form>
       <div class="login-note">Don't have a login yet? Your account is created once your partnership application is approved — we'll send you the details. Want to partner with us? <a href="contact.html">Apply here →</a></div>
-    </div>
-    <div class="login-points fade-up d2">
-      <span class="chip"><i class="ico ico-chart"></i> Live deal analytics</span>
-      <span class="chip"><i class="ico ico-cash"></i> Cashback tracking</span>
-      <span class="chip"><i class="ico ico-chat"></i> Direct line to our team</span>
     </div>
   </div>
 
