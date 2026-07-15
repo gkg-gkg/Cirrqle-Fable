@@ -17,21 +17,32 @@
     .wrap { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: clamp(28px,5vw,52px) clamp(20px,4vw,44px) 90px; }
 
     /* ── Login ── */
-    .login-wrap { max-width: 420px; margin: min(9vh,90px) auto 0; }
+    .login-wrap { max-width: 440px; margin: min(8vh,80px) auto 0; }
     .login-card { padding: clamp(28px,4vw,38px); }
-    .login-eyebrow { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--pink-deep); margin-bottom: 8px; }
+    .login-badge {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--blue-tint); color: var(--blue-deep);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.35rem; margin-bottom: 18px;
+      border: var(--bw) solid #DDEAF3;
+    }
+    .login-eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--blue-deep); margin-bottom: 8px; }
     .login-title { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; letter-spacing: -0.03em; margin-bottom: 6px; }
     .login-sub { font-size: .88rem; color: var(--ink-soft); margin-bottom: 24px; line-height: 1.6; }
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: .78rem; font-weight: 700; margin-bottom: 6px; }
-    .field input {
-      width: 100%; padding: 12px 14px; font: inherit; font-size: .92rem;
-      border: var(--bw) solid var(--line); border-radius: var(--r-chip);
-      background: var(--paper); color: var(--ink);
+    .login-err { font-size: .82rem; font-weight: 700; color: var(--red); margin-top: 4px; min-height: 1.1em; }
+    .pass-toggle {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 34px; height: 34px; border: none; border-radius: 50%;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: .95rem;
     }
-    .field input:focus { outline: none; border-color: var(--pink-deep); }
-    .login-err { font-size: .82rem; font-weight: 700; color: #c0392b; margin-top: 4px; min-height: 1.1em; }
-    .login-note { font-size: .76rem; color: var(--ink-soft); margin-top: 18px; line-height: 1.6; }
+    .pass-toggle:hover { background: var(--paper-deep); }
+    .login-note { font-size: .78rem; color: var(--ink-soft); margin-top: 18px; line-height: 1.65; }
+    .login-note a { color: var(--blue-deep); font-weight: 700; text-decoration: none; }
+    .login-note a:hover { text-decoration: underline; }
+    /* what the portal offers — quiet chips under the card */
+    .login-points { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+    .login-points .chip { background: var(--card); }
 
     /* ── Dashboard ── */
     .greeting-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem,4vw,2.5rem); letter-spacing: -0.03em; }
@@ -114,22 +125,35 @@
   <!-- ── Login view ── -->
   <div class="wrap login-wrap" id="loginView">
     <div class="card login-card fade-up">
+      <div class="login-badge"><i class="ico ico-briefcase"></i></div>
       <div class="login-eyebrow">Merchant portal</div>
       <div class="login-title">Sign in to your deals</div>
       <div class="login-sub">Use the email from your partnership application and the password the Cirqle team gave you.</div>
       <form id="loginForm" autocomplete="on">
         <div class="field">
           <label for="mEmail">Email</label>
-          <input type="email" id="mEmail" required autocomplete="username" />
+          <div class="field-wrap">
+            <span class="field-icon"><i class="ico ico-mail ico-soft"></i></span>
+            <input type="email" id="mEmail" required autocomplete="username" placeholder="you@yourbrand.com" />
+          </div>
         </div>
         <div class="field">
           <label for="mPass">Password</label>
-          <input type="password" id="mPass" required autocomplete="current-password" />
+          <div class="field-wrap">
+            <span class="field-icon"><i class="ico ico-lock ico-soft"></i></span>
+            <input type="password" id="mPass" required autocomplete="current-password" placeholder="Your password" />
+            <button type="button" class="pass-toggle" id="mPassToggle" aria-label="Show password"><i class="ico ico-eye ico-soft"></i></button>
+          </div>
         </div>
         <div class="login-err" id="loginErr"></div>
-        <button type="submit" class="btn btn-ink btn-lg" style="width:100%">Sign in</button>
+        <button type="submit" class="btn btn-lg btn-lime" id="loginBtn" style="width:100%">Sign in →</button>
       </form>
-      <div class="login-note">Don't have a login yet? Your account is created once your partnership application is approved — we'll send you the details. Want to partner with us? <a href="contact.html" style="color:var(--pink-deep);font-weight:700;text-decoration:none">Apply here →</a></div>
+      <div class="login-note">Don't have a login yet? Your account is created once your partnership application is approved — we'll send you the details. Want to partner with us? <a href="contact.html">Apply here →</a></div>
+    </div>
+    <div class="login-points fade-up d2">
+      <span class="chip"><i class="ico ico-chart"></i> Live deal analytics</span>
+      <span class="chip"><i class="ico ico-cash"></i> Cashback tracking</span>
+      <span class="chip"><i class="ico ico-chat"></i> Direct line to our team</span>
     </div>
   </div>
 
@@ -212,12 +236,23 @@
     function signOut() { localStorage.removeItem(SKEY); merchant = null; showLogin(); }
 
     // ── Login ──
+    document.getElementById('mPassToggle').addEventListener('click', function () {
+      const input = document.getElementById('mPass');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      this.innerHTML = show ? '<i class="ico ico-eyeoff ico-soft"></i>' : '<i class="ico ico-eye ico-soft"></i>';
+      this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const err = document.getElementById('loginErr');
+      const btn = document.getElementById('loginBtn');
       err.textContent = '';
       const email = document.getElementById('mEmail').value.trim();
       const password = document.getElementById('mPass').value;
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
       try {
         const res = await fetch(`${API}/merchant/signin`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -231,7 +266,12 @@
         merchant = { token: data.token, ...data.merchant };
         localStorage.setItem(SKEY, JSON.stringify(merchant));
         enterDashboard();
-      } catch (_) { err.textContent = 'Couldn’t reach the server. Try again.'; }
+      } catch (_) {
+        err.textContent = 'Couldn’t reach the server. Try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign in →';
+      }
     });
 
     // ── Number helpers ──
