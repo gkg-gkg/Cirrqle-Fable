@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=7" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=8" />
   <style>
     /* ── Page header ── */
     .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 24px; position: relative; z-index: 1; }
@@ -103,7 +103,6 @@
     .card-image { position: relative; height: 148px; background: var(--paper-deep); border-bottom: var(--bw) solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 3.6rem; overflow: hidden; }
     .card-image .bg-emoji { transition: transform .3s var(--bounce); }
     .deal-card:hover .bg-emoji { transform: scale(1.1); }
-    .cb-sticker { position: absolute; top: 12px; right: 12px; }
 
     .card-body { padding: 14px 16px 12px; }
     .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
@@ -118,8 +117,8 @@
       padding: 11px 16px;
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
-    .earn-label { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); }
-    .earn-val { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--green); line-height: 1.1; }
+    .earn-val { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--green); line-height: 1.05; }
+    .earn-label { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); margin-top: 1px; }
     .shop-btn { font-size: .8rem; padding: 8px 16px; }
 
     /* ── Rating · ending-soon ── */
@@ -174,12 +173,12 @@
       .search-input { width: 100%; }
       .banner-inner { padding: 10px 12px 10px 14px; }
       .banner-sub { display: none; }
-      .side-row { flex-direction: column; }
+      /* sort + postcode stay side by side (each half-width) */
+      .side-row { gap: 12px; }
 
       /* tiles: two-up, compact, no description */
       .deals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .card-image { height: 104px; font-size: 2.3rem; }
-      .cb-sticker { font-size: .62rem; padding: 3px 9px; top: 8px; right: 8px; }
       .ending-badge { top: 8px; left: 8px; font-size: .6rem; padding: 3px 8px; }
       .card-body { padding: 10px 11px 8px; }
       .card-head { margin-bottom: 5px; }
@@ -354,7 +353,6 @@
       el.innerHTML = `
         <div class="card-image">
           ${thumb}
-          <span class="cb-sticker sticker sticker-lime">${esc(c.rate)}% cashback</span>
           ${m.ending ? '<span class="ending-badge">Ends soon</span>' : ''}
         </div>
         <div class="card-body">
@@ -370,7 +368,7 @@
           </div>
         </div>
         <div class="card-footer">
-          <div><div class="earn-label">Earn</div><div class="earn-val">${esc(c.rate)}% cashback</div></div>
+          <div><div class="earn-val">${esc(c.rate)}%</div><div class="earn-label">cashback</div></div>
           <a href="deal.html?id=${c.id}" class="btn btn-lime shop-btn">Shop →</a>
         </div>`;
       el.addEventListener('click', e => {
