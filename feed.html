@@ -11,8 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/cirqle.css?v=5" />
   <style>
-    /* Receipt status chip: amber = pending, green = verified */
-    :root { --tile-pending: #E6892B; --tile-done: #2E9E5A; }
+    /* Receipt lifecycle accents (chips carry a coloured status dot) */
+    :root { --st-review: #E6892B; --st-done: #2E9E5A; }
 
     /* Logged-in nav (matches dashboard.html) */
     .nav-user { display: flex; align-items: center; gap: 10px; }
@@ -88,21 +88,32 @@
     }
     .timer-chip.cash { background: var(--blue); color: #fff; }
 
-    /* Right-side action rail: status icon + Upload Receipt + IG link */
+    /* Right-side action rail: status + receipt actions + IG link */
     .post-actions {
-      flex-shrink: 0; width: 194px;
-      border-left: var(--bw) dashed rgba(31,27,19,.2);
-      padding: 20px; display: flex; flex-direction: column; gap: 12px; justify-content: center;
+      flex-shrink: 0; width: 200px;
+      border-left: var(--bw) solid var(--line);
+      background: var(--paper-deep);
+      padding: 20px; display: flex; flex-direction: column; gap: 10px; justify-content: center;
     }
     .post-actions .btn { width: 100%; }
+    /* Status chip: neutral pill + coloured dot, one per lifecycle state */
     .tile-status {
-      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-      font-size: .76rem; font-weight: 800;
-      padding: 8px 12px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: .74rem; font-weight: 700; letter-spacing: .2px;
+      padding: 8px 12px; margin-bottom: 2px;
       border: var(--bw) solid var(--line); border-radius: var(--r-chip);
-      background: var(--tile-pending); color: var(--ink);
+      background: var(--card); color: var(--ink-soft);
     }
-    .tile-status.done { background: var(--blue); color: #fff; }
+    .tile-status::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: #C3CCD8; flex: none;
+    }
+    .tile-status.review   { background: #FFF8EC; border-color: #F2E4C8; color: #8A5A00; }
+    .tile-status.review::before   { background: var(--st-review); }
+    .tile-status.done     { background: #EDF8F1; border-color: #D2EBDC; color: #1C7C3A; }
+    .tile-status.done::before     { background: var(--st-done); }
+    .tile-status.rejected { background: #FEF2F2; border-color: #F3D6D6; color: #B91C1C; }
+    .tile-status.rejected::before { background: var(--red); }
 
     .feed-empty { text-align: center; padding: 60px 20px; }
     .feed-empty .ei { font-size: 3rem; margin-bottom: 12px; }
@@ -209,9 +220,10 @@
     }
     setInterval(tickCountdowns, 60000);
 
-    // ── Receipt completion state — loaded per-user from the server (Phase 4). ──
-    let receiptSet = new Set();
-    function hasReceipt(id) { return receiptSet.has(id); }
+    // ── Receipt state per post — loaded from the server. Each entry carries the
+    // claim's real status (pending / confirmed / paid / rejected) and, for the
+    // owner, a short-lived link to view their own receipt image. ──
+    let receiptMap = new Map();
     async function loadReceipts() {
       try {
         const res = await fetch(`${window.CIRQLE_API_BASE}/receipts`, {
@@ -220,9 +232,9 @@
         if (res.status === 401) { signOut(); return; }
         if (res.ok) {
           const data = await res.json();
-          receiptSet = new Set((data || []).map(r => r.postId));
+          receiptMap = new Map((data || []).map(r => [r.postId, r]));
         }
-      } catch (e) { /* ignore — tiles just show as pending */ }
+      } catch (e) { /* ignore — tiles just show as awaiting */ }
     }
 
     // ── Render ──
@@ -252,11 +264,29 @@
             '</div>';
         }
 
-        // Receipt state: flips the tile's status chip + border once verified.
-        const done = hasReceipt(p.id);
-        const status = done
-          ? '<span class="tile-status done">Receipt Verified</span>'
-          : '<span class="tile-status">Upload receipt</span>';
+        // Receipt lifecycle: the chip + actions reflect the claim's REAL status.
+        //   no receipt -> Awaiting receipt (upload)
+        //   pending    -> Under review (replace allowed)
+        //   confirmed/paid -> Verified (View Receipt appears)
+        //   rejected   -> Not eligible (re-upload allowed)
+        const r = receiptMap.get(p.id);
+        const uploadHref = 'receipt.html?id=' + encodeURIComponent(p.id || '');
+        let status, actions;
+        if (!r) {
+          status = '<span class="tile-status">Awaiting receipt</span>';
+          actions = '<a class="btn btn-lime btn-sm" href="' + uploadHref + '">Upload Receipt</a>';
+        } else if (r.status === 'confirmed' || r.status === 'paid') {
+          status = '<span class="tile-status done">Receipt verified</span>';
+          actions = r.imageUrl
+            ? '<a class="btn btn-lime btn-sm" href="' + esc(r.imageUrl) + '" target="_blank" rel="noopener">View Receipt</a>'
+            : '';
+        } else if (r.status === 'rejected') {
+          status = '<span class="tile-status rejected">Not eligible</span>';
+          actions = '<a class="btn btn-lime btn-sm" href="' + uploadHref + '">Re-upload Receipt</a>';
+        } else {
+          status = '<span class="tile-status review">Under review</span>';
+          actions = '<a class="btn btn-sm" href="' + uploadHref + '">Replace receipt</a>';
+        }
 
         return (
           '<article class="post-tile">' +
@@ -276,7 +306,7 @@
             '</div>' +
             '<div class="post-actions">' +
               status +
-              (done ? '' : '<a class="btn btn-lime btn-sm" href="receipt.html?id=' + encodeURIComponent(p.id || '') + '">Upload Receipt</a>') +
+              actions +
               (p.url ? '<a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="btn btn-sm">View on Instagram →</a>' : '') +
             '</div>' +
           '</article>'
