@@ -1,0 +1,17 @@
+<!doctype html><meta charset=utf-8><script>
+location.replace('index.html#openmenu');
+</script>HTML
+nohup python3 -m http.server 8094 >"$SP/http6.log" 2>&1 &
+sleep 1
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+"$CHROME" --headless=new --disable-gpu --user-data-dir="$SP/chrome-mm" --no-first-run \
+  --window-size=500,900 --virtual-time-budget=5000 \
+  --run-all-compositor-stages-before-draw \
+  --screenshot="$SP/menu.png" \
+  "http://localhost:8094/index.html" 2>/dev/null &
+CPID=$!
+for i in $(seq 1 12); do [ -f "$SP/menu.png" ] && break; sleep 1; done
+kill $CPID 2>/dev/null; pkill -f "chrome-mm" 2>/dev/null
+lsof -ti:8094 2>/dev/null | xargs kill 2>/dev/null
+rm -f _menutest.html
+ls -la "$SP/menu.png" | tail -1

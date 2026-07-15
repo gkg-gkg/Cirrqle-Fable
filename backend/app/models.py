@@ -117,7 +117,8 @@ class Receipt(SQLModel, table=True):
       pending (uploaded) -> confirmed (admin-verified) -> paid (withdrawn);  or rejected.
     `brand`/`amount` are snapshotted from the deal at upload so the claim stays
     correct even if the campaign is later edited. `image_key` is a private storage
-    key (never a public URL, never returned to the owner's browser).
+    key (never a public URL; owner/admin view via short-lived presigned links).
+    A claim whose tagged post mentions the brand is auto-confirmed at upload.
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, foreign_key="user.id")
@@ -288,8 +289,8 @@ class CampaignOut(BaseModel):
 
 
 # ── Receipts / cashback (Phase 4 + 5) ──
-# The owner never gets an image URL (receipts are private) — just the claim's
-# brand, amount and status.
+# Receipts stay private on S3; the owner (and admin) view them via short-lived
+# presigned URLs only.
 class ReceiptOut(BaseModel):
     id: int
     postId: str
@@ -298,6 +299,7 @@ class ReceiptOut(BaseModel):
     amount: float
     status: str
     uploadedAt: datetime
+    imageUrl: Optional[str] = None   # presigned GET (owner viewing); None in local mode
 
 
 class AdminReceiptOut(BaseModel):
@@ -318,6 +320,7 @@ class ActivityItem(BaseModel):
     amount: float
     status: str
     date: datetime
+    imageUrl: Optional[str] = None   # presigned link to the user's own receipt
 
 
 class AccountStats(BaseModel):

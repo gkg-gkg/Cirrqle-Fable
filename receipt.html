@@ -149,9 +149,17 @@
         });
         if (res.status === 401) { signOut(); return; }
         if (!res.ok) throw new Error('upload failed');
+        const receipt = await res.json().catch(() => ({}));
+        // Auto-verified? (post tags the brand -> confirmed instantly)
+        if (receipt.status === 'confirmed') {
+          document.querySelector('.result-badge').textContent = 'Cashback confirmed ✓';
+          document.querySelector('.result-note').textContent =
+            'Your post tags the brand, so your claim was verified instantly — £' +
+            Number(receipt.amount || 0).toFixed(2) + ' has been added to your wallet.';
+        }
         document.getElementById('uploadCard').hidden = true;
         document.getElementById('resultCard').hidden = false;
-        cirqleToast('Receipt uploaded');
+        cirqleToast(receipt.status === 'confirmed' ? 'Verified instantly ✓' : 'Receipt uploaded');
       } catch (e) {
         dropZone.style.pointerEvents = '';
         cirqleToast('Upload failed — please try again');

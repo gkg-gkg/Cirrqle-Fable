@@ -16,7 +16,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select
 
 from ..db import get_session
-from ..models import (AdminReceiptOut, Campaign, Receipt, ReceiptOut, User)
+from ..models import (AdminReceiptOut, Campaign, Mention, Receipt, ReceiptOut,
+                      User)
 from ..security import get_current_user
 from ..storage import (StorageError, StorageUploadError, receipt_view_url,
                        upload_receipt)
@@ -34,11 +35,22 @@ def _earn_to_amount(earn: str) -> float:
         return 0.0
 
 
-def _receipt_out(r: Receipt) -> ReceiptOut:
+def _receipt_out(r: Receipt, with_image: bool = False) -> ReceiptOut:
     return ReceiptOut(
         id=r.id, postId=r.post_id, campaignId=r.campaign_id,
         brand=r.brand, amount=r.amount, status=r.status, uploadedAt=r.uploaded_at,
+        imageUrl=receipt_view_url(r.image_key) if with_image else None,
     )
+
+
+def _post_tags_brand(caption: Optional[str], brand: str) -> bool:
+    """Does the post's caption tag the brand? ("Nike" matches 'nike' or '@nike';
+    multi-word brands match with spaces dropped, e.g. 'Pure Gym' -> '@puregym')."""
+    if not caption or not brand:
+        return False
+    cap = caption.lower()
+    handle = brand.lower().replace(" ", "")
+    return brand.lower() in cap or handle in cap.replace(" ", "")
 
 
 @router.get("", response_model=list[ReceiptOut])
@@ -46,9 +58,10 @@ def list_receipts(
     user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """This user's receipts/claims (metadata only — no image URL)."""
+    """This user's receipts/claims, each with a short-lived URL to view their
+    own receipt image (presigned; None in local mode)."""
     rows = session.exec(select(Receipt).where(Receipt.user_id == user.id)).all()
-    return [_receipt_out(r) for r in rows]
+    return [_receipt_out(r, with_image=True) for r in rows]
 
 
 @router.post("", response_model=ReceiptOut, status_code=201)
@@ -80,6 +93,14 @@ def create_receipt(
             brand = camp.brand
             amount = _earn_to_amount(camp.earn)
 
+    # Auto-verify: if the user's tagged post for this claim mentions the brand,
+    # confirm instantly — no manual admin review needed.
+    status = "pending"
+    if brand:
+        mention = session.get(Mention, post_id)
+        if mention and mention.user_id == user.id and _post_tags_brand(mention.caption, brand):
+            status = "confirmed"
+
     existing = session.exec(
         select(Receipt).where(Receipt.user_id == user.id, Receipt.post_id == post_id)
     ).first()
@@ -88,13 +109,13 @@ def create_receipt(
         existing.campaign_id = campaign_id
         existing.brand = brand
         existing.amount = amount
-        existing.status = "pending"
+        existing.status = status
         existing.uploaded_at = datetime.now(timezone.utc)
         receipt = existing
     else:
         receipt = Receipt(
             user_id=user.id, post_id=post_id, campaign_id=campaign_id,
-            brand=brand, amount=amount, image_key=key,
+            brand=brand, amount=amount, image_key=key, status=status,
         )
 
     session.add(receipt)

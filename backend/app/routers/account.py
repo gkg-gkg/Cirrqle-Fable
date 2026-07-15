@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from ..db import get_session
 from ..models import AccountStats, ActivityItem, Mention, Receipt, User
 from ..security import get_current_user
+from ..storage import receipt_view_url
 
 router = APIRouter(prefix="/account", tags=["account"])
 
@@ -38,7 +39,8 @@ def _compute_stats(user: User, session: Session) -> AccountStats:
         receiptsCount=len(receipts),
         activity=[
             ActivityItem(brand=r.brand or "Cashback", amount=r.amount,
-                         status=r.status, date=r.uploaded_at)
+                         status=r.status, date=r.uploaded_at,
+                         imageUrl=receipt_view_url(r.image_key))
             for r in recent
         ],
     )

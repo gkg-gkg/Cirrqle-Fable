@@ -187,6 +187,56 @@ body::after {
 .nav-links a[aria-current="page"] { color: var(--ink); }
 .nav-cta { display: flex; gap: 10px; align-items: center; }
 
+/* ── Mobile menu (burger + dropdown, injected by enhance.js) ── */
+.nav-burger {
+  display: none;
+  width: 40px; height: 40px; flex-shrink: 0;
+  border: 1px solid var(--line); border-radius: 50%;
+  background: var(--card); cursor: pointer;
+  align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+.nav-burger span {
+  position: relative; display: block;
+  width: 16px; height: 2px; border-radius: 2px;
+  background: var(--ink);
+  transition: background .2s;
+}
+.nav-burger span::before, .nav-burger span::after {
+  content: ''; position: absolute; left: 0;
+  width: 16px; height: 2px; border-radius: 2px;
+  background: var(--ink);
+  transition: transform .25s var(--snap), top .25s var(--snap);
+}
+.nav-burger span::before { top: -5px; }
+.nav-burger span::after  { top: 5px; }
+.nav-burger.open span { background: transparent; }
+.nav-burger.open span::before { top: 0; transform: rotate(45deg); }
+.nav-burger.open span::after  { top: 0; transform: rotate(-45deg); }
+.nav-menu {
+  position: fixed; top: 64px; left: 12px; right: 12px;
+  z-index: 999;
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  display: none;
+}
+.nav-menu.open { display: block; animation: popIn .18s var(--snap); }
+.nav-menu a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: .95rem; font-weight: 600; color: var(--ink);
+}
+.nav-menu a:active, .nav-menu a:hover { background: var(--paper-deep); }
+.nav-menu a[aria-current="page"] { color: var(--blue-deep); background: var(--blue-pale); }
+.nav-menu .nav-menu-divider { height: 1px; background: var(--line-soft); margin: 6px 10px; }
+@media (max-width: 900px) {
+  .nav-burger { display: inline-flex; }
+}
+
 /* ══════════════════════════════════════
    BUTTONS — clean pill, soft depth, shine sweep
    ══════════════════════════════════════ */

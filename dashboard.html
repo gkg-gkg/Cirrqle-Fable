@@ -259,10 +259,13 @@
         const amt = a.status === 'pending' ? 'Pending'
           : a.status === 'rejected' ? '—'
           : m.sign + '£' + Number(a.amount || 0).toFixed(2);
+        const viewLink = a.imageUrl
+          ? ' · <a href="' + a.imageUrl + '" target="_blank" rel="noopener" style="color:var(--blue-deep);font-weight:700;text-decoration:none">View receipt</a>'
+          : '';
         return '<div class="activity-item">' +
           '<span class="coin ' + m.cls + '" style="font-size:.95rem">' + m.icon + '</span>' +
           '<div><div class="activity-name">' + (a.brand || 'Cashback') + ' — ' + m.label + '</div>' +
-          '<div class="activity-date">' + fmtWhen(a.date) + '</div></div>' +
+          '<div class="activity-date">' + fmtWhen(a.date) + viewLink + '</div></div>' +
           '<span class="activity-amount ' + m.amt + '">' + amt + '</span>' +
         '</div>';
       }).join('');

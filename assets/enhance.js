@@ -57,6 +57,63 @@
     el.style.display = session ? '' : 'none';
   });
 
+  // ── Mobile menu: burger + dropdown injected into the nav ──
+  // .nav-links is hidden under 900px, so phones get a proper menu with the
+  // core site links plus auth-aware account links. Idempotent + self-contained.
+  if (nav && !document.getElementById('navBurger')) {
+    var burger = document.createElement('button');
+    burger.className = 'nav-burger';
+    burger.id = 'navBurger';
+    burger.type = 'button';
+    burger.setAttribute('aria-label', 'Open menu');
+    burger.setAttribute('aria-expanded', 'false');
+    burger.innerHTML = '<span></span>';
+    nav.appendChild(burger);
+
+    var menu = document.createElement('div');
+    menu.className = 'nav-menu';
+    menu.id = 'navMenu';
+    var links = [
+      ['browse.html', 'Browse deals'],
+      ['for-brands.html', 'For brands'],
+      ['about.html', 'About'],
+      ['help.html', 'Help centre'],
+    ];
+    var authLinks = session
+      ? [['dashboard.html', 'My Account'], ['feed.html', 'Dashboard']]
+      : [['signin.html', 'Sign in'], ['signup.html', 'Sign up free']];
+    menu.innerHTML =
+      links.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') +
+      '<div class="nav-menu-divider"></div>' +
+      authLinks.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('');
+    document.body.appendChild(menu);
+
+    // mark the current page in the menu
+    menu.querySelectorAll('a').forEach(function (a) {
+      if ((a.getAttribute('href') || '').split(/[?#]/)[0] === here) {
+        a.setAttribute('aria-current', 'page');
+      }
+    });
+
+    var closeMenu = function () {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    };
+    burger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') && !menu.contains(e.target)) closeMenu();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
+
   // ── Scroll reveal ──
   var revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length) {
