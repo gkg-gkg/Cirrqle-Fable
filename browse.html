@@ -9,11 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/cirqle.css?v=6" />
+  <link rel="stylesheet" href="assets/cirqle.css?v=7" />
   <style>
     /* ── Page header ── */
-    .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 28px; position: relative; z-index: 1; }
-    .search-wrap { position: relative; margin-top: 22px; max-width: 420px; }
+    .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 24px; position: relative; z-index: 1; }
+    /* search + compact limited-time banner share one row */
+    .head-row { display: flex; gap: 18px; align-items: stretch; margin-top: 22px; }
+    .search-wrap { position: relative; flex: 0 0 300px; }
     .search-input {
       background: var(--card);
       border: var(--bw) solid var(--line);
@@ -31,18 +33,19 @@
     .search-input::placeholder { color: #93A0AD; }
     .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 
-    /* ── Featured banner ── */
-    .featured-banner { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 26px; position: relative; z-index: 1; }
+    /* ── Featured banner: compact, sits beside the search bar ── */
     .banner-inner {
-      display: flex; align-items: center; justify-content: space-between; gap: 20px;
-      padding: 15px 26px; flex-wrap: wrap;
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 8px 10px 8px 18px;
     }
-    .banner-title { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em; margin: 2px 0 3px; }
-    .banner-sub { font-size: .85rem; color: var(--ink-soft); font-weight: 500; }
+    .banner-title { font-family: var(--font-display); font-weight: 700; font-size: .92rem; letter-spacing: -0.01em; }
+    .banner-title .sticker { margin-right: 8px; font-size: .68rem; padding: 3px 10px; }
+    .banner-sub { font-size: .76rem; color: var(--ink-soft); font-weight: 500; margin-top: 2px; }
 
     /* ── Layout: filter sidebar + deals grid ── */
     .deals-section { max-width: 1140px; margin: 0 auto; padding: 0 clamp(20px,4vw,44px) 100px; position: relative; z-index: 1; }
-    .deals-layout { display: grid; grid-template-columns: 224px 1fr; gap: 30px; align-items: start; }
+    .deals-layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 30px; align-items: start; }
     .filter-col { position: sticky; top: 86px; display: flex; flex-direction: column; gap: 24px; }
     .side-group-title {
       font-size: .66rem; font-weight: 800; text-transform: uppercase;
@@ -77,7 +80,7 @@
     /* ── Grid ── */
     .results-count { font-size: .85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 18px; }
     .results-count span { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 1rem; }
-    .deals-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .deals-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 
     /* ── Deal card ── */
     .deal-card {
@@ -150,11 +153,11 @@
     .empty-title { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; margin-bottom: 6px; }
     .empty-sub { font-size: .9rem; color: var(--ink-soft); }
 
-    @media (max-width: 1060px) { .deals-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1060px) { .deals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 900px) {
       /* sidebar collapses above the grid: categories become a swipeable row,
          sort + postcode sit side by side */
-      .deals-layout { grid-template-columns: 1fr; gap: 20px; }
+      .deals-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
       .filter-col { position: static; gap: 16px; }
       .side-cats { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 6px; padding-bottom: 4px; }
       .side-cats::-webkit-scrollbar { display: none; }
@@ -165,11 +168,30 @@
       .side-group-title { margin-bottom: 6px; }
     }
     @media (max-width: 620px) {
-      .deals-grid { grid-template-columns: 1fr; }
+      /* header: search + banner stack */
+      .head-row { flex-direction: column; gap: 12px; }
+      .search-wrap { flex: none; }
       .search-input { width: 100%; }
-      .search-wrap { max-width: none; }
-      .banner-inner { flex-direction: column; align-items: flex-start; }
+      .banner-inner { padding: 10px 12px 10px 14px; }
+      .banner-sub { display: none; }
       .side-row { flex-direction: column; }
+
+      /* tiles: two-up, compact, no description */
+      .deals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .card-image { height: 104px; font-size: 2.3rem; }
+      .cb-sticker { font-size: .62rem; padding: 3px 9px; top: 8px; right: 8px; }
+      .ending-badge { top: 8px; left: 8px; font-size: .6rem; padding: 3px 8px; }
+      .card-body { padding: 10px 11px 8px; }
+      .card-head { margin-bottom: 5px; }
+      .card-title { font-size: .84rem; }
+      .card-rating { font-size: .72rem; }
+      .card-desc { display: none; }
+      .card-meta { gap: 4px; }
+      .card-meta .chip { font-size: .6rem; padding: 2px 7px; }
+      .card-footer { padding: 8px 11px; flex-wrap: wrap; }
+      .earn-label { font-size: .54rem; }
+      .earn-val { font-size: 1rem; }
+      .shop-btn { font-size: .7rem; padding: 6px 12px; }
     }
   </style>
 </head>
@@ -183,31 +205,28 @@
       <li><a href="for-brands.html">For brands</a></li>
     </ul>
     <div class="nav-cta">
-      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Sign up free</a>
+      <a href="signup.html" class="btn btn-sm btn-lime" data-auth="out">Sign up</a>
       <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">My Account</a>
       <a href="feed.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
     </div>
   </nav>
 
-  <!-- PAGE HEADER -->
+  <!-- PAGE HEADER: title, subtitle, then search + compact limited-time banner -->
   <div class="browse-head">
     <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
     <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
-    <div class="search-wrap fade-up d2">
-      <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
-      <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
-    </div>
-  </div>
-
-  <!-- FEATURED BANNER -->
-  <div class="featured-banner fade-up d3">
-    <div class="card card-tang banner-inner">
-      <div>
-        <span class="sticker sticker-pink">Limited time</span>
-        <div class="banner-title">Double cashback weekend — up to 20% back</div>
-        <div class="banner-sub">Shop at 50+ selected brands this weekend and earn double. Ends Sunday midnight.</div>
+    <div class="head-row fade-up d2">
+      <div class="search-wrap">
+        <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
       </div>
-      <a href="signup.html" class="btn btn-lg btn-ink">Shop now →</a>
+      <div class="card banner-inner">
+        <div style="min-width:0">
+          <div class="banner-title"><span class="sticker sticker-pink">Limited time</span>Double cashback weekend — up to 20% back</div>
+          <div class="banner-sub">50+ selected brands, ends Sunday midnight.</div>
+        </div>
+        <a href="signup.html" class="btn btn-sm btn-ink" style="flex-shrink:0">Shop now →</a>
+      </div>
     </div>
   </div>
 
@@ -328,8 +347,10 @@
       el.dataset.distance = m.distance;
       el.dataset.id = c.id;
       el.dataset.brand = (c.brand || '').toLowerCase();
-      // Exactly three chips: online/in-store · end date · claims.
+      // Chips: online/in-store · end date (omitted for ongoing deals) · claims.
       const place = /online/i.test(c.location || '') ? 'Online' : 'In-store';
+      const expiryTxt = shortExpiry(c.expiry);
+      const expiryChip = expiryTxt === 'Ongoing' ? '' : `<span class="chip">${esc(expiryTxt)}</span>`;
       el.innerHTML = `
         <div class="card-image">
           ${thumb}
@@ -344,7 +365,7 @@
           <div class="card-desc">${esc(c.cardDesc)}</div>
           <div class="card-meta">
             <span class="chip">${place}</span>
-            <span class="chip">${esc(shortExpiry(c.expiry))}</span>
+            ${expiryChip}
             <span class="chip">${Number(c.claims || 0).toLocaleString()} claims</span>
           </div>
         </div>

@@ -80,13 +80,24 @@
       ['help.html', 'Help centre'],
     ];
     var authLinks = session
-      ? [['dashboard.html', 'My Account'], ['feed.html', 'Dashboard']]
-      : [['signin.html', 'Sign in'], ['signup.html', 'Sign up free']];
+      ? [['dashboard.html', 'My Account'], ['feed.html', 'Dashboard'], ['account.html', 'Account details']]
+      : [['signin.html', 'Sign in'], ['signup.html', 'Sign up']];
     menu.innerHTML =
       links.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') +
       '<div class="nav-menu-divider"></div>' +
-      authLinks.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('');
+      authLinks.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') +
+      (session ? '<a href="#" id="menuSignOut">Sign out</a>' : '');
     document.body.appendChild(menu);
+
+    var so = document.getElementById('menuSignOut');
+    if (so) {
+      so.addEventListener('click', function (e) {
+        e.preventDefault();
+        localStorage.removeItem('cirqle_session');
+        sessionStorage.removeItem('cirqle_session');
+        window.location.href = 'index.html';
+      });
+    }
 
     // mark the current page in the menu
     menu.querySelectorAll('a').forEach(function (a) {
