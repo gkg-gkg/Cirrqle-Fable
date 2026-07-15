@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 
 from ..db import get_session
+from ..email import send_cashback_paid
 from ..models import AccountStats, ActivityItem, Mention, Receipt, User
 from ..security import get_current_user
 from ..storage import receipt_view_url
@@ -64,8 +65,14 @@ def withdraw(
     confirmed = session.exec(
         select(Receipt).where(Receipt.user_id == user.id, Receipt.status == "confirmed")
     ).all()
+    payout = round(sum(r.amount for r in confirmed), 2)
     for r in confirmed:
         r.status = "paid"
         session.add(r)
     session.commit()
+
+    # Best-effort payout email (only if something was actually withdrawn).
+    if payout > 0:
+        send_cashback_paid(user.email, user.first_name, payout)
+
     return _compute_stats(user, session)

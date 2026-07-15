@@ -175,6 +175,38 @@ class MerchantMessage(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class LoginCode(SQLModel, table=True):
+    """A one-time 6-digit code emailed to finish signing in (Phase 6, 2FA).
+
+    Only used when CIRQLE_LOGIN_2FA is on. The code is stored hashed (bcrypt),
+    never plaintext; it expires after ~10 min, can be tried a few times
+    (`attempts` cap) and is `consumed` on success. The newest unconsumed row
+    for a user is the active one.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    code_hash: str
+    expires_at: datetime
+    consumed: bool = False
+    attempts: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PasswordResetToken(SQLModel, table=True):
+    """A one-time token backing the 'forgot password' email link (Phase 6).
+
+    The token is high-entropy (secrets.token_urlsafe), so we store a fast
+    SHA-256 hash and look it up directly (no per-row scan). Expires after
+    ~30 min and is `consumed` the moment a new password is set.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    token_hash: str = Field(index=True)
+    expires_at: datetime
+    consumed: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -215,6 +247,34 @@ class UserOut(BaseModel):
 class AuthOut(BaseModel):
     token: str
     user: UserOut
+
+
+class SigninOut(BaseModel):
+    """What POST /auth/signin returns. Either a token straight away (2FA off) or
+    `codeRequired: true` when CIRQLE_LOGIN_2FA is on and a code has been emailed.
+    token/user stay populated in the 2FA-off case so the frontend is unchanged.
+    """
+    codeRequired: bool = False
+    token: Optional[str] = None
+    user: Optional[UserOut] = None
+
+
+class VerifyCodeIn(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class ResendCodeIn(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str
+    newPassword: str
 
 
 # ── Instagram feed (Phase 2) ──

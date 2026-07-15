@@ -158,6 +158,30 @@
         </div>
       </form>
 
+      <!-- Step 2: emailed 6-digit code (shown only when CIRQLE_LOGIN_2FA is on) -->
+      <div id="codeStep" style="display:none;">
+        <div class="error-banner" id="codeError" role="alert">
+          <span><i class="ico ico-warning" style="color:inherit"></i></span>
+          <span id="codeErrorMsg">Incorrect code. Please try again.</span>
+        </div>
+        <p class="card-sub" style="margin-bottom:18px;">
+          We've emailed a 6-digit code to <strong id="codeEmailLabel"></strong>. Enter it below to finish signing in.
+        </p>
+        <div class="field">
+          <label for="code">6-digit code</label>
+          <div class="field-wrap">
+            <span class="field-icon"><i class="ico ico-lock ico-soft"></i></span>
+            <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" />
+          </div>
+        </div>
+        <button type="button" class="btn btn-lg btn-lime btn-submit" id="verifyBtn">
+          <span id="verifyText">Verify &amp; sign in →</span>
+        </button>
+        <div class="signup-link" style="margin-top:16px;">
+          Didn't get it? <a href="#" id="resendLink">Resend code</a>
+        </div>
+      </div>
+
       <div class="signup-link">
         Don't have an account? <a href="signup.html">Sign up</a>
       </div>
@@ -256,7 +280,30 @@
 
       banner.classList.remove('visible');
 
-      // Store the login token + profile as the session the other pages read.
+      // 2FA on: no token yet — reveal the emailed-code step instead.
+      if (data.codeRequired) {
+        pendingEmail = email;
+        pendingRemember = remember;
+        document.getElementById('codeEmailLabel').textContent = email;
+        document.getElementById('signinForm').style.display = 'none';
+        document.querySelector('.card-title').textContent = 'Check your email';
+        document.querySelector('.card-sub').style.display = 'none';
+        document.getElementById('codeStep').style.display = 'block';
+        document.getElementById('code').focus();
+        return;
+      }
+
+      // 2FA off: token returned directly — sign in as before.
+      storeSession(data, remember);
+      btn.classList.add('success');
+      document.getElementById('submitText').textContent = `Welcome back, ${data.user.firstName}!`;
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1400);
+    });
+
+    // ── Session helpers + emailed-code (2FA) step ──
+    let pendingEmail = '', pendingRemember = false;
+
+    function storeSession(data, remember) {
       const session = {
         firstName: data.user.firstName,
         lastName: data.user.lastName,
@@ -264,15 +311,75 @@
         instagramHandle: data.user.instagramHandle,
         token: data.token,
       };
-      if (remember) {
-        localStorage.setItem('cirqle_session', JSON.stringify(session));
-      } else {
-        sessionStorage.setItem('cirqle_session', JSON.stringify(session));
+      const store = remember ? localStorage : sessionStorage;
+      store.setItem('cirqle_session', JSON.stringify(session));
+    }
+
+    async function verifyCode() {
+      const code = document.getElementById('code').value.trim();
+      const codeError = document.getElementById('codeError');
+      codeError.classList.remove('visible');
+      if (!/^\d{6}$/.test(code)) {
+        document.getElementById('codeErrorMsg').textContent = 'Enter the 6-digit code from your email.';
+        codeError.classList.add('visible');
+        return;
+      }
+      const vbtn = document.getElementById('verifyBtn');
+      vbtn.disabled = true;
+      document.getElementById('verifyText').textContent = 'Verifying…';
+
+      let data;
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingEmail, code }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          vbtn.disabled = false;
+          document.getElementById('verifyText').textContent = 'Verify & sign in →';
+          document.getElementById('codeErrorMsg').textContent = err.detail || 'Incorrect code. Please try again.';
+          codeError.classList.add('visible');
+          return;
+        }
+        data = await res.json();
+      } catch (err) {
+        vbtn.disabled = false;
+        document.getElementById('verifyText').textContent = 'Verify & sign in →';
+        cirqleToast('Could not reach the server. Please try again.');
+        return;
       }
 
-      btn.classList.add('success');
-      document.getElementById('submitText').textContent = `Welcome back, ${data.user.firstName}!`;
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1400);
+      storeSession(data, pendingRemember);
+      vbtn.classList.add('success');
+      document.getElementById('verifyText').textContent = `Welcome back, ${data.user.firstName}!`;
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+
+    document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+    document.getElementById('code').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); verifyCode(); }
+    });
+
+    document.getElementById('resendLink').addEventListener('click', async function(e) {
+      e.preventDefault();
+      document.getElementById('codeError').classList.remove('visible');
+      try {
+        const res = await fetch(`${window.CIRQLE_API_BASE}/auth/resend-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: pendingEmail }),
+        });
+        if (res.status === 429) {
+          const err = await res.json().catch(() => ({}));
+          cirqleToast(err.detail || 'Please wait a moment before requesting another code.');
+          return;
+        }
+        cirqleToast("We've sent you a new code.");
+      } catch (err) {
+        cirqleToast('Could not reach the server. Please try again.');
+      }
     });
 
     // ── Clear errors on input ──
@@ -294,9 +401,21 @@
     });
     modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('resetBtn').addEventListener('click', async () => {
       const em = document.getElementById('resetEmail').value.trim();
       if (!em) return;
+      const rbtn = document.getElementById('resetBtn');
+      rbtn.disabled = true;
+      rbtn.textContent = 'Sending…';
+      try {
+        // Always fire-and-forget; the same success message shows whether or not
+        // the email has an account (so we never reveal which emails are registered).
+        await fetch(`${window.CIRQLE_API_BASE}/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: em }),
+        });
+      } catch (err) { /* ignore — show the same message regardless */ }
       document.getElementById('forgotForm').style.display = 'none';
       document.getElementById('forgotSuccess').classList.add('visible');
     });

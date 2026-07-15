@@ -16,6 +16,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select
 
 from ..db import get_session
+from ..email import (send_cashback_confirmed, send_receipt_received,
+                     send_receipt_rejected)
 from ..models import (AdminReceiptOut, Campaign, Mention, Receipt, ReceiptOut,
                       User)
 from ..security import get_current_user
@@ -121,6 +123,14 @@ def create_receipt(
     session.add(receipt)
     session.commit()
     session.refresh(receipt)
+
+    # Best-effort email — send_email swallows any failure so it never blocks the
+    # upload. Auto-confirmed claims skip straight to the "confirmed" message.
+    if receipt.status == "confirmed":
+        send_cashback_confirmed(user.email, user.first_name, receipt.brand, receipt.amount)
+    else:
+        send_receipt_received(user.email, user.first_name, receipt.brand)
+
     return _receipt_out(receipt)
 
 
@@ -147,7 +157,7 @@ def admin_list_receipts(
     ]
 
 
-def _set_status(receipt_id: int, status: str, session: Session) -> ReceiptOut:
+def _set_status(receipt_id: int, status: str, session: Session) -> Receipt:
     r = session.get(Receipt, receipt_id)
     if r is None:
         raise HTTPException(status_code=404, detail="Receipt not found.")
@@ -155,18 +165,34 @@ def _set_status(receipt_id: int, status: str, session: Session) -> ReceiptOut:
     session.add(r)
     session.commit()
     session.refresh(r)
-    return _receipt_out(r)
+    return r
+
+
+def _notify_status_change(r: Receipt, session: Session) -> None:
+    """Email the claim's owner about a confirm/reject. Best-effort (send_email
+    swallows failures), so it never breaks the admin action."""
+    user = session.get(User, r.user_id)
+    if user is None:
+        return
+    if r.status == "confirmed":
+        send_cashback_confirmed(user.email, user.first_name, r.brand, r.amount)
+    elif r.status == "rejected":
+        send_receipt_rejected(user.email, user.first_name, r.brand)
 
 
 @router.post("/{receipt_id}/verify", response_model=ReceiptOut,
              dependencies=[Depends(require_admin)])
 def verify_receipt(receipt_id: int, session: Session = Depends(get_session)):
     """Admin: confirm a claim — its cashback becomes withdrawable."""
-    return _set_status(receipt_id, "confirmed", session)
+    r = _set_status(receipt_id, "confirmed", session)
+    _notify_status_change(r, session)
+    return _receipt_out(r)
 
 
 @router.post("/{receipt_id}/reject", response_model=ReceiptOut,
              dependencies=[Depends(require_admin)])
 def reject_receipt(receipt_id: int, session: Session = Depends(get_session)):
     """Admin: reject a claim (no cashback)."""
-    return _set_status(receipt_id, "rejected", session)
+    r = _set_status(receipt_id, "rejected", session)
+    _notify_status_change(r, session)
+    return _receipt_out(r)
