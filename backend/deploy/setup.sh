@@ -19,7 +19,7 @@ RUN_USER="$(whoami)"
 echo "Detected OS:"; grep -E '^(NAME|VERSION)=' /etc/os-release 2>/dev/null || true
 echo ""
 
-echo "== 1/6 Installing system packages (python, pip, git) =="
+echo "== 1/7 Installing system packages (python, pip, git) =="
 if command -v dnf >/dev/null 2>&1; then
   sudo dnf install -y python3 python3-pip git
 elif command -v yum >/dev/null 2>&1; then
@@ -32,20 +32,20 @@ else
   exit 1
 fi
 
-echo "== 2/6 Fetching the code from GitHub =="
+echo "== 2/7 Fetching the code from GitHub =="
 if [ -d "$APP_DIR/.git" ]; then
   git -C "$APP_DIR" pull
 else
   git clone "$REPO_URL" "$APP_DIR"
 fi
 
-echo "== 3/6 Creating the Python virtual environment + installing dependencies =="
+echo "== 3/7 Creating the Python virtual environment + installing dependencies =="
 echo "   Using $(python3 --version)"
 python3 -m venv "$BACKEND_DIR/.venv"
 "$BACKEND_DIR/.venv/bin/pip" install --upgrade pip
 "$BACKEND_DIR/.venv/bin/pip" install -r "$BACKEND_DIR/requirements.txt"
 
-echo "== 4/6 Creating .env (only if it does not exist yet) =="
+echo "== 4/7 Creating .env (only if it does not exist yet) =="
 if [ ! -f "$BACKEND_DIR/.env" ]; then
   SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
   cat > "$BACKEND_DIR/.env" <<EOF
@@ -64,7 +64,10 @@ else
   echo "   NOTE: if the feed is new to you, add APIFY_TOKEN=... to $BACKEND_DIR/.env and restart."
 fi
 
-echo "== 5/6 Installing + starting the systemd service =="
+echo "== 5/7 Applying database migrations (alembic upgrade head) =="
+( cd "$BACKEND_DIR" && "$BACKEND_DIR/.venv/bin/alembic" upgrade head )
+
+echo "== 6/7 Installing + starting the systemd service =="
 # Generated dynamically so the user/paths are correct for whatever OS this is.
 sudo tee /etc/systemd/system/cirqle-api.service >/dev/null <<EOF
 [Unit]
@@ -86,7 +89,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable cirqle-api
 sudo systemctl restart cirqle-api
 
-echo "== 6/6 Done. Current service status: =="
+echo "== 7/7 Done. Current service status: =="
 sleep 2
 sudo systemctl --no-pager status cirqle-api | head -n 12
 echo ""

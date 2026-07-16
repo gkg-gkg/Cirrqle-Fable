@@ -12,7 +12,6 @@ from fastapi.staticfiles import StaticFiles
 
 load_dotenv()  # read backend/.env if present
 
-from .db import init_db  # noqa: E402  (import after load_dotenv so env is set)
 from .routers import (account, adminlog, auth, campaigns, events, feed,  # noqa: E402
                       merchant, partners, receipts)
 from .storage import MEDIA_DIR  # noqa: E402
@@ -56,9 +55,9 @@ MEDIA_DIR.mkdir(exist_ok=True)
 app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
 
-@app.on_event("startup")
-def _startup() -> None:
-    init_db()
+# The schema is owned by Alembic (see backend/alembic). The deploy runs
+# `alembic upgrade head` before starting the service, so we no longer create
+# tables on startup — that couldn't add new columns to an existing database.
 
 
 @app.get("/")
