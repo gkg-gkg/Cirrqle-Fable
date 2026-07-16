@@ -48,6 +48,8 @@
     .rbadge.paid { background: #E9E9F5; color: #4a4a7a; }
     .rbadge.rejected { background: #FBE0E0; color: #a62222; }
     .rbadge.approved { background: #DDF5E3; color: #1c7c3a; }
+    .rbadge.verified { background: #E3EEFB; color: #2a5a8a; }
+    .rbadge.expired { background: #ECECEC; color: #777; }
     /* partnership application rows expand to show the full submission */
     .clist-item { flex-wrap: wrap; }
     .app-detail { flex-basis: 100%; display: none; margin: 4px 0 6px 56px; padding: 12px 14px;
@@ -132,7 +134,7 @@
     <!-- RECEIPTS REVIEW -->
     <div class="card pad" style="margin-top:22px">
       <h2>Receipt reviews (<span id="rcount">0</span>)</h2>
-      <p class="muted" style="margin-top:-8px">Claims clear to the member's wallet automatically 3 days after their post. Reject a claim here to stop it before it clears.</p>
+      <p class="muted" style="margin-top:-8px">Approve a claim within 3 days of the member's post — its cashback is then released to their wallet at the end of the 3 days. Unapproved claims expire (no cashback); reject to decline one.</p>
       <div class="rfilter">
         <button class="btn mini" data-rf="pending">Pending</button>
         <button class="btn mini" data-rf="">All</button>
@@ -324,9 +326,11 @@
           const thumb = r.imageUrl
             ? `<a href="${r.imageUrl}" target="_blank" rel="noopener"><img src="${r.imageUrl}" alt="receipt"></a>`
             : '<i class="ico ico-receipt ico-soft"></i>';
-          const actions = r.status === 'pending'
-            ? `<button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`
-            : '';
+          let actions = '';
+          if (r.status === 'pending')
+            actions = `<button class="btn mini" data-verify="${r.id}">Verify</button><button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`;
+          else if (r.status === 'verified')
+            actions = `<button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`;
           row.innerHTML = `
             <div class="clist-thumb">${thumb}</div>
             <div class="clist-main">
@@ -334,6 +338,7 @@
               <div class="clist-sub">${r.userName} · ${r.userEmail}</div>
             </div>
             <div class="clist-actions">${actions}</div>`;
+          const v = row.querySelector('[data-verify]'); if (v) v.addEventListener('click', () => setReceipt(r.id, 'verify'));
           const j = row.querySelector('[data-reject]'); if (j) j.addEventListener('click', () => setReceipt(r.id, 'reject'));
           list.appendChild(row);
         });
@@ -343,8 +348,11 @@
     }
     async function setReceipt(id, action) {
       const res = await fetch(`${API}/receipts/${id}/${action}`, { method: 'POST', headers: { 'X-Admin-Key': keyInput.value } });
-      if (res.ok) loadReceipts();
-      else if (res.status === 401) setMsg('Invalid admin key.', false);
+      if (res.ok) { loadReceipts(); return; }
+      if (res.status === 401) { setMsg('Invalid admin key.', false); return; }
+      const b = await res.json().catch(() => ({}));
+      window.alert(b.detail || `Action failed (${res.status}).`);
+      loadReceipts();
     }
     document.querySelectorAll('[data-rf]').forEach(b =>
       b.addEventListener('click', () => { currentRFilter = b.dataset.rf; loadReceipts(); }));

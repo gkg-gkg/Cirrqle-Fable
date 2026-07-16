@@ -283,6 +283,9 @@
         } else if (r.status === 'rejected') {
           status = '<span class="tile-status rejected">Not eligible</span>';
           actions = '<a class="btn btn-lime btn-sm" href="' + uploadHref + '">Re-upload Receipt</a>';
+        } else if (r.status === 'expired') {
+          status = '<span class="tile-status rejected">Not approved in time</span>';
+          actions = '';
         } else {
           status = '<span class="tile-status review">Under review</span>';
           actions = '<a class="btn btn-sm" href="' + uploadHref + '">Replace receipt</a>';

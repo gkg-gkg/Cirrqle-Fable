@@ -15,7 +15,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select
 
-from ..cashback import effective_status, parse_post_ts
+from ..cashback import admin_status, clears_at, effective_status, parse_post_ts
 from ..db import get_session
 from ..models import (AdminReceiptOut, Campaign, Mention, Receipt, ReceiptOut,
                       User)
@@ -138,22 +138,44 @@ def admin_list_receipts(
     out = []
     for r, u in rows:
         m = session.get(Mention, r.post_id)
-        eff = effective_status(r, parse_post_ts(m.timestamp) if m else None)
+        st = admin_status(r, parse_post_ts(m.timestamp) if m else None)
         out.append(AdminReceiptOut(
             id=r.id, userEmail=u.email, userName=f"{u.first_name} {u.last_name}",
-            postId=r.post_id, brand=r.brand, amount=r.amount, status=eff,
+            postId=r.post_id, brand=r.brand, amount=r.amount, status=st,
             uploadedAt=r.uploaded_at, imageUrl=receipt_view_url(r.image_key),
         ))
     return out
 
 
+def _post_ts_of(r: Receipt, session: Session) -> Optional[datetime]:
+    m = session.get(Mention, r.post_id)
+    return parse_post_ts(m.timestamp) if m else None
+
+
+@router.post("/{receipt_id}/verify", response_model=ReceiptOut,
+             dependencies=[Depends(require_admin)])
+def verify_receipt(receipt_id: int, session: Session = Depends(get_session)):
+    """Admin: approve a claim. Its cashback is released to the member's wallet at
+    the END of the 3-day window (not now). Approval is only possible while the
+    window is open — once the 3 days pass, an unapproved claim expires."""
+    r = session.get(Receipt, receipt_id)
+    if r is None:
+        raise HTTPException(status_code=404, detail="Receipt not found.")
+    post_ts = _post_ts_of(r, session)
+    if datetime.utcnow() >= clears_at(r, post_ts):
+        raise HTTPException(status_code=400,
+                            detail="This claim's 3-day window has passed and can no longer be approved.")
+    r.status = "verified"
+    session.add(r)
+    session.commit()
+    session.refresh(r)
+    return _receipt_out(r, effective_status(r, post_ts))
+
+
 @router.post("/{receipt_id}/reject", response_model=ReceiptOut,
              dependencies=[Depends(require_admin)])
 def reject_receipt(receipt_id: int, session: Session = Depends(get_session)):
-    """Admin: reject a claim within its 3-day clearing window (no cashback).
-
-    There is no 'verify' action any more — confirmation is automatic once the
-    3 days since the post date pass (see app/cashback.py)."""
+    """Admin: reject a claim (no cashback)."""
     r = session.get(Receipt, receipt_id)
     if r is None:
         raise HTTPException(status_code=404, detail="Receipt not found.")

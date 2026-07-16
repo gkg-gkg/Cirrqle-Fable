@@ -242,6 +242,7 @@
         pending:   { icon: cirqleIcon('clock'), cls: '',          label: 'pending verification', amt: 'amount-pending', sign: '' },
         paid:      { icon: cirqleIcon('cash'),  cls: 'coin-pink',  label: 'paid out',             amt: 'amount-muted', sign: '' },
         rejected:  { icon: cirqleIcon('x'),     cls: '',          label: 'not eligible',         amt: 'amount-muted', sign: '' },
+        expired:   { icon: cirqleIcon('clock'), cls: '',          label: 'not approved in time', amt: 'amount-muted', sign: '' },
       })[s] || { icon: '•', cls: '', label: s, amt: 'amount-muted', sign: '' };
     }
     function fmtWhen(iso) {
@@ -257,7 +258,7 @@
       el.innerHTML = activity.map(a => {
         const m = statusMeta(a.status);
         const amt = a.status === 'pending' ? 'Pending'
-          : a.status === 'rejected' ? '—'
+          : (a.status === 'rejected' || a.status === 'expired') ? '—'
           : m.sign + '£' + Number(a.amount || 0).toFixed(2);
         const viewLink = a.imageUrl
           ? ' · <a href="' + a.imageUrl + '" target="_blank" rel="noopener" style="color:var(--blue-deep);font-weight:700;text-decoration:none">View receipt</a>'

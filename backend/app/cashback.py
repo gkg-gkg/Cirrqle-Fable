@@ -42,11 +42,29 @@ def clears_at(receipt: Receipt, post_ts: Optional[datetime]) -> datetime:
 
 
 def effective_status(receipt: Receipt, post_ts: Optional[datetime]) -> str:
-    """The claim's real status right now. 'pending' claims clear to 'confirmed'
-    once CONFIRM_DAYS have passed since the post date; any other stored status
-    (legacy 'confirmed' / 'paid' / 'rejected') is returned unchanged."""
-    if receipt.status != "pending":
+    """The member's view of a claim right now.
+
+      pending   -> within the 3-day window (awaiting admin approval, or approved
+                   and still clearing)
+      confirmed -> approved within the window AND the 3 days have passed (in wallet)
+      expired   -> the 3 days passed without approval (no cashback)
+      rejected / paid -> as stored (legacy 'confirmed' is also returned as-is)
+    """
+    if receipt.status in ("paid", "rejected", "confirmed"):
         return receipt.status
-    if datetime.utcnow() >= clears_at(receipt, post_ts):
-        return "confirmed"
-    return "pending"
+    cleared = datetime.utcnow() >= clears_at(receipt, post_ts)
+    if receipt.status == "verified":
+        return "confirmed" if cleared else "pending"
+    # 'pending' — not yet approved
+    return "expired" if cleared else "pending"
+
+
+def admin_status(receipt: Receipt, post_ts: Optional[datetime]) -> str:
+    """The admin's view — like effective_status but keeps 'verified' (approved,
+    still clearing) distinct so the review queue is clear about what needs action."""
+    cleared = datetime.utcnow() >= clears_at(receipt, post_ts)
+    if receipt.status == "verified":
+        return "confirmed" if cleared else "verified"
+    if receipt.status == "pending":
+        return "expired" if cleared else "pending"
+    return receipt.status  # confirmed (legacy) / rejected / paid
