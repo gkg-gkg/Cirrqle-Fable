@@ -13,7 +13,7 @@
   <style>
     /* ── Page header ── */
     .browse-head { max-width: 1140px; margin: 0 auto; padding: clamp(36px,5vw,60px) clamp(20px,4vw,44px) 24px; position: relative; z-index: 1; }
-    .search-wrap { position: relative; margin-top: 22px; width: 300px; }
+    .search-wrap { position: relative; width: 100%; }
     .search-input {
       background: var(--card);
       border: var(--bw) solid var(--line);
@@ -198,10 +198,6 @@
   <div class="browse-head">
     <h1 class="h-display fade-up d1" style="margin-top:18px">All the <span class="hl hl-pink">deals.</span></h1>
     <p class="h-sub fade-up d2" style="margin-top:10px">The best cashback from top UK brands.</p>
-    <div class="search-wrap fade-up d2">
-      <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
-      <input class="search-input" type="text" id="searchInput" placeholder="Search brands or deals…" aria-label="Search deals" />
-    </div>
   </div>
 
   <!-- SIDEBAR + DEALS GRID -->
@@ -210,6 +206,10 @@
 
       <!-- Filter sidebar -->
       <aside class="filter-col fade-up">
+        <div class="search-wrap">
+          <span class="search-icon"><i class="ico ico-search ico-soft"></i></span>
+          <input class="search-input" type="text" id="searchInput" placeholder="Search deals…" aria-label="Search deals" />
+        </div>
         <div>
           <div class="side-group-title">Categories</div>
           <div class="side-cats" role="tablist" aria-label="Deal categories">

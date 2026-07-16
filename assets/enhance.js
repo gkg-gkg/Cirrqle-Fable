@@ -32,16 +32,8 @@
     onNavScroll();
   }
 
-  // ── Nav: mark the current page's link ──
+  // ── Current page + session ──
   var here = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-links a').forEach(function (a) {
-    var target = (a.getAttribute('href') || '').split(/[?#]/)[0];
-    if (target === here) a.setAttribute('aria-current', 'page');
-  });
-
-  // ── Auth-aware nav ──
-  // Elements tagged data-auth="out" show when signed OUT (sign in / sign up).
-  // Elements tagged data-auth="in"  show when signed IN  (dashboard link).
   var session = null;
   try {
     session = JSON.parse(
@@ -50,6 +42,41 @@
     );
   } catch (e) { /* ignore malformed session */ }
 
+  // ── Consistent top banner across the main site ──
+  // Centre = Browse Deals + For brands; right = My Account / Dashboard chips.
+  // The chip for the page you're on is hidden, and there's no sign-out chip
+  // (sign-out lives on the account page). Skipped on the auth pages + merchant
+  // portal, which keep their own navs.
+  var SPECIAL_NAV = { 'signin.html': 1, 'signup.html': 1, 'merchant.html': 1, 'reset-password.html': 1 };
+  if (nav && !SPECIAL_NAV[here]) {
+    var navLinks = nav.querySelector('.nav-links');
+    if (!navLinks) {
+      navLinks = document.createElement('ul');
+      navLinks.className = 'nav-links';
+      var logoEl = nav.querySelector('.logo');
+      if (logoEl) logoEl.insertAdjacentElement('afterend', navLinks);
+      else nav.insertBefore(navLinks, nav.firstChild);
+    }
+    navLinks.innerHTML =
+      '<li><a href="browse.html">Browse Deals</a></li>' +
+      '<li><a href="for-brands.html">For brands</a></li>';
+
+    var cta = nav.querySelector('.nav-cta');
+    if (!cta) { cta = document.createElement('div'); cta.className = 'nav-cta'; nav.appendChild(cta); }
+    var acctHref = session ? 'dashboard.html' : 'signin.html';
+    var dashHref = session ? 'feed.html' : 'signin.html';
+    var chips = '';
+    if (here !== 'dashboard.html') chips += '<a href="' + acctHref + '" class="btn btn-sm">My Account</a>';
+    if (here !== 'feed.html')      chips += '<a href="' + dashHref + '" class="btn btn-sm btn-ink">Dashboard</a>';
+    cta.innerHTML = chips;
+  }
+
+  // ── Mark the current page's centre link ──
+  document.querySelectorAll('.nav-links a').forEach(function (a) {
+    if ((a.getAttribute('href') || '').split(/[?#]/)[0] === here) a.setAttribute('aria-current', 'page');
+  });
+
+  // ── Auth-aware nav (for pages keeping their own data-auth chips) ──
   document.querySelectorAll('[data-auth="out"]').forEach(function (el) {
     if (session) el.style.display = 'none';
   });

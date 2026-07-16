@@ -153,6 +153,12 @@
     .modal-err { font-size: .82rem; font-weight: 700; color: var(--red); min-height: 1.1em; margin-top: 6px; }
     @media (max-width: 520px) { .modal .row2 { grid-template-columns: 1fr; } }
 
+    /* Account details modal rows */
+    .acct-rows { margin: 2px 0; }
+    .acct-row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 2px dashed rgba(31,27,19,.14); font-size: .9rem; }
+    .acct-row:last-child { border-bottom: none; }
+    .acct-row span { color: var(--ink-soft); font-weight: 600; }
+
     /* Your submissions panel */
     .sub-card { padding: 24px 22px; margin-bottom: 24px; }
     .sub-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 2px dashed rgba(31,27,19,.14); }
@@ -175,11 +181,13 @@
 <body>
 
   <nav class="nav">
-    <a href="index.html" class="logo">cirqle</a>
-    <div class="nav-cta">
+    <div style="display:flex; align-items:center; gap:10px">
+      <a href="index.html" class="logo">cirqle</a>
       <span class="chip" style="background:var(--card)">Merchant portal</span>
+    </div>
+    <div class="nav-cta">
       <button class="btn btn-sm btn-lime hidden" id="createCampaignBtn" onclick="openCampaignModal()">+ Create campaign</button>
-      <button class="btn btn-sm hidden" id="signOutBtn" onclick="signOut()">Sign out</button>
+      <button class="btn btn-sm hidden" id="accountBtn" onclick="openAccountModal()">Account Details</button>
     </div>
   </nav>
 
@@ -366,6 +374,20 @@
     </div>
   </div>
 
+  <!-- Account details modal (merchant info + sign out) -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="card modal" style="max-width:420px">
+      <button class="modal-close" type="button" onclick="closeAccountModal()" aria-label="Close">✕</button>
+      <h2>Account details</h2>
+      <div class="modal-sub">Your Cirqle merchant account.</div>
+      <div class="acct-rows" id="acctRows"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-pink" onclick="signOut()">Sign out</button>
+        <button type="button" class="btn" onclick="closeAccountModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/api.js"></script>
   <script>
     const API = window.CIRQLE_API_BASE;
@@ -382,13 +404,13 @@
     function showLogin() {
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('dashView').classList.add('hidden');
-      document.getElementById('signOutBtn').classList.add('hidden');
+      document.getElementById('accountBtn').classList.add('hidden');
       document.getElementById('createCampaignBtn').classList.add('hidden');
     }
     function showDash() {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('dashView').classList.remove('hidden');
-      document.getElementById('signOutBtn').classList.remove('hidden');
+      document.getElementById('accountBtn').classList.remove('hidden');
       document.getElementById('createCampaignBtn').classList.remove('hidden');
     }
     function authHeader() { return { 'Authorization': 'Bearer ' + merchant.token }; }
@@ -672,6 +694,22 @@
     }
     document.getElementById('campaignModal').addEventListener('click', (e) => {
       if (e.target.id === 'campaignModal') closeCampaignModal();
+    });
+
+    // ── Account details (merchant info + sign out) ──
+    function openAccountModal() {
+      const since = merchant.createdAt ? new Date(merchant.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : '—';
+      document.getElementById('acctRows').innerHTML =
+        `<div class="acct-row"><span>Business</span><b>${escapeHtml(merchant.businessName || '—')}</b></div>` +
+        `<div class="acct-row"><span>Email</span><b>${escapeHtml(merchant.email || '—')}</b></div>` +
+        `<div class="acct-row"><span>Partner since</span><b>${since}</b></div>`;
+      document.getElementById('accountModal').classList.add('open');
+    }
+    function closeAccountModal() {
+      document.getElementById('accountModal').classList.remove('open');
+    }
+    document.getElementById('accountModal').addEventListener('click', (e) => {
+      if (e.target.id === 'accountModal') closeAccountModal();
     });
 
     async function submitCampaign(e) {
