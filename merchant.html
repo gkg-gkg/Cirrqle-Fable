@@ -332,6 +332,16 @@
 
     async function enterDashboard() {
       showDash();
+      // Refresh the profile from the server so a renamed business (or changed
+      // email) shows straight away, without having to sign out and back in.
+      try {
+        const meRes = await fetch(`${API}/merchant/me`, { headers: authHeader() });
+        if (meRes.status === 401) { signOut(); return; }
+        if (meRes.ok) {
+          merchant = { ...merchant, ...(await meRes.json()) };
+          localStorage.setItem(SKEY, JSON.stringify(merchant));
+        }
+      } catch (_) { /* offline — fall back to the cached values */ }
       document.getElementById('bizName').textContent = merchant.businessName || 'Your deals';
       // Surface account info in the greeting sub (email + when they joined).
       const since = merchant.createdAt ? new Date(merchant.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '';
