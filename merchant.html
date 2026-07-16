@@ -93,6 +93,23 @@
     .chart-tip .tip-sw { width: 9px; height: 9px; border-radius: 50%; }
     .chart-empty { text-align: center; padding: 40px 20px; color: var(--ink-soft); font-size: .88rem; font-weight: 600; }
 
+    /* Dashboard 2-column layout: campaigns table left, chart + funnel tiles right */
+    .dash-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; margin-bottom: 24px; }
+    .dash-grid .card { margin-bottom: 0; }
+    .dash-right { display: flex; flex-direction: column; gap: 24px; }
+    .chart-card { margin-bottom: 0; }
+
+    /* Conversion funnel */
+    .funnel-card { padding: 22px 22px 10px; }
+    .funnel-row { margin-bottom: 15px; }
+    .funnel-head { display: flex; justify-content: space-between; align-items: baseline; font-size: .84rem; font-weight: 700; margin-bottom: 6px; }
+    .funnel-num { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+    .funnel-bar { height: 12px; background: var(--paper-deep); border-radius: 999px; overflow: hidden; }
+    .funnel-bar span { display: block; height: 100%; border-radius: 999px; transition: width .7s var(--snap); }
+    .funnel-rate { font-size: .72rem; color: var(--ink-soft); font-weight: 600; margin-top: 5px; }
+
+    @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+
     /* Deals table */
     .deals-card { padding: 24px 22px; margin-bottom: 24px; overflow-x: auto; }
     table.deals { width: 100%; border-collapse: collapse; font-size: .86rem; min-width: 520px; }
@@ -199,25 +216,34 @@
       <div class="card stat-card fade-up"><div class="stat-label">Pending</div><div class="stat-val">£<span id="sPending">0</span></div></div>
     </div>
 
-    <!-- Chart -->
-    <div class="card chart-card fade-up">
-      <div class="panel-title">Last 30 days</div>
-      <div class="panel-sub">Deal views, outbound clicks and cashback claims per day. <span id="convNote"></span></div>
-      <div class="legend" id="legend"></div>
-      <div class="chart-box" id="chartBox"></div>
-    </div>
+    <div class="dash-grid">
+      <!-- Left: this merchant's own campaigns + how each performs -->
+      <div class="card deals-card fade-up">
+        <div class="panel-title">Your campaigns</div>
+        <div class="panel-sub">How each of your deals is performing — the numbers behind the chart.</div>
+        <table class="deals">
+          <thead><tr>
+            <th>Deal</th><th class="num">Views</th><th class="num">Clicks</th>
+            <th class="num">Claims</th><th class="num">Cashback</th>
+          </tr></thead>
+          <tbody id="dealsBody"></tbody>
+        </table>
+      </div>
 
-    <!-- Per-deal breakdown -->
-    <div class="card deals-card fade-up">
-      <div class="panel-title">Per-deal breakdown</div>
-      <div class="panel-sub">Every metric, deal by deal — the numbers behind the chart.</div>
-      <table class="deals">
-        <thead><tr>
-          <th>Deal</th><th class="num">Views</th><th class="num">Clicks</th>
-          <th class="num">Claims</th><th class="num">Cashback</th>
-        </tr></thead>
-        <tbody id="dealsBody"></tbody>
-      </table>
+      <!-- Right: 30-day trend chart tile + conversion funnel -->
+      <div class="dash-right">
+        <div class="card chart-card fade-up">
+          <div class="panel-title">Last 30 days</div>
+          <div class="panel-sub">Views, clicks &amp; claims per day. <span id="convNote"></span></div>
+          <div class="legend" id="legend"></div>
+          <div class="chart-box" id="chartBox"></div>
+        </div>
+        <div class="card funnel-card fade-up">
+          <div class="panel-title">Conversion funnel</div>
+          <div class="panel-sub">How views turn into clicks and claims.</div>
+          <div id="funnel"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Messages -->
@@ -307,6 +333,10 @@
     async function enterDashboard() {
       showDash();
       document.getElementById('bizName').textContent = merchant.businessName || 'Your deals';
+      // Surface account info in the greeting sub (email + when they joined).
+      const since = merchant.createdAt ? new Date(merchant.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '';
+      document.querySelector('.greeting-sub').innerHTML =
+        escapeHtml(merchant.email || '') + (since ? ' · Cirqle partner since ' + since : '');
       await Promise.all([loadStats(), loadMessages()]);
     }
 
@@ -327,7 +357,27 @@
 
       renderLegend(s);
       renderChart(s.timeseries);
+      renderFunnel(s);
       renderDeals(s.deals);
+    }
+
+    // ── Conversion funnel (views -> clicks -> claims), from the same real stats ──
+    function renderFunnel(s) {
+      const el = document.getElementById('funnel');
+      const stages = [
+        { label: 'Views',  val: s.views,  color: 'var(--s-views)',  sub: '' },
+        { label: 'Clicks', val: s.clicks, color: 'var(--s-clicks)', sub: s.views ? `${(s.clicks / s.views * 100).toFixed(1)}% of views` : '' },
+        { label: 'Claims', val: s.claims, color: 'var(--s-claims)', sub: s.clicks ? `${(s.claims / s.clicks * 100).toFixed(1)}% of clicks` : '' },
+      ];
+      const max = Math.max(1, s.views, s.clicks, s.claims);
+      el.innerHTML = stages.map(st => {
+        const pct = Math.round(st.val / max * 100);
+        return `<div class="funnel-row">
+             <div class="funnel-head"><span>${st.label}</span><span class="funnel-num">${fmtInt(st.val)}</span></div>
+             <div class="funnel-bar"><span style="width:${pct}%;background:${st.color}"></span></div>
+             ${st.sub ? `<div class="funnel-rate">${st.sub}</div>` : ''}
+           </div>`;
+      }).join('');
     }
 
     function renderLegend(s) {
@@ -340,7 +390,7 @@
     }
 
     // ── Inline SVG line chart (no external libs) ──
-    const W = 760, H = 280, PAD = { l: 40, r: 16, t: 12, b: 30 };
+    const W = 480, H = 300, PAD = { l: 40, r: 16, t: 12, b: 30 };
     const PLOT_W = W - PAD.l - PAD.r, PLOT_H = H - PAD.t - PAD.b;
     let chartData = [];
 
