@@ -450,7 +450,7 @@
         if (res.status === 401) { signOut(); return; }
         if (!res.ok) throw new Error('save failed');
         const user = await res.json();
-        window.CirqleAccount.setHandle(user.instagramHandle);   // mirror into session + registry
+        window.CirqleAccount.setHandle(user.instagramHandle);   // mirror into session
         cirqleToast('Saved @' + user.instagramHandle + ' — hit Refresh to load your posts');
         applyAndRender();
       } catch (e) {

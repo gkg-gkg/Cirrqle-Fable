@@ -1,7 +1,8 @@
 /* ── Cirqle: per-user Instagram handle helpers ──
-   Reads/writes each user's Instagram handle on their cirqle_users registry
-   record (keyed by email) plus the live session, so it survives logout/login.
-   Exposed as window.CirqleAccount and used by the Dashboard feed (feed.html). */
+   Reads/writes the signed-in user's Instagram handle on the live session.
+   The handle is the server's source of truth (persisted via PATCH /auth/me in
+   feed.html); this just mirrors it into the session so pages can read it
+   without a fetch. Exposed as window.CirqleAccount, used by the feed (feed.html). */
 (function () {
   'use strict';
 
@@ -19,44 +20,18 @@
     return (h || '').trim().replace(/^@+/, '').toLowerCase();
   }
 
-  function readUsers() {
-    try { return JSON.parse(localStorage.getItem('cirqle_users') || '[]'); }
-    catch (e) { return []; }
-  }
-
-  // The current signed-in user's registry record (matched by email).
-  function getUser() {
-    var session = getSession();
-    if (!session || !session.email) return null;
-    var email = session.email.toLowerCase();
-    return readUsers().find(function (u) {
-      return u.email && u.email.toLowerCase() === email;
-    }) || null;
-  }
-
-  // The stored handle — session first (fast), then the registry record.
+  // The stored handle, read from the session.
   function getHandle() {
     var session = getSession();
-    if (session && session.instagramHandle) return normalizeHandle(session.instagramHandle);
-    var user = getUser();
-    return user && user.instagramHandle ? normalizeHandle(user.instagramHandle) : '';
+    return session && session.instagramHandle ? normalizeHandle(session.instagramHandle) : '';
   }
 
-  // Save a handle onto BOTH the persistent registry record and the session.
+  // Mirror a handle into the session (the caller persists it server-side first).
   function setHandle(raw) {
     var handle = normalizeHandle(raw);
     if (!handle) return '';
     var session = getSession();
-
-    if (session && session.email) {
-      var email = session.email.toLowerCase();
-      var users = readUsers();
-      users.forEach(function (u) {
-        if (u.email && u.email.toLowerCase() === email) u.instagramHandle = handle;
-      });
-      localStorage.setItem('cirqle_users', JSON.stringify(users));
-
-      // Mirror into whichever storage currently holds the session.
+    if (session) {
       session.instagramHandle = handle;
       var store = localStorage.getItem('cirqle_session') ? localStorage : sessionStorage;
       store.setItem('cirqle_session', JSON.stringify(session));
@@ -65,7 +40,6 @@
   }
 
   window.CirqleAccount = {
-    getUser: getUser,
     getHandle: getHandle,
     setHandle: setHandle,
     normalizeHandle: normalizeHandle
