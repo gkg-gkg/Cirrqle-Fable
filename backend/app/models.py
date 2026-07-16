@@ -204,6 +204,16 @@ class CampaignSubmission(SQLModel, table=True):
     reviewed_at: Optional[datetime] = None
 
 
+class AdminActivity(SQLModel, table=True):
+    """A log of admin actions (approve/reject applications + campaign submissions,
+    verify/reject receipt claims, create merchant logins, reply to merchants).
+    Shown as a scrollable feed at the bottom of admin.html."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    action: str = ""      # short label, e.g. "Approved campaign submission"
+    detail: str = ""      # context, e.g. "Nike — 20% off summer (deal #14)"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -546,3 +556,11 @@ class CampaignSubmissionOut(BaseModel):
 
 class RejectSubmissionIn(BaseModel):
     reason: str
+
+
+# ── Admin activity log (Phase 6) ──
+class AdminActivityOut(BaseModel):
+    id: int
+    action: str
+    detail: str
+    createdAt: datetime

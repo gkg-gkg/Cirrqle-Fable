@@ -22,6 +22,7 @@ from ..models import (AdminMessageIn, Campaign, CampaignSubmission,
                       MerchantMessageIn, MerchantMessageOut, MerchantOut,
                       MerchantSigninIn, MerchantStats, MerchantThreadOut,
                       Receipt, RejectSubmissionIn, TimePoint)
+from ..activity import log_activity
 from ..security import (create_merchant_token, get_current_merchant,
                         hash_password, verify_password)
 from .campaigns import require_admin
@@ -282,6 +283,7 @@ def approve_submission(sub_id: int, session: Session = Depends(get_session)):
     session.add(sub)
     session.commit()
     session.refresh(sub)
+    log_activity(session, "Approved campaign submission", f"{sub.brand} — {sub.card_title} → deal #{c.id}")
     return _submission_out(sub)
 
 
@@ -302,6 +304,7 @@ def reject_submission(sub_id: int, data: RejectSubmissionIn,
     session.add(sub)
     session.commit()
     session.refresh(sub)
+    log_activity(session, "Rejected campaign submission", f"{sub.brand} — {sub.card_title}")
     return _submission_out(sub)
 
 
@@ -345,6 +348,7 @@ def create_merchant(data: MerchantCreateIn, session: Session = Depends(get_sessi
             session.add(camp)
             session.commit()
 
+    log_activity(session, "Created merchant login", merchant.business_name)
     return MerchantCreatedOut(merchant=_merchant_out(merchant), password=password)
 
 
@@ -399,4 +403,5 @@ def admin_reply(data: AdminMessageIn, session: Session = Depends(get_session)):
     session.add(reply)
     session.commit()
     session.refresh(reply)
+    log_activity(session, "Replied to merchant", merchant.business_name)
     return _message_out(reply)

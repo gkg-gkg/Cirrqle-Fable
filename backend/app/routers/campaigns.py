@@ -15,8 +15,10 @@ from fastapi import (APIRouter, Depends, File, Form, Header, HTTPException,
                      Response, UploadFile)
 from sqlmodel import Session, select
 
+from ..activity import log_activity
 from ..db import get_session
-from ..models import Campaign, CampaignIn, CampaignOut
+from ..models import (Campaign, CampaignIn, CampaignOut, CampaignSubmission,
+                      MerchantApplication, Receipt)
 from ..storage import StorageError, StorageUploadError, upload_image
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
@@ -180,10 +182,29 @@ def update_campaign(
 @router.delete("/{campaign_id}", status_code=204,
                dependencies=[Depends(require_admin)])
 def delete_campaign(campaign_id: int, session: Session = Depends(get_session)):
-    """Admin: delete a campaign."""
+    """Admin: delete a campaign.
+
+    First unlinks anything that references it — receipts (which keep their
+    snapshotted brand/amount), merchant applications, and campaign submissions —
+    so a foreign-key constraint (on Postgres) can't block the delete.
+    """
     c = session.get(Campaign, campaign_id)
     if c is None:
         raise HTTPException(status_code=404, detail="Campaign not found.")
+
+    for r in session.exec(select(Receipt).where(Receipt.campaign_id == campaign_id)).all():
+        r.campaign_id = None
+        session.add(r)
+    for a in session.exec(select(MerchantApplication).where(MerchantApplication.campaign_id == campaign_id)).all():
+        a.campaign_id = None
+        session.add(a)
+    for sub in session.exec(select(CampaignSubmission).where(CampaignSubmission.campaign_id == campaign_id)).all():
+        sub.campaign_id = None
+        session.add(sub)
+    session.flush()
+
+    brand = c.brand
     session.delete(c)
     session.commit()
+    log_activity(session, "Deleted campaign", f"{brand or 'Campaign'} (deal #{campaign_id})")
     return Response(status_code=204)

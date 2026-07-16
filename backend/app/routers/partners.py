@@ -12,6 +12,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlmodel import Session, select
 
+from ..activity import log_activity
 from ..db import get_session
 from ..models import (Campaign, MerchantApplication, MerchantApplicationIn,
                       MerchantApplicationOut)
@@ -145,6 +146,7 @@ def approve_application(app_id: int, session: Session = Depends(get_session)):
     session.add(a)
     session.commit()
     session.refresh(a)
+    log_activity(session, "Approved merchant application", f"{a.brand} → live deal #{c.id}")
     return _app_out(a)
 
 
@@ -160,6 +162,7 @@ def reject_application(app_id: int, session: Session = Depends(get_session)):
     session.add(a)
     session.commit()
     session.refresh(a)
+    log_activity(session, "Rejected merchant application", a.brand)
     return _app_out(a)
 
 
@@ -170,6 +173,8 @@ def delete_application(app_id: int, session: Session = Depends(get_session)):
     a = session.get(MerchantApplication, app_id)
     if a is None:
         raise HTTPException(status_code=404, detail="Application not found.")
+    brand = a.brand
     session.delete(a)
     session.commit()
+    log_activity(session, "Deleted merchant application", brand)
     return Response(status_code=204)

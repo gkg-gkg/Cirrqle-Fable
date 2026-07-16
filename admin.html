@@ -50,6 +50,13 @@
     .rbadge.approved { background: #DDF5E3; color: #1c7c3a; }
     .rbadge.verified { background: #E3EEFB; color: #2a5a8a; }
     .rbadge.expired { background: #ECECEC; color: #777; }
+    .alog { max-height: 340px; overflow-y: auto; padding-right: 4px; }
+    .alog-item { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,.07); }
+    .alog-item:last-child { border-bottom: none; }
+    .alog-main { min-width: 0; }
+    .alog-action { font-weight: 700; font-size: .86rem; }
+    .alog-detail { color: var(--ink-soft); font-size: .8rem; overflow-wrap: anywhere; }
+    .alog-when { color: var(--ink-soft); font-size: .74rem; white-space: nowrap; flex-shrink: 0; }
     /* partnership application rows expand to show the full submission */
     .clist-item { flex-wrap: wrap; }
     .app-detail { flex-basis: 100%; display: none; margin: 4px 0 6px 56px; padding: 12px 14px;
@@ -176,6 +183,13 @@
       <div id="mlist"><p class="muted">Enter the admin key to load messages.</p></div>
       <div id="mmsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
     </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="card pad" style="margin-top:22px">
+      <h2>Activity log</h2>
+      <p class="muted" style="margin-top:-8px">Recent admin actions — newest first. Scroll for more.</p>
+      <div id="alog" class="alog"><p class="muted">Enter the admin key to load activity.</p></div>
+    </div>
   </div>
 
   <script src="assets/api.js"></script>
@@ -256,7 +270,7 @@
         method: 'DELETE',
         headers: { 'X-Admin-Key': keyInput.value },
       });
-      if (res.status === 204) { setMsg(`Deleted #${id}.`, true); loadList(); }
+      if (res.status === 204) { setMsg(`Deleted #${id}.`, true); loadList(); loadActivity(); }
       else if (res.status === 401) setMsg('Invalid admin key.', false);
       else setMsg(`Delete failed (${res.status}).`, false);
     }
@@ -348,7 +362,7 @@
     }
     async function setReceipt(id, action) {
       const res = await fetch(`${API}/receipts/${id}/${action}`, { method: 'POST', headers: { 'X-Admin-Key': keyInput.value } });
-      if (res.ok) { loadReceipts(); return; }
+      if (res.ok) { loadReceipts(); loadActivity(); return; }
       if (res.status === 401) { setMsg('Invalid admin key.', false); return; }
       const b = await res.json().catch(() => ({}));
       window.alert(b.detail || `Action failed (${res.status}).`);
@@ -451,6 +465,7 @@
         setPMsg(`Approved ${brand} — live as deal #${body.campaignId}. Refine images/copy in the campaign editor above.`, true);
         loadApps();
         loadList();   // the new deal appears in "Existing campaigns"
+        loadActivity();
       } else if (res.status === 401) setPMsg('Invalid admin key.', false);
       else setPMsg(`Approve failed (${res.status}): ${body.detail || 'request failed'}`, false);
     }
@@ -485,7 +500,7 @@
       const res = await fetch(`${API}/partners/${id}/${action}`, {
         method: 'POST', headers: { 'X-Admin-Key': keyInput.value },
       });
-      if (res.ok) { setPMsg(`Application #${id} ${action}ed.`, true); loadApps(); }
+      if (res.ok) { setPMsg(`Application #${id} ${action}ed.`, true); loadApps(); loadActivity(); }
       else if (res.status === 401) setPMsg('Invalid admin key.', false);
       else setPMsg(`Action failed (${res.status}).`, false);
     }
@@ -575,7 +590,7 @@
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
         setSMsg(`Approved — live as deal #${body.campaignId}. Refine images/copy in the campaign editor above.`, true);
-        loadSubs(); loadList();
+        loadSubs(); loadList(); loadActivity();
       } else if (res.status === 401) setSMsg('Invalid admin key.', false);
       else setSMsg(`Approve failed (${res.status}): ${body.detail || 'request failed'}`, false);
     }
@@ -589,7 +604,7 @@
         body: JSON.stringify({ reason: reason.trim() }),
       });
       const body = await res.json().catch(() => ({}));
-      if (res.ok) { setSMsg(`Denied “${title}” — the merchant will see your reason.`, true); loadSubs(); }
+      if (res.ok) { setSMsg(`Denied “${title}” — the merchant will see your reason.`, true); loadSubs(); loadActivity(); }
       else if (res.status === 401) setSMsg('Invalid admin key.', false);
       else setSMsg(`Deny failed (${res.status}): ${body.detail || 'request failed'}`, false);
     }
@@ -664,11 +679,27 @@
     }
 
     resetForm();
+    // ── Activity log (scrollable feed of admin actions) ──
+    async function loadActivity() {
+      const el = $('alog');
+      if (!keyInput.value) { el.innerHTML = '<p class="muted">Enter the admin key to load activity.</p>'; return; }
+      try {
+        const res = await fetch(`${API}/admin/activity`, { headers: { 'X-Admin-Key': keyInput.value } });
+        if (res.status === 401) { el.innerHTML = '<p class="muted">Invalid admin key.</p>'; return; }
+        const data = await res.json();
+        if (!data.length) { el.innerHTML = '<p class="muted">No activity yet.</p>'; return; }
+        el.innerHTML = data.map(a =>
+          `<div class="alog-item"><div class="alog-main"><div class="alog-action">${esc(a.action)}</div>${a.detail ? `<div class="alog-detail">${esc(a.detail)}</div>` : ''}</div><div class="alog-when">${fmtDate(a.createdAt)}</div></div>`
+        ).join('');
+      } catch (e) { el.innerHTML = '<p class="muted">Could not load activity.</p>'; }
+    }
+
     loadList();
     loadReceipts();
     loadApps();
     loadSubs();
     loadThreads();
+    loadActivity();
   </script>
 </body>
 </html>

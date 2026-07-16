@@ -15,6 +15,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session, select
 
+from ..activity import log_activity
 from ..cashback import admin_status, clears_at, effective_status, parse_post_ts
 from ..db import get_session
 from ..models import (AdminReceiptOut, Campaign, Mention, Receipt, ReceiptOut,
@@ -169,6 +170,7 @@ def verify_receipt(receipt_id: int, session: Session = Depends(get_session)):
     session.add(r)
     session.commit()
     session.refresh(r)
+    log_activity(session, "Approved receipt claim", f"{r.brand or 'Cashback'} £{r.amount:.2f}")
     return _receipt_out(r, effective_status(r, post_ts))
 
 
@@ -183,4 +185,5 @@ def reject_receipt(receipt_id: int, session: Session = Depends(get_session)):
     session.add(r)
     session.commit()
     session.refresh(r)
+    log_activity(session, "Rejected receipt claim", f"{r.brand or 'Cashback'} £{r.amount:.2f}")
     return _receipt_out(r, "rejected")
