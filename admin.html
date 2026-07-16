@@ -17,14 +17,14 @@
     .admin-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start; }
     @media (max-width: 860px) { .admin-grid { grid-template-columns: 1fr; } }
     .pad { padding: 24px; }
-    .pad h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-bottom: 16px; }
-    .field { margin-bottom: 12px; }
-    .field label { display: block; font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 5px; }
+    .pad h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; margin-bottom: 12px; }
+    .field { margin-bottom: 8px; }
+    .field label { display: block; font-size: .78rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
     .field input, .field textarea, .field select {
-      width: 100%; padding: 9px 11px; border: var(--bw) solid var(--line);
+      width: 100%; padding: 7px 10px; border: var(--bw) solid var(--line);
       border-radius: 12px; font: inherit; font-size: .88rem; background: var(--card); color: var(--ink);
     }
-    .field textarea { min-height: 60px; resize: vertical; }
+    .field textarea { min-height: 44px; resize: vertical; }
     .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .keybar { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 22px; max-width: 460px; }
     .keybar .field { flex: 1; margin: 0; }
@@ -78,10 +78,7 @@
         <h2 id="formTitle">New campaign</h2>
         <form id="campaignForm">
           <input type="hidden" id="editId" />
-          <div class="two">
-            <div class="field"><label>Brand *</label><input id="f_brand" required /></div>
-            <div class="field"><label>Emoji (legacy — public pages use category icons)</label><input id="f_emoji" placeholder="(optional)" /></div>
-          </div>
+          <div class="field"><label>Brand *</label><input id="f_brand" required /></div>
           <div class="field"><label>Detail title *</label><input id="f_title" required placeholder="Nike Summer Sale — up to 13% back" /></div>
           <div class="two">
             <div class="field"><label>Card title (short)</label><input id="f_cardTitle" placeholder="Nike Summer Sale" /></div>
@@ -188,7 +185,7 @@
     keyInput.value = sessionStorage.getItem('cirqle_admin_key') || '';
     keyInput.addEventListener('input', () => sessionStorage.setItem('cirqle_admin_key', keyInput.value));
 
-    const FIELDS = ['brand','title','cardTitle','cardDesc','longDesc','emoji','category','rate',
+    const FIELDS = ['brand','title','cardTitle','cardDesc','longDesc','category','rate',
                     'spendDesc','totalPaid','expiry','location','brandUrl','terms'];
 
     function setMsg(text, ok) {

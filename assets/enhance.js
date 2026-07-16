@@ -74,7 +74,7 @@
     menu.className = 'nav-menu';
     menu.id = 'navMenu';
     var links = [
-      ['browse.html', 'Browse deals'],
+      ['browse.html', 'Browse Deals'],
       ['for-brands.html', 'For brands'],
       ['about.html', 'About'],
       ['help.html', 'Help centre'],
