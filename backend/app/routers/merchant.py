@@ -15,11 +15,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from ..db import get_session
-from ..models import (AdminMessageIn, Campaign, DealEvent, DealStat, Merchant,
-                      MerchantApplication, MerchantAuthOut, MerchantCreatedOut,
-                      MerchantCreateIn, MerchantMessage, MerchantMessageIn,
-                      MerchantMessageOut, MerchantOut, MerchantSigninIn,
-                      MerchantStats, MerchantThreadOut, Receipt, TimePoint)
+from ..models import (AdminMessageIn, Campaign, CampaignSubmission,
+                      CampaignSubmissionIn, CampaignSubmissionOut, DealEvent,
+                      DealStat, Merchant, MerchantApplication, MerchantAuthOut,
+                      MerchantCreatedOut, MerchantCreateIn, MerchantMessage,
+                      MerchantMessageIn, MerchantMessageOut, MerchantOut,
+                      MerchantSigninIn, MerchantStats, MerchantThreadOut,
+                      Receipt, RejectSubmissionIn, TimePoint)
 from ..security import (create_merchant_token, get_current_merchant,
                         hash_password, verify_password)
 from .campaigns import require_admin
@@ -179,6 +181,128 @@ def send_message(data: MerchantMessageIn,
     session.commit()
     session.refresh(msg)
     return _message_out(msg)
+
+
+# ── Merchant-submitted campaigns (propose a deal -> admin approves/rejects) ──
+def _submission_out(sub: CampaignSubmission) -> CampaignSubmissionOut:
+    return CampaignSubmissionOut(
+        id=sub.id, brand=sub.brand, cardTitle=sub.card_title, cardDesc=sub.card_desc,
+        longDesc=sub.long_desc, category=sub.category, rate=sub.rate, earn=sub.earn,
+        spendDesc=sub.spend_desc, expiry=sub.expiry, location=sub.location,
+        brandUrl=sub.brand_url, terms=sub.terms, status=sub.status,
+        rejectionReason=sub.rejection_reason, campaignId=sub.campaign_id,
+        createdAt=sub.created_at,
+    )
+
+
+@router.post("/campaigns", response_model=CampaignSubmissionOut, status_code=201)
+def submit_campaign(data: CampaignSubmissionIn,
+                    merchant: Merchant = Depends(get_current_merchant),
+                    session: Session = Depends(get_session)):
+    """Merchant: propose a new deal. Stored as 'pending' for admin review."""
+    title = data.cardTitle.strip()
+    if not title:
+        raise HTTPException(status_code=422, detail="Give your deal a title.")
+    sub = CampaignSubmission(
+        merchant_id=merchant.id, brand=merchant.business_name,
+        card_title=title, card_desc=data.cardDesc.strip(),
+        long_desc=data.longDesc.strip(), category=data.category.strip(),
+        rate=data.rate, earn=data.earn.strip(), spend_desc=data.spendDesc.strip(),
+        expiry=data.expiry.strip(), location="Online · UK",
+        brand_url=data.brandUrl.strip(), terms=data.terms.strip(),
+    )
+    session.add(sub)
+    session.commit()
+    session.refresh(sub)
+    return _submission_out(sub)
+
+
+@router.get("/campaigns", response_model=list[CampaignSubmissionOut])
+def list_my_submissions(merchant: Merchant = Depends(get_current_merchant),
+                        session: Session = Depends(get_session)):
+    """Merchant: their own submissions (newest first), with status + any reason."""
+    subs = session.exec(
+        select(CampaignSubmission)
+        .where(CampaignSubmission.merchant_id == merchant.id)
+        .order_by(CampaignSubmission.id.desc())
+    ).all()
+    return [_submission_out(s) for s in subs]
+
+
+@router.get("/campaigns/admin", response_model=list[CampaignSubmissionOut],
+            dependencies=[Depends(require_admin)])
+def admin_list_submissions(status: str = "", session: Session = Depends(get_session)):
+    """Admin: all merchant campaign submissions, newest first. Optional ?status=."""
+    stmt = select(CampaignSubmission).order_by(CampaignSubmission.id.desc())
+    if status:
+        stmt = stmt.where(CampaignSubmission.status == status)
+    return [_submission_out(s) for s in session.exec(stmt).all()]
+
+
+def _campaign_from_submission(sub: CampaignSubmission) -> Campaign:
+    """Build a live deal from an approved submission, attributed to the merchant."""
+    return Campaign(
+        brand=sub.brand,
+        title=sub.card_title or sub.brand,
+        card_title=sub.card_title or sub.brand,
+        card_desc=sub.card_desc,
+        long_desc=sub.long_desc,
+        emoji="🛍️",
+        category=sub.category,
+        rate=sub.rate,
+        earn=sub.earn,
+        spend_desc=sub.spend_desc,
+        expiry=sub.expiry or "Ongoing",
+        location=sub.location or "Online · UK",
+        brand_url=sub.brand_url,
+        terms=sub.terms,
+        merchant_id=sub.merchant_id,
+    )
+
+
+@router.post("/campaigns/{sub_id}/approve", response_model=CampaignSubmissionOut,
+             dependencies=[Depends(require_admin)])
+def approve_submission(sub_id: int, session: Session = Depends(get_session)):
+    """Admin: approve -> publish a live deal built from the submission."""
+    sub = session.get(CampaignSubmission, sub_id)
+    if sub is None:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    if sub.status == "approved":
+        raise HTTPException(status_code=400, detail="Already approved.")
+
+    c = _campaign_from_submission(sub)
+    session.add(c)
+    session.commit()
+    session.refresh(c)
+
+    sub.status = "approved"
+    sub.campaign_id = c.id
+    sub.rejection_reason = ""
+    sub.reviewed_at = datetime.utcnow()
+    session.add(sub)
+    session.commit()
+    session.refresh(sub)
+    return _submission_out(sub)
+
+
+@router.post("/campaigns/{sub_id}/reject", response_model=CampaignSubmissionOut,
+             dependencies=[Depends(require_admin)])
+def reject_submission(sub_id: int, data: RejectSubmissionIn,
+                      session: Session = Depends(get_session)):
+    """Admin: reject with a reason the merchant will see in their portal."""
+    sub = session.get(CampaignSubmission, sub_id)
+    if sub is None:
+        raise HTTPException(status_code=404, detail="Submission not found.")
+    reason = data.reason.strip()
+    if not reason:
+        raise HTTPException(status_code=422, detail="Give a reason for the rejection.")
+    sub.status = "rejected"
+    sub.rejection_reason = reason
+    sub.reviewed_at = datetime.utcnow()
+    session.add(sub)
+    session.commit()
+    session.refresh(sub)
+    return _submission_out(sub)
 
 
 # ── Admin: create merchant logins + manage message threads ──

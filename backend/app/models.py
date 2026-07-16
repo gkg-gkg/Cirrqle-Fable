@@ -175,6 +175,35 @@ class MerchantMessage(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
+class CampaignSubmission(SQLModel, table=True):
+    """A deal a merchant proposes from the portal, awaiting admin review (Phase 6).
+
+    On approve, a live `Campaign` is created from these fields (attributed to the
+    merchant via `merchant_id`) and `campaign_id` links to it. On reject, the
+    admin's `rejection_reason` is shown back to the merchant in their portal.
+    Lifecycle: pending -> approved / rejected.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    merchant_id: int = Field(index=True, foreign_key="merchant.id")
+    brand: str = ""              # snapshot of the merchant's business name
+    card_title: str = ""
+    card_desc: str = ""
+    long_desc: str = ""
+    category: str = ""
+    rate: float = 0              # cashback %
+    earn: str = ""               # e.g. "£10.00"
+    spend_desc: str = ""         # e.g. "on a £50 spend"
+    expiry: str = ""
+    location: str = ""
+    brand_url: str = ""
+    terms: str = ""
+    status: str = "pending"      # pending -> approved / rejected
+    rejection_reason: str = ""
+    campaign_id: Optional[int] = Field(default=None, foreign_key="campaign.id")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    reviewed_at: Optional[datetime] = None
+
+
 # ── What the browser sends ──
 class SignupIn(BaseModel):
     firstName: str
@@ -477,3 +506,43 @@ class AdminMessageIn(BaseModel):
 class EventIn(BaseModel):
     campaignId: int
     kind: str                # "view" | "click"
+
+
+# ── Merchant-submitted campaigns (Phase 6) ──
+class CampaignSubmissionIn(BaseModel):
+    """What the merchant portal sends to propose a new deal. Brand is taken from
+    the merchant's account, not the form."""
+    cardTitle: str
+    cardDesc: str = ""
+    longDesc: str = ""
+    category: str = ""
+    rate: float = 0
+    earn: str = ""
+    spendDesc: str = ""
+    expiry: str = ""
+    brandUrl: str = ""
+    terms: str = ""
+
+
+class CampaignSubmissionOut(BaseModel):
+    id: int
+    brand: str
+    cardTitle: str
+    cardDesc: str
+    longDesc: str
+    category: str
+    rate: float
+    earn: str
+    spendDesc: str
+    expiry: str
+    location: str
+    brandUrl: str
+    terms: str
+    status: str
+    rejectionReason: str
+    campaignId: Optional[int] = None
+    createdAt: datetime
+
+
+class RejectSubmissionIn(BaseModel):
+    reason: str

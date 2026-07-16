@@ -160,6 +160,20 @@
       <div id="pmsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
     </div>
 
+    <!-- CAMPAIGN SUBMISSIONS -->
+    <div class="card pad" style="margin-top:22px">
+      <h2>Campaign submissions (<span id="scount">0</span>)</h2>
+      <p class="muted" style="margin-top:-8px">Deals proposed by merchants from their portal. Approving one publishes it as a live deal in the catalog above; denying sends the merchant your reason.</p>
+      <div class="rfilter">
+        <button class="btn mini" data-sf="pending">Pending</button>
+        <button class="btn mini" data-sf="approved">Approved</button>
+        <button class="btn mini" data-sf="rejected">Rejected</button>
+        <button class="btn mini" data-sf="">All</button>
+      </div>
+      <div id="slist"><p class="muted">Enter the admin key to load submissions.</p></div>
+      <div id="smsg" style="margin-top:10px; font-size:.85rem; font-weight:600; min-height:1.2em"></div>
+    </div>
+
     <!-- MERCHANT MESSAGES -->
     <div class="card pad" style="margin-top:22px">
       <h2>Merchant messages (<span id="mcount">0</span> unread)</h2>
@@ -489,6 +503,100 @@
     document.querySelectorAll('[data-pf]').forEach(b =>
       b.addEventListener('click', () => { currentPFilter = b.dataset.pf; loadApps(); }));
 
+    // ── Campaign submissions (Phase 6): merchants propose deals; approve → live ──
+    let currentSFilter = 'pending';
+    function setSMsg(text, ok) { const m = $('smsg'); m.textContent = text; m.className = ok ? 'ok' : 'err'; }
+
+    function subDetail(s) {
+      const rows = [
+        ['Merchant', esc(s.brand)],
+        ['Category', esc(s.category)],
+        ['Cashback rate', esc(s.rate) + '%'],
+        ['Example earn', esc(s.earn)],
+        ['Spend', esc(s.spendDesc)],
+        ['Expiry', esc(s.expiry)],
+        ['Shop URL', s.brandUrl ? `<a href="${esc(s.brandUrl)}" target="_blank" rel="noopener noreferrer">${esc(s.brandUrl)}</a>` : ''],
+        ['Description', esc(s.cardDesc)],
+        ['Terms', esc(s.terms)],
+        ['Submitted', fmtDate(s.createdAt)],
+        ['Reason (if denied)', esc(s.rejectionReason)],
+      ].filter(([, v]) => v);
+      return `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    }
+
+    async function loadSubs() {
+      const list = $('slist');
+      if (!keyInput.value) { list.innerHTML = '<p class="muted">Enter the admin key to load submissions.</p>'; return; }
+      list.innerHTML = '<p class="muted">Loading…</p>';
+      try {
+        const q = currentSFilter ? `?status=${currentSFilter}` : '';
+        const res = await fetch(`${API}/merchant/campaigns/admin${q}`, { headers: { 'X-Admin-Key': keyInput.value } });
+        if (res.status === 401) { list.innerHTML = '<p class="muted">Invalid admin key.</p>'; return; }
+        const data = await res.json();
+        $('scount').textContent = data.length;
+        if (!data.length) { list.innerHTML = '<p class="muted">No submissions.</p>'; return; }
+        list.innerHTML = '';
+        data.forEach(s => {
+          const row = document.createElement('div');
+          row.className = 'clist-item';
+          const actions = s.status === 'pending'
+            ? `<button class="btn mini" data-sapprove="${s.id}">Approve</button><button class="btn mini btn-pink" data-sreject="${s.id}">Deny</button>`
+            : (s.status === 'approved' && s.campaignId
+                ? `<a class="btn mini" href="deal.html?id=${s.campaignId}" target="_blank" rel="noopener">Deal #${s.campaignId}</a>` : '');
+          row.innerHTML = `
+            <div class="clist-thumb"><i class="ico ico-tag"></i></div>
+            <div class="clist-main">
+              <div class="clist-title">${esc(s.cardTitle)} <span class="rbadge ${esc(s.status)}">${esc(s.status)}</span></div>
+              <div class="clist-sub">${esc(s.brand)} · ${esc(s.category)} · ${esc(s.rate)}%</div>
+            </div>
+            <div class="clist-actions">
+              <button class="btn mini" data-sdetail>Details</button>
+              ${actions}
+            </div>
+            <div class="app-detail">${subDetail(s)}</div>`;
+          row.querySelector('[data-sdetail]').addEventListener('click', () =>
+            row.querySelector('.app-detail').classList.toggle('open'));
+          const ap = row.querySelector('[data-sapprove]');
+          if (ap) ap.addEventListener('click', () => approveSub(s.id, s.cardTitle));
+          const rj = row.querySelector('[data-sreject]');
+          if (rj) rj.addEventListener('click', () => rejectSub(s.id, s.cardTitle));
+          list.appendChild(row);
+        });
+      } catch (e) {
+        list.innerHTML = '<p class="muted">Could not load submissions.</p>';
+      }
+    }
+
+    async function approveSub(id, title) {
+      if (!confirm(`Approve “${title}”? This publishes it as a live deal on the site.`)) return;
+      const res = await fetch(`${API}/merchant/campaigns/${id}/approve`, {
+        method: 'POST', headers: { 'X-Admin-Key': keyInput.value },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setSMsg(`Approved — live as deal #${body.campaignId}. Refine images/copy in the campaign editor above.`, true);
+        loadSubs(); loadList();
+      } else if (res.status === 401) setSMsg('Invalid admin key.', false);
+      else setSMsg(`Approve failed (${res.status}): ${body.detail || 'request failed'}`, false);
+    }
+
+    async function rejectSub(id, title) {
+      const reason = prompt(`Deny “${title}”. Enter a reason the merchant will see:`);
+      if (reason == null) return;
+      if (!reason.trim()) { setSMsg('A reason is required to deny.', false); return; }
+      const res = await fetch(`${API}/merchant/campaigns/${id}/reject`, {
+        method: 'POST', headers: { 'X-Admin-Key': keyInput.value, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) { setSMsg(`Denied “${title}” — the merchant will see your reason.`, true); loadSubs(); }
+      else if (res.status === 401) setSMsg('Invalid admin key.', false);
+      else setSMsg(`Deny failed (${res.status}): ${body.detail || 'request failed'}`, false);
+    }
+
+    document.querySelectorAll('[data-sf]').forEach(b =>
+      b.addEventListener('click', () => { currentSFilter = b.dataset.sf; loadSubs(); }));
+
     // ── Merchant messages (Phase 6): view threads, reply to merchants ──
     function setMMsg(text, ok) {
       const m = $('mmsg');
@@ -559,6 +667,7 @@
     loadList();
     loadReceipts();
     loadApps();
+    loadSubs();
     loadThreads();
   </script>
 </body>

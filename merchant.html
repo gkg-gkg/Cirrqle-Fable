@@ -136,6 +136,36 @@
     .composer textarea:focus { outline: none; border-color: var(--pink-deep); }
     .composer-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 
+    /* Create-campaign modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(31,27,19,.55); z-index: 2000; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 16px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { width: 100%; max-width: 560px; padding: 30px; position: relative; }
+    .modal h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .modal .modal-sub { font-size: .85rem; color: var(--ink-soft); margin-bottom: 20px; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border: var(--bw) solid var(--line); border-radius: 50%; background: var(--paper-deep); cursor: pointer; font-weight: 800; }
+    .modal .field { margin-bottom: 14px; }
+    .modal label { display: block; font-size: .78rem; font-weight: 700; margin-bottom: 5px; }
+    .modal input, .modal textarea, .modal select { width: 100%; padding: 11px 13px; font: inherit; font-size: .9rem; border: var(--bw) solid var(--line); border-radius: var(--r-chip); background: var(--paper); color: var(--ink); }
+    .modal input:focus, .modal textarea:focus, .modal select:focus { outline: none; border-color: var(--pink-deep); }
+    .modal textarea { resize: vertical; min-height: 60px; }
+    .modal .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-err { font-size: .82rem; font-weight: 700; color: var(--red); min-height: 1.1em; margin-top: 6px; }
+    @media (max-width: 520px) { .modal .row2 { grid-template-columns: 1fr; } }
+
+    /* Your submissions panel */
+    .sub-card { padding: 24px 22px; margin-bottom: 24px; }
+    .sub-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 2px dashed rgba(31,27,19,.14); }
+    .sub-item:last-child { border-bottom: none; }
+    .sub-main { flex: 1; min-width: 0; }
+    .sub-title { font-weight: 700; font-size: .9rem; }
+    .sub-meta { font-size: .76rem; color: var(--ink-soft); font-weight: 600; margin-top: 2px; }
+    .sub-reason { font-size: .78rem; color: #a62222; font-weight: 600; margin-top: 4px; }
+    .sbadge { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; padding: 4px 10px; border-radius: 999px; flex-shrink: 0; }
+    .sbadge.pending { background: var(--tang); }
+    .sbadge.approved { background: #DDF5E3; color: #1c7c3a; }
+    .sbadge.rejected { background: #FBE0E0; color: #a62222; }
+
     .hidden { display: none !important; }
 
     @media (max-width: 960px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
@@ -148,6 +178,7 @@
     <a href="index.html" class="logo">cirqle</a>
     <div class="nav-cta">
       <span class="chip" style="background:var(--card)">Merchant portal</span>
+      <button class="btn btn-sm btn-lime hidden" id="createCampaignBtn" onclick="openCampaignModal()">+ Create campaign</button>
       <button class="btn btn-sm hidden" id="signOutBtn" onclick="signOut()">Sign out</button>
     </div>
   </nav>
@@ -246,6 +277,13 @@
       </div>
     </div>
 
+    <!-- Your campaign submissions -->
+    <div class="card sub-card fade-up">
+      <div class="panel-title">Your campaign submissions</div>
+      <div class="panel-sub">Deals you've proposed, and where they are in review.</div>
+      <div id="subList"></div>
+    </div>
+
     <!-- Messages -->
     <div class="card msg-card fade-up">
       <div class="panel-title">Message the Cirqle team</div>
@@ -258,6 +296,73 @@
           <button class="btn btn-lime" onclick="sendMessage('deal_request')">Request more deals</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Create-campaign modal -->
+  <div class="modal-overlay" id="campaignModal">
+    <div class="card modal">
+      <button class="modal-close" type="button" onclick="closeCampaignModal()" aria-label="Close">✕</button>
+      <h2>Create a campaign</h2>
+      <div class="modal-sub">Propose a new deal. Our team reviews it, then it goes live on Cirqle.</div>
+      <form id="campaignForm" onsubmit="return submitCampaign(event)">
+        <div class="field">
+          <label for="cTitle">Deal title *</label>
+          <input id="cTitle" required placeholder="e.g. 15% off the summer collection" />
+        </div>
+        <div class="field">
+          <label for="cDesc">Short description</label>
+          <input id="cDesc" placeholder="One line shown on the deal card" />
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="cCategory">Category</label>
+            <select id="cCategory">
+              <option>Fashion &amp; Beauty</option>
+              <option>Food &amp; Drink</option>
+              <option>Electronics</option>
+              <option>Travel</option>
+              <option>Home &amp; Living</option>
+              <option>Fitness</option>
+              <option>Entertainment</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cRate">Cashback rate (%) *</label>
+            <input id="cRate" type="number" step="0.1" min="0" required placeholder="10" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="cEarn">Example earn</label>
+            <input id="cEarn" placeholder="£10.00" />
+          </div>
+          <div class="field">
+            <label for="cSpend">Spend description</label>
+            <input id="cSpend" placeholder="on a £100 spend" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="cExpiry">Expiry</label>
+            <input id="cExpiry" placeholder="Ongoing / 31 Aug 2026" />
+          </div>
+          <div class="field">
+            <label for="cUrl">Shop URL</label>
+            <input id="cUrl" placeholder="https://yourbrand.com" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="cTerms">Terms (optional)</label>
+          <textarea id="cTerms" placeholder="Any conditions that apply to the deal"></textarea>
+        </div>
+        <div class="modal-err" id="cErr"></div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-lime" id="cSubmitBtn">Submit for review →</button>
+          <button type="button" class="btn" onclick="closeCampaignModal()">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -278,11 +383,13 @@
       document.getElementById('loginView').classList.remove('hidden');
       document.getElementById('dashView').classList.add('hidden');
       document.getElementById('signOutBtn').classList.add('hidden');
+      document.getElementById('createCampaignBtn').classList.add('hidden');
     }
     function showDash() {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('dashView').classList.remove('hidden');
       document.getElementById('signOutBtn').classList.remove('hidden');
+      document.getElementById('createCampaignBtn').classList.remove('hidden');
     }
     function authHeader() { return { 'Authorization': 'Bearer ' + merchant.token }; }
     function signOut() { localStorage.removeItem(SKEY); merchant = null; showLogin(); }
@@ -347,7 +454,7 @@
       const since = merchant.createdAt ? new Date(merchant.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '';
       document.querySelector('.greeting-sub').innerHTML =
         escapeHtml(merchant.email || '') + (since ? ' · Cirqle partner since ' + since : '');
-      await Promise.all([loadStats(), loadMessages()]);
+      await Promise.all([loadStats(), loadMessages(), loadSubmissions()]);
     }
 
     async function loadStats() {
@@ -553,6 +660,88 @@
       ta.value = '';
       cirqleToast(kind === 'deal_request' ? 'Deal request sent ✓' : 'Message sent ✓');
       loadMessages();
+    }
+
+    // ── Create campaign (merchant proposes a deal -> admin reviews) ──
+    function openCampaignModal() {
+      document.getElementById('cErr').textContent = '';
+      document.getElementById('campaignModal').classList.add('open');
+    }
+    function closeCampaignModal() {
+      document.getElementById('campaignModal').classList.remove('open');
+    }
+    document.getElementById('campaignModal').addEventListener('click', (e) => {
+      if (e.target.id === 'campaignModal') closeCampaignModal();
+    });
+
+    async function submitCampaign(e) {
+      e.preventDefault();
+      const err = document.getElementById('cErr');
+      const btn = document.getElementById('cSubmitBtn');
+      err.textContent = '';
+      const payload = {
+        cardTitle: document.getElementById('cTitle').value.trim(),
+        cardDesc:  document.getElementById('cDesc').value.trim(),
+        category:  document.getElementById('cCategory').value,
+        rate:      parseFloat(document.getElementById('cRate').value) || 0,
+        earn:      document.getElementById('cEarn').value.trim(),
+        spendDesc: document.getElementById('cSpend').value.trim(),
+        expiry:    document.getElementById('cExpiry').value.trim(),
+        brandUrl:  document.getElementById('cUrl').value.trim(),
+        terms:     document.getElementById('cTerms').value.trim(),
+      };
+      if (!payload.cardTitle) { err.textContent = 'Give your deal a title.'; return false; }
+      btn.disabled = true; btn.textContent = 'Submitting…';
+      try {
+        const res = await fetch(`${API}/merchant/campaigns`, {
+          method: 'POST', headers: { ...authHeader(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.status === 401) { signOut(); return false; }
+        if (!res.ok) {
+          const b = await res.json().catch(() => ({}));
+          err.textContent = b.detail || 'Could not submit — try again.';
+          return false;
+        }
+        document.getElementById('campaignForm').reset();
+        closeCampaignModal();
+        cirqleToast('Campaign submitted for review ✓');
+        loadSubmissions();
+      } catch (_) {
+        err.textContent = 'Couldn’t reach the server. Try again.';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit for review →';
+      }
+      return false;
+    }
+
+    async function loadSubmissions() {
+      const res = await fetch(`${API}/merchant/campaigns`, { headers: authHeader() });
+      if (res.status === 401) { signOut(); return; }
+      if (!res.ok) return;
+      renderSubmissions(await res.json());
+    }
+    function renderSubmissions(subs) {
+      const el = document.getElementById('subList');
+      if (!subs.length) {
+        el.innerHTML = '<div class="thread-empty">No submissions yet. Use “+ Create campaign” (top right) to propose a deal.</div>';
+        return;
+      }
+      el.innerHTML = subs.map(s => {
+        const when = new Date(s.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const reason = (s.status === 'rejected' && s.rejectionReason)
+          ? `<div class="sub-reason">Reason: ${escapeHtml(s.rejectionReason)}</div>` : '';
+        const live = (s.status === 'approved' && s.campaignId)
+          ? ` · <a href="deal.html?id=${s.campaignId}" target="_blank" rel="noopener" style="color:var(--blue-deep);font-weight:700">view live deal →</a>` : '';
+        return `<div class="sub-item">
+             <div class="sub-main">
+               <div class="sub-title">${escapeHtml(s.cardTitle)}</div>
+               <div class="sub-meta">${escapeHtml(s.category || 'Deal')} · ${s.rate}% · submitted ${when}${live}</div>
+               ${reason}
+             </div>
+             <span class="sbadge ${escapeHtml(s.status)}">${escapeHtml(s.status)}</span>
+           </div>`;
+      }).join('');
     }
 
     function escapeHtml(s) {
