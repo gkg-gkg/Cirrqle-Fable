@@ -150,16 +150,20 @@
         if (res.status === 401) { signOut(); return; }
         if (!res.ok) throw new Error('upload failed');
         const receipt = await res.json().catch(() => ({}));
-        // Auto-verified? (post tags the brand -> confirmed instantly)
+        // Cashback clears automatically 3 days after the post date (not on upload).
+        const amt = '£' + Number(receipt.amount || 0).toFixed(2);
         if (receipt.status === 'confirmed') {
           document.querySelector('.result-badge').textContent = 'Cashback confirmed ✓';
           document.querySelector('.result-note').textContent =
-            'Your post tags the brand, so your claim was verified instantly — £' +
-            Number(receipt.amount || 0).toFixed(2) + ' has been added to your wallet.';
+            'Your claim has cleared — ' + amt + ' has been added to your wallet.';
+        } else {
+          document.querySelector('.result-badge').textContent = 'Receipt received ✓';
+          document.querySelector('.result-note').textContent =
+            'Your ' + amt + ' cashback will land in your wallet 3 days after your post — track the countdown on your dashboard.';
         }
         document.getElementById('uploadCard').hidden = true;
         document.getElementById('resultCard').hidden = false;
-        cirqleToast(receipt.status === 'confirmed' ? 'Verified instantly ✓' : 'Receipt uploaded');
+        cirqleToast(receipt.status === 'confirmed' ? 'Cashback confirmed ✓' : 'Receipt uploaded');
       } catch (e) {
         dropZone.style.pointerEvents = '';
         cirqleToast('Upload failed — please try again');

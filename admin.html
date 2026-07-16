@@ -132,6 +132,7 @@
     <!-- RECEIPTS REVIEW -->
     <div class="card pad" style="margin-top:22px">
       <h2>Receipt reviews (<span id="rcount">0</span>)</h2>
+      <p class="muted" style="margin-top:-8px">Claims clear to the member's wallet automatically 3 days after their post. Reject a claim here to stop it before it clears.</p>
       <div class="rfilter">
         <button class="btn mini" data-rf="pending">Pending</button>
         <button class="btn mini" data-rf="">All</button>
@@ -324,7 +325,7 @@
             ? `<a href="${r.imageUrl}" target="_blank" rel="noopener"><img src="${r.imageUrl}" alt="receipt"></a>`
             : '<i class="ico ico-receipt ico-soft"></i>';
           const actions = r.status === 'pending'
-            ? `<button class="btn mini" data-verify="${r.id}">Verify</button><button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`
+            ? `<button class="btn mini btn-pink" data-reject="${r.id}">Reject</button>`
             : '';
           row.innerHTML = `
             <div class="clist-thumb">${thumb}</div>
@@ -333,7 +334,6 @@
               <div class="clist-sub">${r.userName} · ${r.userEmail}</div>
             </div>
             <div class="clist-actions">${actions}</div>`;
-          const v = row.querySelector('[data-verify]'); if (v) v.addEventListener('click', () => setReceipt(r.id, 'verify'));
           const j = row.querySelector('[data-reject]'); if (j) j.addEventListener('click', () => setReceipt(r.id, 'reject'));
           list.appendChild(row);
         });

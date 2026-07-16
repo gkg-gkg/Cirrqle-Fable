@@ -6,6 +6,7 @@ receipts (the cashback ledger) + their stored posts. No placeholders.
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 
+from ..cashback import effective_status, parse_post_ts
 from ..db import get_session
 from ..models import AccountStats, ActivityItem, Mention, Receipt, User
 from ..security import get_current_user
@@ -16,16 +17,19 @@ router = APIRouter(prefix="/account", tags=["account"])
 
 def _compute_stats(user: User, session: Session) -> AccountStats:
     receipts = session.exec(select(Receipt).where(Receipt.user_id == user.id)).all()
-
-    def total(*statuses) -> float:
-        return round(sum(r.amount for r in receipts if r.status in statuses), 2)
-
-    pending = total("pending")
-    wallet = total("confirmed")          # confirmed = available to withdraw
-    paid = total("paid")
-    earned = round(wallet + paid, 2)     # all verified cashback ever
-
     posts = session.exec(select(Mention).where(Mention.user_id == user.id)).all()
+
+    # Cashback status is time-based: a claim clears to 'confirmed' 3 days after
+    # its post date (app/cashback.py), so we compute the effective status here.
+    ts = {m.id: parse_post_ts(m.timestamp) for m in posts}
+    def eff(r: Receipt) -> str:
+        return effective_status(r, ts.get(r.post_id))
+
+    pending = round(sum(r.amount for r in receipts if eff(r) == "pending"), 2)
+    wallet = round(sum(r.amount for r in receipts if eff(r) == "confirmed"), 2)  # available to withdraw
+    paid = round(sum(r.amount for r in receipts if r.status == "paid"), 2)
+    earned = round(wallet + paid, 2)     # all cleared cashback ever
+
     brands = {r.brand for r in receipts if r.brand}
     recent = sorted(receipts, key=lambda r: r.uploaded_at, reverse=True)[:6]
 
@@ -39,7 +43,7 @@ def _compute_stats(user: User, session: Session) -> AccountStats:
         receiptsCount=len(receipts),
         activity=[
             ActivityItem(brand=r.brand or "Cashback", amount=r.amount,
-                         status=r.status, date=r.uploaded_at,
+                         status=eff(r), date=r.uploaded_at,
                          imageUrl=receipt_view_url(r.image_key))
             for r in recent
         ],
@@ -60,12 +64,13 @@ def withdraw(
     user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
-    """Withdraw the confirmed balance — marks confirmed claims as paid."""
-    confirmed = session.exec(
-        select(Receipt).where(Receipt.user_id == user.id, Receipt.status == "confirmed")
-    ).all()
-    for r in confirmed:
-        r.status = "paid"
-        session.add(r)
+    """Withdraw the cleared balance — marks effectively-confirmed claims as paid."""
+    receipts = session.exec(select(Receipt).where(Receipt.user_id == user.id)).all()
+    posts = session.exec(select(Mention).where(Mention.user_id == user.id)).all()
+    ts = {m.id: parse_post_ts(m.timestamp) for m in posts}
+    for r in receipts:
+        if effective_status(r, ts.get(r.post_id)) == "confirmed":
+            r.status = "paid"
+            session.add(r)
     session.commit()
     return _compute_stats(user, session)
