@@ -51,7 +51,7 @@ if [ ! -f "$BACKEND_DIR/.env" ]; then
   cat > "$BACKEND_DIR/.env" <<EOF
 CIRQLE_SECRET_KEY=$SECRET
 CIRQLE_DB_PATH=$BACKEND_DIR/cirqle.db
-CIRQLE_CORS_ORIGINS=*
+CIRQLE_CORS_ORIGINS=https://gkg-gkg.github.io,https://cirqle.co.uk,https://www.cirqle.co.uk
 # Fill this in to enable the Instagram feed (Apify → Settings → API tokens),
 # then: sudo systemctl restart cirqle-api
 APIFY_TOKEN=
