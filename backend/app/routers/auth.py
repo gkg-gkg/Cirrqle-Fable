@@ -27,7 +27,7 @@ def _user_out(user: User) -> UserOut:
 
 
 @router.post("/signup", response_model=AuthOut, status_code=201,
-             dependencies=[rate_limit("signup", limit=5, window=3600)])
+             dependencies=[rate_limit("signup", limit=20, window=3600)])
 def signup(data: SignupIn, session: Session = Depends(get_session)):
     email = data.email.lower()
     if session.exec(select(User).where(User.email == email)).first():
