@@ -100,15 +100,10 @@
           <div class="field"><label>Long description</label><textarea id="f_longDesc"></textarea></div>
           <div class="two">
             <div class="field"><label>Cashback rate (%)</label><input id="f_rate" type="number" step="0.1" placeholder="13" /></div>
-            <div class="field"><label>Earn (e.g. £13.00)</label><input id="f_earn" placeholder="£13.00" /></div>
           </div>
           <div class="two">
             <div class="field"><label>Spend description</label><input id="f_spendDesc" placeholder="on a £100 spend" /></div>
             <div class="field"><label>Total paid</label><input id="f_totalPaid" placeholder="£112,705 paid to members" /></div>
-          </div>
-          <div class="two">
-            <div class="field"><label>Members</label><input id="f_members" placeholder="1.8k" /></div>
-            <div class="field"><label>Claims</label><input id="f_claims" type="number" placeholder="1840" /></div>
           </div>
           <div class="two">
             <div class="field"><label>Expiry</label><input id="f_expiry" placeholder="30 Jun 2026 / Ongoing / New members only" /></div>
@@ -139,7 +134,7 @@
 
     <!-- RECEIPTS REVIEW -->
     <div class="card pad" style="margin-top:22px">
-      <h2>Receipt review (<span id="rcount">0</span>)</h2>
+      <h2>Receipt reviews (<span id="rcount">0</span>)</h2>
       <div class="rfilter">
         <button class="btn mini" data-rf="pending">Pending</button>
         <button class="btn mini" data-rf="">All</button>
@@ -149,7 +144,7 @@
 
     <!-- PARTNERSHIP APPLICATIONS -->
     <div class="card pad" style="margin-top:22px">
-      <h2>Partnership applications (<span id="pcount">0</span>)</h2>
+      <h2>Merchant applications (<span id="pcount">0</span>)</h2>
       <p class="muted" style="margin-top:-8px">Submitted by brands via the partner form. Approving one publishes it as a live deal in the catalog above.</p>
       <div class="rfilter">
         <button class="btn mini" data-pf="pending">Pending</button>
@@ -194,7 +189,7 @@
     keyInput.addEventListener('input', () => sessionStorage.setItem('cirqle_admin_key', keyInput.value));
 
     const FIELDS = ['brand','title','cardTitle','cardDesc','longDesc','emoji','category','rate',
-                    'earn','spendDesc','totalPaid','members','claims','expiry','location','brandUrl','terms'];
+                    'spendDesc','totalPaid','expiry','location','brandUrl','terms'];
 
     function setMsg(text, ok) {
       const m = $('msg');

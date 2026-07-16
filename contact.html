@@ -33,7 +33,6 @@
   <nav class="nav">
     <a href="index.html" class="logo">cirqle</a>
     <div class="nav-cta">
-      <a href="browse.html" class="btn btn-sm">Browse</a>
       <a href="dashboard.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">My Account</a>
       <a href="feed.html" class="btn btn-sm btn-ink" data-auth="in" style="display:none">Dashboard</a>
     </div>
@@ -55,33 +54,6 @@
           <div class="field"><label for="brand">Brand / company name <span class="req">*</span></label><input id="brand" type="text" placeholder="e.g. Nova Athletics" /></div>
           <div class="field"><label for="website">Website <span class="req">*</span></label><input id="website" type="url" placeholder="https://" /></div>
         </div>
-        <div class="form-row">
-          <div class="field">
-            <label for="category">Category <span class="req">*</span></label>
-            <select id="category">
-              <option value="">Select…</option>
-              <option>Fashion &amp; Beauty</option>
-              <option>Food &amp; Drink</option>
-              <option>Electronics</option>
-              <option>Travel</option>
-              <option>Home &amp; Living</option>
-              <option>Fitness</option>
-              <option>Health &amp; Wellness</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field"><label for="markets">Primary market(s) <span class="req">*</span></label><input id="markets" type="text" placeholder="e.g. UK, Ireland" /></div>
-        </div>
-        <div class="field">
-          <label for="channels">Where do you sell?</label>
-          <select id="channels">
-            <option value="">Select…</option>
-            <option>Online only</option>
-            <option>In-store only</option>
-            <option>Online &amp; in-store</option>
-            <option>Marketplace (Amazon, eBay, etc.)</option>
-          </select>
-        </div>
 
         <div class="form-section">Who should we talk to</div>
         <div class="form-row">
@@ -92,21 +64,9 @@
           <div class="field"><label for="em">Work email <span class="req">*</span></label><input id="em" type="email" placeholder="jane@brand.com" /></div>
           <div class="field"><label for="phone">Phone</label><input id="phone" type="tel" placeholder="+44 …" /></div>
         </div>
-        <div class="field"><label for="role">Your role</label><input id="role" type="text" placeholder="e.g. Head of Growth" /></div>
 
         <div class="form-section">Your business</div>
         <div class="form-row-3">
-          <div class="field">
-            <label for="revenue">Monthly online revenue</label>
-            <select id="revenue">
-              <option value="">Select…</option>
-              <option>Under £10k</option>
-              <option>£10k–£50k</option>
-              <option>£50k–£250k</option>
-              <option>£250k–£1M</option>
-              <option>£1M+</option>
-            </select>
-          </div>
           <div class="field">
             <label for="orders">Monthly orders</label>
             <select id="orders">
@@ -154,7 +114,6 @@
           <label class="check"><input type="checkbox" name="goal" value="data" /> Attribution &amp; performance data</label>
         </div>
         <div class="field" style="margin-top:20px"><label for="heard">How did you hear about us?</label><input id="heard" type="text" placeholder="e.g. a friend, LinkedIn, search…" /></div>
-        <div class="field"><label for="msg">Anything else we should know?</label><textarea id="msg" placeholder="Tell us about your brand, current channels, and what a great partnership looks like…"></textarea></div>
 
         <button class="btn btn-lg btn-lime" style="width:100%" id="submitBtn" onclick="handleSubmit()">Submit partnership application →</button>
         <div class="success-msg" id="successMsg">Thanks — your partnership application is in! Our brand team will be in touch within one business day.</div>
@@ -168,7 +127,7 @@
     const val = id => document.getElementById(id).value.trim();
 
     async function handleSubmit() {
-      const required = ['brand', 'website', 'category', 'markets', 'fn', 'ln', 'em', 'rate'];
+      const required = ['brand', 'website', 'fn', 'ln', 'em', 'rate'];
       const missing = required.filter(id => !val(id));
       if (missing.length) {
         document.getElementById(missing[0]).focus();
@@ -182,21 +141,17 @@
         return;
       }
 
-      // "Where do you sell?" has no field of its own server-side — keep it
-      // inside the message so the info still reaches the review queue.
-      const channels = val('channels');
-      const message = val('msg') + (channels ? `${val('msg') ? '\n\n' : ''}Sells: ${channels}` : '');
       const goals = [...document.querySelectorAll('input[name="goal"]:checked')]
         .map(c => c.closest('label').textContent.trim());
 
       const payload = {
-        brand: val('brand'), website: val('website'), category: val('category'),
-        cashbackRate: rate, markets: val('markets'),
+        brand: val('brand'), website: val('website'), category: '',
+        cashbackRate: rate, markets: '',
         firstName: val('fn'), lastName: val('ln'), email: val('em'),
-        phone: val('phone'), role: val('role'),
-        revenue: val('revenue'), orders: val('orders'), aov: val('aov'),
+        phone: val('phone'),
+        orders: val('orders'), aov: val('aov'),
         budget: val('budget'), timeline: val('timeline'),
-        goals, heard: val('heard'), message,
+        goals, heard: val('heard'), message: '',
       };
 
       const btn = document.getElementById('submitBtn');
