@@ -268,9 +268,23 @@
           document.getElementById('emailErr').classList.add('visible');
           return;
         }
-        if (!res.ok) throw new Error('Signup failed');
+        if (!res.ok) {
+          // The server responded with an error — show the real reason rather
+          // than a misleading "could not reach the server".
+          btn.disabled = false;
+          txt.textContent = 'Create free account →';
+          let msg = 'Something went wrong. Please try again.';
+          if (res.status === 429) {
+            msg = 'Too many attempts. Please wait a few minutes and try again.';
+          } else {
+            try { const e = await res.json(); if (e && e.detail) msg = e.detail; } catch (_) {}
+          }
+          cirqleToast(msg);
+          return;
+        }
         data = await res.json();
       } catch (err) {
+        // fetch itself threw — a genuine network/connection failure.
         btn.disabled = false;
         txt.textContent = 'Create free account →';
         cirqleToast('Could not reach the server. Please try again.');

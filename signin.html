@@ -234,9 +234,23 @@
           document.getElementById('password').classList.add('error');
           return;
         }
-        if (!res.ok) throw new Error('Signin failed');
+        if (!res.ok) {
+          // The server responded with an error — show the real reason rather
+          // than a misleading "could not reach the server".
+          btn.disabled = false;
+          document.getElementById('submitText').textContent = 'Sign in →';
+          let msg = 'Something went wrong. Please try again.';
+          if (res.status === 429) {
+            msg = 'Too many attempts. Please wait a few minutes and try again.';
+          } else {
+            try { const e = await res.json(); if (e && e.detail) msg = e.detail; } catch (_) {}
+          }
+          cirqleToast(msg);
+          return;
+        }
         data = await res.json();
       } catch (err) {
+        // fetch itself threw — a genuine network/connection failure.
         btn.disabled = false;
         document.getElementById('submitText').textContent = 'Sign in →';
         cirqleToast('Could not reach the server. Please try again.');
