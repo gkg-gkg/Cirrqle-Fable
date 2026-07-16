@@ -18,7 +18,7 @@ from sqlmodel import Session, select
 from ..activity import log_activity
 from ..db import get_session
 from ..models import (Campaign, CampaignIn, CampaignOut, CampaignSubmission,
-                      MerchantApplication, Receipt)
+                      DealEvent, MerchantApplication, Receipt)
 from ..storage import StorageError, StorageUploadError, upload_image
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
@@ -186,12 +186,15 @@ def delete_campaign(campaign_id: int, session: Session = Depends(get_session)):
 
     First unlinks anything that references it — receipts (which keep their
     snapshotted brand/amount), merchant applications, and campaign submissions —
-    so a foreign-key constraint (on Postgres) can't block the delete.
+    so a foreign-key constraint (on Postgres) can't block the delete. Deal
+    events have a non-nullable campaign link, so those rows are deleted outright.
     """
     c = session.get(Campaign, campaign_id)
     if c is None:
         raise HTTPException(status_code=404, detail="Campaign not found.")
 
+    for ev in session.exec(select(DealEvent).where(DealEvent.campaign_id == campaign_id)).all():
+        session.delete(ev)
     for r in session.exec(select(Receipt).where(Receipt.campaign_id == campaign_id)).all():
         r.campaign_id = None
         session.add(r)
