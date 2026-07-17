@@ -5,7 +5,7 @@
 # forwards requests to the FastAPI app on 127.0.0.1:8000.
 #
 # Run on the server, passing your domain:
-#   curl -fsSL https://raw.githubusercontent.com/gkg-gkg/Cirrqle-Fable/main/backend/deploy/setup_https.sh | bash -s cirqle.duckdns.org
+#   curl -fsSL https://raw.githubusercontent.com/gkg-gkg/cirqle-proj/main/backend/deploy/setup_https.sh | bash -s cirqle.duckdns.org
 #
 # Requirements: ports 80 and 443 open to the world (they already are), and the
 # domain's DNS pointing at THIS server's public IP.

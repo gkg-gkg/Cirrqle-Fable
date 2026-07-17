@@ -4,14 +4,14 @@
 # Works on Amazon Linux 2023 (dnf), Amazon Linux 2 (yum), and Ubuntu (apt).
 #
 # Run it ON THE SERVER with a single command:
-#   curl -fsSL https://raw.githubusercontent.com/gkg-gkg/Cirrqle-Fable/main/backend/deploy/setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/gkg-gkg/cirqle-proj/main/backend/deploy/setup.sh | bash
 #
 # Safe to re-run to deploy updates — it pulls the latest code and restarts the
 # service WITHOUT touching your .env or database (so users are preserved).
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO_URL="https://github.com/gkg-gkg/Cirrqle-Fable.git"
+REPO_URL="https://github.com/gkg-gkg/cirqle-proj.git"
 APP_DIR="$HOME/cirqle"
 BACKEND_DIR="$APP_DIR/backend"
 RUN_USER="$(whoami)"

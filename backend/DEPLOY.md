@@ -49,7 +49,7 @@ Type `yes` at the fingerprint prompt the first time. You're now on the server.
 Paste this into that browser terminal:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gkg-gkg/Cirrqle-Fable/main/backend/deploy/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/gkg-gkg/cirqle-proj/main/backend/deploy/setup.sh | bash
 ```
 
 It installs Python, pulls the code, creates a virtualenv, generates a secret key,
